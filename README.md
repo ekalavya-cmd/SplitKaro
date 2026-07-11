@@ -1,4 +1,4 @@
-﻿# SplitKaro 💸
+# SplitKaro 💸
 
 > **🚧 Active Development** — SplitKaro is an actively developed, ongoing project. Features are being added incrementally, and the codebase is evolving rapidly.
 
@@ -30,7 +30,7 @@
 
 ---
 
-## Overview
+## Overview 🌐
 
 **SplitKaro** is a full-stack expense-splitting web application designed to make splitting bills and tracking shared costs between groups of people effortless. Whether it's a trip with friends, shared rent with roommates, or a group dinner — SplitKaro handles the math and keeps everyone's balances clear.
 
@@ -40,7 +40,7 @@ The name "SplitKaro" is a mix of English and Hindi, where _"Karo"_ means _"to do
 
 ---
 
-## Features
+## Features ✨
 
 The following features are **fully implemented** in the current version:
 
@@ -86,7 +86,7 @@ The following features are **fully implemented** in the current version:
 
 ---
 
-## Tech Stack
+## Tech Stack 🛠️
 
 ### Backend
 | Technology | Version | Purpose |
@@ -118,7 +118,7 @@ The following features are **fully implemented** in the current version:
 
 ---
 
-## Architecture
+## Architecture 🏗️
 
 SplitKaro follows a classic **Client–Server** architecture with a clear separation between the frontend and backend.
 
@@ -174,7 +174,7 @@ SplitKaro follows a classic **Client–Server** architecture with a clear separa
 
 ---
 
-## Project Structure
+## Project Structure 📁
 
 ```
 splitKaro/
@@ -242,7 +242,7 @@ splitKaro/
 
 ---
 
-## Database Schema
+## Database Schema 🗄️
 
 ```
 ┌──────────────┐        ┌──────────────┐
@@ -296,7 +296,7 @@ splitKaro/
 
 ---
 
-## API Reference
+## API Reference 🔌
 
 Base URL: `http://localhost:3000/api`
 
@@ -379,7 +379,7 @@ POST /api/groups/1/settlements
 
 ---
 
-## Getting Started
+## Getting Started 🚀
 
 ### Prerequisites
 
@@ -458,7 +458,7 @@ POST /api/groups/1/settlements
 
 ---
 
-## Environment Variables
+## Environment Variables 🔐
 
 ### Backend (`backend/.env`)
 
@@ -480,7 +480,7 @@ POST /api/groups/1/settlements
 
 ---
 
-## Development Practices
+## Development Practices 🧑‍💻
 
 - **Monorepo Layout**: `backend/` and `frontend/` are separate npm workspaces within the same repository, each with their own `package.json`.
 - **CommonJS (Backend)**: The backend uses `require`/`module.exports` (CommonJS modules).
@@ -495,7 +495,7 @@ POST /api/groups/1/settlements
 
 ---
 
-## Roadmap
+## Roadmap 🗺️
 
 > Features planned for upcoming development.
 
@@ -516,6 +516,6 @@ POST /api/groups/1/settlements
 
 ---
 
-## License
+## License 📄
 
 This project is licensed under the **ISC License**.
