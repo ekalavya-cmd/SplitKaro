@@ -1,6 +1,6 @@
 ﻿# SplitKaro 💸
 
-> **🚧 Active Development** — This project is actively being built by [Ekalavya](https://github.com/ekalavya-zwt). Features are being added incrementally, and the codebase is evolving rapidly.
+> **🚧 Active Development** — SplitKaro is an actively developed, ongoing project. Features are being added incrementally, and the codebase is evolving rapidly.
 
 ---
 
