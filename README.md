@@ -30,7 +30,7 @@
 
 ---
 
-## About
+## Overview
 
 **SplitKaro** is a full-stack expense-splitting web application designed to make splitting bills and tracking shared costs between groups of people effortless. Whether it's a trip with friends, shared rent with roommates, or a group dinner — SplitKaro handles the math and keeps everyone's balances clear.
 
