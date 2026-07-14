@@ -1,4 +1,4 @@
-﻿# DATABASE_SCHEMA.md — SplitKaro
+# DATABASE_SCHEMA.md — SplitKaro
 
 **ORM:** Sequelize v6  
 **Database:** MySQL  
@@ -41,12 +41,12 @@
 | `id` | `id` | `INT` AUTO_INCREMENT PK | No | Yes (PK) | — | `isInt`, `min: 1` |
 | `group_id` | `groupId` | `INT` FK → `groups.id` | No | No | — | `isInt` |
 | `name` | `name` | `VARCHAR(255)` | No | No | — | `notEmpty` |
-| `email` | `email` | `VARCHAR(255)` | No | **Yes** | — | `isEmail`, `notEmpty` |
+| `email` | `email` | `VARCHAR(255)` | No | **No (composite key)** | — | `isEmail`, `notEmpty` |
 | `phone` | `phone` | `VARCHAR(255)` | No | No | — | `notEmpty` |
 | `created_at` | `createdAt` | `DATETIME` | No | No | `CURRENT_TIMESTAMP` | — |
 | `updated_at` | `updatedAt` | `DATETIME` | No | No | `CURRENT_TIMESTAMP` | — |
 
-> **Note:** `email` is globally unique across all groups — a single person cannot be a member of two different groups using the same email address. This is a significant modelling limitation (see Section 6).
+> **Note:** `email` is unique per-group (composite unique key `(group_id, email)`). A single person can be a member of different groups using the same email address, but cannot join the same group twice with the same email.
 
 ---
 
@@ -109,14 +109,7 @@
 | `members` | 1 → N | `settlements` (as payee) | `settlements.paid_to` | `settlementsReceived` / `payee` | CASCADE |
 | `expenses` | 1 → N | `expense_splits` | `expense_splits.expense_id` | `splits` / `expense` | CASCADE |
 
-### Defect: broken `ExpenseSplits.associate` registration
 
-`ExpenseSplits.js` defines `ExpenseSplits.associate` **twice**. In JavaScript, assigning a property twice overwrites the first assignment, so only the second block (the `belongsTo Members`) is ever registered. The `belongsTo Expenses` association is silently dropped. As a result:
-
-- Querying `ExpenseSplits` with `include: Expenses` will fail or return unexpected results at runtime.
-- The `expense_splits.expense_id` FK column and the CASCADE rule exist in the DB (migration is correct), but the Sequelize ORM-level association object is missing.
-
----
 
 ## 4. Relationship Diagram (Mermaid ER)
 
@@ -134,7 +127,7 @@ erDiagram
         int id PK
         int group_id FK
         varchar name
-        varchar email "UNIQUE"
+        varchar email "UNIQUE(group_id, email)"
         varchar phone
         datetime created_at
         datetime updated_at
@@ -192,44 +185,26 @@ The following indexes are confirmed to exist based on the migrations and Sequeli
 |---|---|---|---|
 | `groups` | `id` | PRIMARY KEY (clustered) | Migration |
 | `members` | `id` | PRIMARY KEY (clustered) | Migration |
-| `members` | `email` | UNIQUE | Migration + Model |
+| `members` | `group_id, email` | UNIQUE (`members_group_id_email_unique`) | Migration + Model |
 | `expenses` | `id` | PRIMARY KEY (clustered) | Migration |
+| `expenses` | `group_id` | SECONDARY (`expenses_group_id`) | Migration |
+| `expenses` | `paid_by` | SECONDARY (`expenses_paid_by`) | Migration |
 | `expense_splits` | `id` | PRIMARY KEY (clustered) | Migration |
+| `expense_splits` | `expense_id` | SECONDARY (`expense_splits_expense_id`) | Migration |
+| `expense_splits` | `member_id` | SECONDARY (`expense_splits_member_id`) | Migration |
+| `expense_splits` | `expense_id, member_id` | UNIQUE (`expense_splits_expense_id_member_id_unique`) | Migration + Model |
 | `settlements` | `id` | PRIMARY KEY (clustered) | Migration |
+| `settlements` | `group_id` | SECONDARY (`settlements_group_id`) | Migration |
 
-**No explicit secondary indexes are defined anywhere in the codebase.**
+**Explicit secondary indexes and unique indexes are defined via migrations to optimize common queries and safeguard relationships.**
 
-MySQL InnoDB will create implicit indexes for foreign key columns automatically (`group_id`, `paid_by`, `paid_to`, `expense_id`, `member_id`), but these are engine-managed and not declared in migrations.
+MySQL InnoDB will also create implicit indexes for any remaining foreign key columns automatically (`paid_to` in `settlements`), but all critical query-filtering columns are explicitly indexed.
 
 ---
 
 ## 6. Known Gaps
 
-### Missing explicit secondary indexes
 
-| Table | Column | Why it needs an index | Current state |
-|---|---|---|---|
-| `expenses` | `group_id` | Every expense query filters by group — used in every page load | Implicit FK index only |
-| `expenses` | `paid_by` | Balance calculation iterates expenses per payer | Implicit FK index only |
-| `expense_splits` | `expense_id` | Every split lookup joins on expense_id | Implicit FK index only |
-| `expense_splits` | `member_id` | Balance calculation aggregates splits per member | Implicit FK index only |
-| `settlements` | `group_id` | Settlement listing and balance calc filter by group | Implicit FK index only |
-
-These implicit FK indexes _do_ exist in InnoDB, but they are not declared in migrations. This means they would not be reproduced on a non-InnoDB engine, and they cannot be easily documented, tuned, or dropped via migrations.
-
----
-
-### Missing constraints
-
-| Issue | Location | Detail |
-|---|---|---|
-| `email` globally unique instead of per-group unique | `members` | A person with the same email cannot join two groups. A composite unique constraint on `(group_id, email)` would be more appropriate. |
-| No CHECK constraint on `amount > 0` at DB level | `expenses`, `settlements` | Only enforced in service-layer code. A DB-level `CHECK (amount > 0)` would prevent direct SQL inserts from bypassing validation. |
-| No CHECK constraint on `amount_owed >= 0` at DB level | `expense_splits` | Same issue — validation is ORM/service only. |
-| No uniqueness constraint on `(expense_id, member_id)` | `expense_splits` | Nothing prevents two split rows for the same member on the same expense, which would corrupt balance calculations. |
-| No self-reference guard on `settlements` at DB level | `settlements` | `paid_by ≠ paid_to` is enforced only in `groupService.js`. No DB-level `CHECK` constraint exists. |
-
----
 
 ### Normalisation issues
 

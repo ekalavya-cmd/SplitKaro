@@ -32,7 +32,6 @@ module.exports = (sequelize, DataTypes) => {
       email: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true,
         validate: {
           isEmail: true,
           notEmpty: true,
@@ -48,7 +47,17 @@ module.exports = (sequelize, DataTypes) => {
       },
     },
 
-    { tableName: "members", timestamps: true, underscored: true },
+    {
+      tableName: "members",
+      timestamps: true,
+      underscored: true,
+      indexes: [
+        {
+          unique: true,
+          fields: ["groupId", "email"],
+        },
+      ],
+    },
   );
 
   Members.associate = (models) => {

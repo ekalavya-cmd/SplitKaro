@@ -39,7 +39,17 @@ module.exports = (sequelize, DataTypes) => {
       },
     },
 
-    { tableName: "expense_splits", timestamps: true, underscored: true },
+    {
+      tableName: "expense_splits",
+      timestamps: true,
+      underscored: true,
+      indexes: [
+        {
+          unique: true,
+          fields: ["expenseId", "memberId"],
+        },
+      ],
+    },
   );
 
   ExpenseSplits.associate = (models) => {
@@ -48,9 +58,7 @@ module.exports = (sequelize, DataTypes) => {
       as: "expense",
       onDelete: "CASCADE",
     });
-  };
 
-  ExpenseSplits.associate = (models) => {
     ExpenseSplits.belongsTo(models.Members, {
       foreignKey: "memberId",
       as: "member",
