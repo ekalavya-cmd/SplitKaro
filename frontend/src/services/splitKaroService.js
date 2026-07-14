@@ -3,7 +3,7 @@ import api from "../api/splitKaroAPI";
 const getGroups = async () => {
   try {
     const response = await api.get("/groups");
-    return response.data;
+    return response.data.groups;
   } catch (error) {
     console.error("Error fetching groups:", error);
     throw error;
@@ -72,7 +72,7 @@ const getBalances = async (groupId) => {
 const getSettlementSuggestions = async (groupId) => {
   try {
     const response = await api.get(`/groups/${groupId}/settlements/suggest`);
-    return response.data;
+    return response.data.suggestions;
   } catch (error) {
     console.error("Error fetching settlement suggestions:", error);
     throw error;
@@ -104,7 +104,7 @@ const createSettlement = async (groupId, settlementData) => {
 
 const deleteSettlement = async (settlementId) => {
   try {
-    await api.delete(`/settlements/${settlementId}`);
+    await api.delete(`/groups/settlements/${settlementId}`);
   } catch (error) {
     console.error("Error deleting settlement:", error);
     throw error;

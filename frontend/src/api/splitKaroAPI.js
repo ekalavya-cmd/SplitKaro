@@ -16,7 +16,7 @@ splitKaroAPI.interceptors.response.use(
 
       return Promise.reject({
         status,
-        message: data?.error || "Something went wrong",
+        message: data?.message || "Something went wrong",
       });
     }
 

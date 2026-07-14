@@ -1,4 +1,4 @@
-﻿# API_REFERENCE.md — SplitKaro
+# API_REFERENCE.md — SplitKaro
 
 > **Source of truth:** all endpoint shapes are derived directly from
 > `backend/routes/`, `backend/controllers/`, and `backend/services/`.
@@ -23,28 +23,23 @@ or API key is required or checked.
 All requests and responses use `Content-Type: application/json`.  
 The frontend axios instance sets this header globally.
 
-### Standard error shape — INCONSISTENCY FLAGGED
-The backend always responds with:
+### Standard error shape
+The backend always responds with, and the frontend axios interceptor correctly reads:
 ```json
 { "message": "Human-readable error description" }
 ```
-However, the frontend axios interceptor (`splitKaroAPI.js`) reads `data.error`
-to build its normalised error object:
-```js
-message: data?.error || "Something went wrong"
-```
-Because the backend uses `message` (not `error`) as the key, **every API
-error surfaces to the frontend as `"Something went wrong"`**. The
-per-endpoint error strings the backend sends are silently discarded.
+This is fully consistent across all API endpoints, and validation/error strings are correctly passed to the frontend.
 
-### Success response shape — INCONSISTENCY FLAGGED
-Most endpoints wrap their payload in an object with a `message` field:
+### Success response shape
+All endpoints wrap their payload in an object with a `message` and data field:
 ```json
 { "message": "...", "<resource>": { ... } }
 ```
-One endpoint (`GET /groups/:id/settlements/suggest`) returns a **bare array**
-with no envelope object. This is the only endpoint that does not follow the
-`{ message, <data> }` pattern.
+or for lists:
+```json
+{ "message": "...", "<plural_resource>": [...] }
+```
+This includes `GET /groups` (wrapped in `groups`) and `GET /groups/:id/settlements/suggest` (wrapped in `suggestions`).
 
 ### Pagination
 **Not implemented.** All list endpoints return the full, unbounded result set.
@@ -72,18 +67,18 @@ List all groups.
 
 **Response `200`**
 ```json
-[
-  { "id": 1, "name": "Trip to Bali Expenses", "description": "..." },
-  { "id": 2, "name": "Household Expenses",    "description": null }
-]
+{
+  "message": "Groups fetched successfully",
+  "groups": [
+    { "id": 1, "name": "Trip to Bali Expenses", "description": "..." },
+    { "id": 2, "name": "Household Expenses",    "description": null }
+  ]
+}
 ```
-Returns a **bare array** (no envelope). `description` may be `null`.
+`description` may be `null`.
 
 **Error responses:** None explicitly handled — a DB error propagates as an
 unhandled rejection (Express 5 converts it to a `500` with no JSON body).
-
-> **Inconsistency:** This is the only `GET` list endpoint that returns a bare
-> array. All other list endpoints return `{ message, <key>: [...] }`.
 
 ---
 
@@ -341,12 +336,8 @@ database CASCADE). Wrapped in a transaction.
 
 | Status | Body | Condition |
 |---|---|---|
-| `500` | `{ "message": "Internal Server Error" }` | Any error, including if `id` does not exist |
-
-> **Bug:** The service calls `findByPk(expenseId)` then `.destroy()` on the
-> result. If the expense does not exist, `findByPk` returns `null` and
-> `.destroy()` throws a `TypeError: Cannot read properties of null`. This is
-> caught by the generic `catch` and returned as a `500`, not a `404`.
+| `404` | `{ "message": "Expense not found" }` | No expense with given `:id` exists |
+| `500` | `{ "message": "Internal Server Error" }` | Unexpected DB error |
 
 ---
 
@@ -407,21 +398,20 @@ largest debtor repeatedly until all balances are zero.
 **Query params:** None  
 **Request body:** None
 
-**Response `200`** — **bare array, no envelope object**
+**Response `200`**
 ```json
-[
-  {
-    "from": { "id": 3, "name": "Charlie" },
-    "to":   { "id": 1, "name": "Alice" },
-    "amount": 350.00
-  }
-]
+{
+  "message": "Settlement suggestions fetched successfully",
+  "suggestions": [
+    {
+      "from": { "id": 3, "name": "Charlie" },
+      "to":   { "id": 1, "name": "Alice" },
+      "amount": 350.00
+    }
+  ]
+}
 ```
-Returns an empty array `[]` when all balances are zero (everyone is settled).
-
-> **Inconsistency:** This is the only endpoint that returns a bare array
-> instead of `{ message, <data> }`. The frontend checks `data.length > 0`
-> directly rather than `data.<key>`.
+Returns an empty array `suggestions: []` when all balances are zero (everyone is settled).
 
 **Error responses**
 
@@ -489,12 +479,9 @@ amount does not exceed what the payer owes the payee.
 | `400` | `{ "message": "Invalid date format" }` | `date` provided but not parseable |
 | `400` | `{ "message": "<name> does not owe any money" }` | Payer has a non-negative balance |
 | `400` | `{ "message": "<name> is not owed any money" }` | Payee has a non-positive balance |
-| `400` | `{ "message": "Amount cannot exceed ₹<max> (what <payer> owes <payee>)" }` | Amount exceeds what the payer can pay the payee |
+| `400` | `{ "message": "Amount cannot exceed <max> (what <payer> owes <payee>)" }` | Amount exceeds what the payer can pay the payee |
 | `500` | `{ "message": "Error calculating balances" }` | `calculateGroupBalances` returns unexpected data |
 | `500` | `{ "message": "Internal Server Error" }` | Unexpected DB error |
-
-> **Note:** The error message `"Amount cannot exceed ₹..."` hard-codes the
-> Indian Rupee symbol in the server-side error string.
 
 ---
 
@@ -554,18 +541,13 @@ Delete a recorded settlement. Wrapped in a transaction.
 
 | Status | Body | Condition |
 |---|---|---|
-| `500` | `{ "message": "Internal Server Error" }` | Any error, including if `id` does not exist |
-
-> **Bug:** Same null-guard issue as `DELETE /expenses/:id`. If the settlement
-> does not exist, `findByPk` returns `null`, `.destroy()` throws `TypeError`,
-> and the response is `500` instead of `404`.
+| `404` | `{ "message": "Settlement not found" }` | No settlement with given `:id` exists |
+| `500` | `{ "message": "Internal Server Error" }` | Unexpected DB error |
 
 > **Routing note:** The full mounted path is `/api/groups/settlements/:id`.
-> Because `router.get("/:id", ...)` also exists, a `GET` request to
-> `/api/groups/settlements` would be matched by the `/:id` handler with
-> `id = "settlements"`, which would then fail with a `404` from the DB
-> lookup. This is a latent routing ambiguity — the path segment `"settlements"`
-> is treated as a group ID by all non-DELETE methods.
+> The routing ambiguity is resolved by declaring the `delete("/settlements/:id", ...)`
+> handler above the generic `get("/:id", ...)` handler in the router file. This
+> prevents dynamic ID matches from intercepting the settlements paths.
 
 ---
 
@@ -589,14 +571,14 @@ Delete a recorded settlement. Wrapped in a transaction.
 
 ---
 
-## Flagged Inconsistencies
+## Flagged Inconsistencies (All Resolved)
 
-| # | Issue | Affected endpoints |
-|---|---|---|
-| 1 | `GET /groups` returns a bare array; all other list endpoints return `{ message, <key>: [...] }` | `GET /groups` |
-| 2 | `GET /groups/:id/settlements/suggest` returns a bare array; all other endpoints return an envelope object | `GET /groups/:id/settlements/suggest` |
-| 3 | Frontend error interceptor reads `data.error`; backend sends `data.message` — all API errors show as "Something went wrong" | All endpoints |
-| 4 | `DELETE /expenses/:id` and `DELETE /groups/settlements/:id` return `500` when the resource does not exist instead of `404` | Both DELETE endpoints |
-| 5 | `POST /groups` validates in the controller; `POST /groups/:id/expenses` and `POST /groups/:id/settlements` validate in the service layer | POST endpoints |
-| 6 | The error string `"Amount cannot exceed ₹..."` hard-codes the currency symbol server-side | `POST /groups/:id/settlements` |
-| 7 | The path `/api/groups/settlements/:id` (DELETE) shares the `/api/groups/` prefix with `/:id` sub-routes, creating a routing ambiguity for non-DELETE methods on `/api/groups/settlements` | `DELETE /groups/settlements/:id` |
+| # | Issue | Affected endpoints | Resolution |
+|---|---|---|---|
+| 1 | `GET /groups` returns a bare array | `GET /groups` | **Resolved**: Wrapped in `{ message, groups }` on the backend. Frontend service layer unwraps it to maintain compatibility. |
+| 2 | `GET /groups/:id/settlements/suggest` returns a bare array | `GET /groups/:id/settlements/suggest` | **Resolved**: Wrapped in `{ message, suggestions }` on the backend. Frontend service layer unwraps it. |
+| 3 | Frontend error interceptor reads `data.error` instead of `data.message` | All endpoints | **Resolved**: Updated axios interceptor to read `data?.message`. Real backend error messages are now displayed. |
+| 4 | DELETE endpoints return `500` instead of `404` for missing IDs | Both DELETE endpoints | **Resolved**: Added null guards in service layers to throw a proper `404` response. |
+| 5 | `POST /groups` validates in the controller instead of the service | POST endpoints | **Resolved**: Field validation moved into the service layer, keeping error catching in the controller. |
+| 6 | Error string hard-codes `₹` symbol | `POST /groups/:id/settlements` | **Resolved**: Removed `₹` from the server-side error string. |
+| 7 | Routing ambiguity on `/api/groups/settlements/:id` | `DELETE /groups/settlements/:id` | **Resolved**: Moved the DELETE route above the generic dynamic ID route in the backend router file. |

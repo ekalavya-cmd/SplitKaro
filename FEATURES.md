@@ -117,10 +117,10 @@
 
 | Bug | Status | Description |
 |---|---|---|
-| API error key mismatch | 🐛 | Backend sends `{ message }` but the axios interceptor reads `data.error`; all API validation messages are silently discarded — every error shows as "Something went wrong" |
+| API error key mismatch | ✅ | **Resolved**: Updated axios interceptor to read `data?.message`. Backend validation/error messages are now correctly shown in the UI. |
 | Equal split preview wrong | 🐛 | AddExpense.jsx previews `amount / members.length` (floating-point) but the server uses integer-cent math with penny-remainder distribution — the preview can show different values than what gets stored |
 | Nav links cause full-page reload | 🐛 | `Layout.jsx` uses `<a href="...">` instead of React Router `<Link>` — every nav click triggers a full reload and discards in-memory state |
-| DELETE endpoints return 500 for missing IDs | 🐛 | `deleteExpense` and `deleteSettlement` call `.destroy()` on a `null` result when the ID doesn't exist; server crashes with `TypeError` and returns `500` instead of `404` |
+| DELETE endpoints return 500 for missing IDs | ✅ | **Resolved**: Added null guards in `deleteExpense` and `deleteSettlement` to correctly return a `404` error instead of crashing. |
 
 ---
 

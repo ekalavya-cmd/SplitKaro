@@ -29,6 +29,28 @@ async function getGroup(groupId) {
 }
 
 async function createGroupWithMembers(groupData, membersData) {
+  if (
+    !groupData.name ||
+    !membersData ||
+    !Array.isArray(membersData) ||
+    membersData.length === 0
+  ) {
+    throw {
+      status: 400,
+      message:
+        "Group name and at least one member is required, and members must be a non-empty array",
+    };
+  }
+
+  for (const member of membersData) {
+    if (!member.name || !member.email || !member.phone) {
+      throw {
+        status: 400,
+        message: "Each member must have name, email, and phone",
+      };
+    }
+  }
+
   const transaction = await sequelize.transaction();
 
   try {
@@ -601,7 +623,7 @@ async function recordSettlementForGroup(groupId, settlementData) {
   if (parsedAmount / 100 > maxAmount) {
     throw {
       status: 400,
-      message: `Amount cannot exceed ₹${maxAmount.toFixed(2)} (what ${payerBalance.name} owes ${payeeBalance.name})`,
+      message: `Amount cannot exceed ${maxAmount.toFixed(2)} (what ${payerBalance.name} owes ${payeeBalance.name})`,
     };
   }
 
@@ -659,6 +681,10 @@ async function deleteSettlement(settlementId) {
     const settlement = await Settlements.findByPk(settlementId, {
       transaction,
     });
+    if (!settlement) {
+      await transaction.rollback();
+      throw { status: 404, message: "Settlement not found" };
+    }
     await settlement.destroy({ transaction });
     await transaction.commit();
   } catch (error) {

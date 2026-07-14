@@ -14,7 +14,7 @@ const {
 async function fetchGroups(req, res) {
   try {
     const groups = await getGroups();
-    res.status(200).json(groups);
+    res.status(200).json({ message: "Groups fetched successfully", groups });
   } catch (err) {
     console.error("Error fetching groups:", err);
     res.status(500).json({ message: "Internal Server Error" });
@@ -40,27 +40,14 @@ async function createGroup(req, res) {
   try {
     const { name, description, members } = req.body;
 
-    if (!name || !members || !Array.isArray(members) || members.length === 0) {
-      return res.status(400).json({
-        message:
-          "Group name and at least one member is required, and members must be a non-empty array",
-      });
-    }
-
-    for (const member of members) {
-      if (!member.name || !member.email || !member.phone) {
-        return res.status(400).json({
-          message: "Each member must have name, email, and phone",
-        });
-      }
-    }
-
     const groupData = { name, description };
-    const membersData = members.map((member) => ({
-      name: member.name,
-      email: member.email,
-      phone: member.phone,
-    }));
+    const membersData = Array.isArray(members)
+      ? members.map((member) => ({
+          name: member.name,
+          email: member.email,
+          phone: member.phone,
+        }))
+      : [];
 
     const result = await createGroupWithMembers(groupData, membersData);
 
@@ -70,6 +57,10 @@ async function createGroup(req, res) {
     });
   } catch (err) {
     console.error("Error creating group:", err);
+
+    if (err && err.status && err.message) {
+      return res.status(err.status).json({ message: err.message });
+    }
 
     if (err.name === "SequelizeUniqueConstraintError") {
       return res.status(400).json({
@@ -147,9 +138,12 @@ async function fetchBalances(req, res) {
 async function fetchSettlementSuggestions(req, res) {
   try {
     const groupId = req.params.id;
-    const settlements = await suggestSettlementForGroup(groupId);
+    const suggestions = await suggestSettlementForGroup(groupId);
 
-    res.status(200).json(settlements);
+    res.status(200).json({
+      message: "Settlement suggestions fetched successfully",
+      suggestions,
+    });
   } catch (err) {
     console.error("Error suggesting settlements:", err);
 
