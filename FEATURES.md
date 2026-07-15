@@ -119,7 +119,7 @@
 |---|---|---|
 | API error key mismatch | ✅ | **Resolved**: Updated axios interceptor to read `data?.message`. Backend validation/error messages are now correctly shown in the UI. |
 | Equal split preview wrong | 🐛 | AddExpense.jsx previews `amount / members.length` (floating-point) but the server uses integer-cent math with penny-remainder distribution — the preview can show different values than what gets stored |
-| Nav links cause full-page reload | 🐛 | `Layout.jsx` uses `<a href="...">` instead of React Router `<Link>` — every nav click triggers a full reload and discards in-memory state |
+| Nav links cause full-page reload | ✅ | **Resolved**: Swapped `<a href="...">` nav tags for React Router's `<Link>` components in Layout.jsx. Navigation now works client-side without full-page reloads. |
 | DELETE endpoints return 500 for missing IDs | ✅ | **Resolved**: Added null guards in `deleteExpense` and `deleteSettlement` to correctly return a `404` error instead of crashing. |
 
 ---

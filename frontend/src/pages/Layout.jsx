@@ -1,19 +1,36 @@
 import React from "react";
-import { Outlet } from "react-router-dom";
+import { Link, Outlet } from "react-router-dom";
 
 const Layout = () => {
   return (
-    <>
-      <div className="flex items-center justify-between bg-gray-800 p-4 text-white">
-        <h1 className="text-2xl">SplitKaro</h1>
-        <div className="space-x-4">
-          <a href="/">Dashboard</a>
-          <a href="/expenses">Expenses</a>
-          <a href="/settle-up">Settle Up</a>
+    <div className="min-h-screen bg-canvas-soft text-ink font-sans">
+      <nav className="flex items-center justify-between bg-canvas py-3 px-6 border-b border-canvas-soft">
+        <h1 className="text-display-xs text-ink font-bold">SplitKaro</h1>
+        <div className="space-x-6 flex">
+          <Link
+            to="/"
+            className="text-body-sm-strong text-ink hover:text-body transition-colors"
+          >
+            Dashboard
+          </Link>
+          <Link
+            to="/expenses"
+            className="text-body-sm-strong text-ink hover:text-body transition-colors"
+          >
+            Expenses
+          </Link>
+          <Link
+            to="/settle-up"
+            className="text-body-sm-strong text-ink hover:text-body transition-colors text-nowrap"
+          >
+            Settle Up
+          </Link>
         </div>
-      </div>
-      <Outlet />
-    </>
+      </nav>
+      <main className="py-6 px-6 max-w-7xl mx-auto">
+        <Outlet />
+      </main>
+    </div>
   );
 };
 

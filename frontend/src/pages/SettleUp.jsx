@@ -144,19 +144,19 @@ const SettleUp = () => {
   }, [selectedGroupId]);
 
   return (
-    <div className="m-4 grid grid-cols-2 gap-8">
-      <div>
-        <div className="mb-4">
-          <h1 className="mb-2 text-3xl font-bold text-gray-800">Settle Up</h1>
-          <p className="text-sm text-gray-600">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="space-y-6">
+        <div className="border-b border-canvas-soft pb-4">
+          <h1 className="text-display-sm text-ink font-bold mb-1">Settle Up</h1>
+          <p className="text-body-sm text-mute">
             Record payments between group members to clear balances
           </p>
         </div>
 
-        <div className="mb-4">
+        <div className="bg-canvas border border-canvas-soft rounded-xl p-6 shadow-sm">
           <label
             htmlFor="groupSelect"
-            className="mb-2 block font-semibold text-gray-700"
+            className="text-body-sm-strong text-ink block mb-2"
           >
             Select Group:
           </label>
@@ -164,7 +164,7 @@ const SettleUp = () => {
             id="groupSelect"
             value={selectedGroupId}
             onChange={handleGroupChange}
-            className="rounded-lg border border-gray-300 bg-white px-4 py-2"
+            className="w-full bg-canvas text-ink border border-ink text-body-md rounded-md py-3 px-4 focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
           >
             <option value="" disabled>
               Select a group
@@ -181,24 +181,24 @@ const SettleUp = () => {
           </select>
         </div>
 
-        <div className="mb-4">
-          <h2 className="mt-4 mb-2 text-2xl font-semibold text-gray-800">
+        <div className="space-y-3">
+          <h2 className="text-display-xs text-ink font-semibold">
             Simplified Settlements
           </h2>
           {suggestions && suggestions.length > 0 ? (
-            <div className="w-full space-y-2">
+            <div className="w-full space-y-3">
               {suggestions.map((suggestion, index) => (
                 <div
                   key={index}
-                  className="rounded-lg border border-gray-200 bg-gray-50 p-4"
+                  className="rounded-xl border border-canvas-soft bg-canvas p-4 shadow-sm"
                 >
-                  <p className="text-lg">
+                  <p className="text-body-md text-ink">
                     <span className="font-semibold">
                       {suggestion.from.name}
                     </span>{" "}
                     owes{" "}
                     <span className="font-semibold">{suggestion.to.name}</span>:{" "}
-                    <span className="font-bold text-green-600">
+                    <span className="font-semibold text-positive-deep bg-primary-pale px-2 py-0.5 rounded-full text-body-sm-strong inline-block">
                       ₹{suggestion.amount.toFixed(2)}
                     </span>
                   </p>
@@ -206,176 +206,177 @@ const SettleUp = () => {
               ))}
             </div>
           ) : (
-            <div className="mb-4 w-full rounded-lg border border-gray-300 bg-gray-100 p-5">
-              <p className="text-md font-medium text-gray-600">
+            <div className="w-full rounded-xl border border-canvas-soft bg-canvas p-6 text-center shadow-sm">
+              <p className="text-body-md text-mute font-semibold">
                 All balances are settled!
               </p>
             </div>
           )}
         </div>
 
-        <div>
-          <h2 className="mt-4 mb-2 text-2xl font-semibold text-gray-800">
+        <div className="space-y-3">
+          <h2 className="text-display-xs text-ink font-semibold">
             Settlements History
           </h2>
-          <table className="w-full border-collapse border border-gray-400 text-center">
-            <thead>
-              <tr className="bg-gray-200">
-                <th className="border border-gray-300 p-2">Date</th>
-                <th className="border border-gray-300 p-2">Payer</th>
-                <th className="border border-gray-300 p-2">Payee</th>
-                <th className="border border-gray-300 p-2">Amount</th>
-              </tr>
-            </thead>
-            <tbody>
-              {settlementsData &&
-              settlementsData.settlements &&
-              settlementsData.settlements.length > 0 ? (
-                settlementsData.settlements.map((settlement) => (
-                  <tr key={settlement.id}>
-                    <td className="border border-gray-300 p-2">
-                      {new Date(settlement.date).toLocaleDateString()}
-                    </td>
-                    <td className="border border-gray-300 p-2">
-                      {settlement.payer.name}
-                    </td>
-                    <td className="border border-gray-300 p-2">
-                      {settlement.payee.name}
-                    </td>
-                    <td className="border border-gray-300 p-2">
-                      {settlement.amount}
-                    </td>
+          <div className="bg-canvas border border-canvas-soft rounded-xl overflow-hidden shadow-sm">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-canvas-soft border-b border-canvas-soft">
+                    <th className="py-4 px-6 text-caption text-mute font-semibold uppercase tracking-wider">Date</th>
+                    <th className="py-4 px-6 text-caption text-mute font-semibold uppercase tracking-wider">Payer</th>
+                    <th className="py-4 px-6 text-caption text-mute font-semibold uppercase tracking-wider">Payee</th>
+                    <th className="py-4 px-6 text-caption text-mute font-semibold uppercase tracking-wider">Amount</th>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td className="border border-gray-300 p-2" colSpan="4">
-                    No settlements found.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-      <div>
-        <div>
-          <div className="max-w-md rounded-2xl bg-gray-100 p-8">
-            <h1 className="mb-5 text-2xl font-semibold text-gray-800">
-              Record Settlement
-            </h1>
-            <form onSubmit={handleFormSubmit} className="flex flex-col gap-4">
-              <div className="flex flex-col">
-                <label
-                  htmlFor="paid_by"
-                  className="mb-2 text-sm font-semibold text-gray-700"
-                >
-                  Payer
-                </label>
-                <select
-                  id="paid_by"
-                  name="paid_by"
-                  value={inputs.paid_by}
-                  onChange={handleInputChange}
-                  required
-                  className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm"
-                >
-                  <option value="" disabled>
-                    Select Payer
-                  </option>
-                  {group && group.members && group.members.length > 0 ? (
-                    group.members.map((member) => (
-                      <option key={member.id} value={member.id}>
-                        {member.name}
-                      </option>
+                </thead>
+                <tbody className="divide-y divide-canvas-soft">
+                  {settlementsData &&
+                  settlementsData.settlements &&
+                  settlementsData.settlements.length > 0 ? (
+                    settlementsData.settlements.map((settlement) => (
+                      <tr key={settlement.id} className="hover:bg-canvas-soft/20 transition-colors">
+                        <td className="py-4 px-6 text-body-sm text-ink font-medium whitespace-nowrap">
+                          {new Date(settlement.date).toLocaleDateString()}
+                        </td>
+                        <td className="py-4 px-6 text-body-sm text-ink font-semibold">
+                          {settlement.payer.name}
+                        </td>
+                        <td className="py-4 px-6 text-body-sm text-body">
+                          {settlement.payee.name}
+                        </td>
+                        <td className="py-4 px-6 text-body-sm text-ink font-bold">
+                          ₹{settlement.amount}
+                        </td>
+                      </tr>
                     ))
                   ) : (
-                    <option value="" disabled>
-                      No members available
-                    </option>
+                    <tr>
+                      <td className="py-6 px-6 text-body-md text-mute text-center" colSpan="4">
+                        No settlements found.
+                      </td>
+                    </tr>
                   )}
-                </select>
-              </div>
-
-              <div className="flex flex-col">
-                <label
-                  htmlFor="paid_to"
-                  className="mb-2 text-sm font-semibold text-gray-700"
-                >
-                  Payee
-                </label>
-                <select
-                  id="paid_to"
-                  name="paid_to"
-                  value={inputs.paid_to}
-                  onChange={handleInputChange}
-                  required
-                  className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm"
-                >
-                  <option value="" disabled>
-                    Select Payee
-                  </option>
-                  {group && group.members && group.members.length > 0 ? (
-                    group.members.map((member) => (
-                      <option key={member.id} value={member.id}>
-                        {member.name}
-                      </option>
-                    ))
-                  ) : (
-                    <option value="" disabled>
-                      No members available
-                    </option>
-                  )}
-                </select>
-              </div>
-
-              <div className="flex flex-col">
-                <label
-                  htmlFor="amount"
-                  className="mb-2 text-sm font-semibold text-gray-700"
-                >
-                  Amount
-                </label>
-                <input
-                  type="number"
-                  id="amount"
-                  name="amount"
-                  value={inputs.amount}
-                  onChange={handleInputChange}
-                  placeholder="Enter amount"
-                  step="0.01"
-                  required
-                  className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm"
-                />
-              </div>
-
-              <div className="flex flex-col">
-                <label
-                  htmlFor="date"
-                  className="mb-2 text-sm font-semibold text-gray-700"
-                >
-                  Date
-                </label>
-                <input
-                  type="date"
-                  id="date"
-                  name="date"
-                  value={inputs.date}
-                  onChange={handleInputChange}
-                  required
-                  className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm"
-                />
-              </div>
-
-              <button
-                type="submit"
-                className="mt-2 cursor-pointer rounded-lg bg-blue-500 px-4 py-2 font-semibold text-white hover:bg-blue-600"
-              >
-                Record Payment
-              </button>
-            </form>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
+      </div>
+
+      <div className="bg-canvas rounded-xl p-6 shadow-sm border border-canvas-soft w-full h-fit">
+        <h1 className="text-display-xs text-ink font-bold mb-4">
+          Record Settlement
+        </h1>
+        <form onSubmit={handleFormSubmit} className="space-y-3">
+          <div className="flex flex-col">
+            <label
+              htmlFor="paid_by"
+              className="text-body-sm-strong text-ink mb-1"
+            >
+              Payer
+            </label>
+            <select
+              id="paid_by"
+              name="paid_by"
+              value={inputs.paid_by}
+              onChange={handleInputChange}
+              required
+              className="bg-canvas text-ink border border-ink text-body-md rounded-md py-3 px-4 focus:outline-none focus:ring-2 focus:ring-primary w-full cursor-pointer"
+            >
+              <option value="" disabled>
+                Select Payer
+              </option>
+              {group && group.members && group.members.length > 0 ? (
+                group.members.map((member) => (
+                  <option key={member.id} value={member.id}>
+                    {member.name}
+                  </option>
+                ))
+              ) : (
+                <option value="" disabled>
+                  No members available
+                </option>
+              )}
+            </select>
+          </div>
+
+          <div className="flex flex-col">
+            <label
+              htmlFor="paid_to"
+              className="text-body-sm-strong text-ink mb-1"
+            >
+              Payee
+            </label>
+            <select
+              id="paid_to"
+              name="paid_to"
+              value={inputs.paid_to}
+              onChange={handleInputChange}
+              required
+              className="bg-canvas text-ink border border-ink text-body-md rounded-md py-3 px-4 focus:outline-none focus:ring-2 focus:ring-primary w-full cursor-pointer"
+            >
+              <option value="" disabled>
+                Select Payee
+              </option>
+              {group && group.members && group.members.length > 0 ? (
+                group.members.map((member) => (
+                  <option key={member.id} value={member.id}>
+                    {member.name}
+                  </option>
+                ))
+              ) : (
+                <option value="" disabled>
+                  No members available
+                </option>
+              )}
+            </select>
+          </div>
+
+          <div className="flex flex-col">
+            <label
+              htmlFor="amount"
+              className="text-body-sm-strong text-ink mb-1"
+            >
+              Amount
+            </label>
+            <input
+              type="number"
+              id="amount"
+              name="amount"
+              value={inputs.amount}
+              onChange={handleInputChange}
+              placeholder="Enter amount"
+              step="0.01"
+              required
+              className="bg-canvas text-ink border border-ink text-body-md rounded-md py-3 px-4 focus:outline-none focus:ring-2 focus:ring-primary w-full"
+            />
+          </div>
+
+          <div className="flex flex-col">
+            <label
+              htmlFor="date"
+              className="text-body-sm-strong text-ink mb-1"
+            >
+              Date
+            </label>
+            <input
+              type="date"
+              id="date"
+              name="date"
+              value={inputs.date}
+              onChange={handleInputChange}
+              required
+              className="bg-canvas text-ink border border-ink text-body-md rounded-md py-3 px-4 focus:outline-none focus:ring-2 focus:ring-primary w-full cursor-pointer"
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="cursor-pointer bg-primary text-on-primary hover:bg-primary-active rounded-xl py-3 px-6 text-button-md font-semibold transition-colors mt-4 w-full shadow-sm"
+          >
+            Record Payment
+          </button>
+        </form>
       </div>
     </div>
   );

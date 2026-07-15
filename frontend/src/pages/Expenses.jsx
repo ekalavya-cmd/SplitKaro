@@ -16,11 +16,11 @@ const Expenses = () => {
   const setSplitTypeColor = (splitType) => {
     switch (splitType) {
       case "equal":
-        return "bg-blue-100 text-blue-800 px-2 py-1 rounded-full";
+        return "bg-canvas-soft text-body px-3 py-1 rounded-full text-caption font-semibold";
       case "exact":
-        return "bg-green-100 text-green-800 px-2 py-1 rounded-full";
+        return "bg-primary-pale text-positive-deep px-3 py-1 rounded-full text-caption font-semibold";
       default:
-        return "bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full";
+        return "bg-accent-orange/20 text-ink px-3 py-1 rounded-full text-caption font-semibold";
     }
   };
 
@@ -107,12 +107,17 @@ const Expenses = () => {
   };
 
   return (
-    <div className="m-4">
-      <h1 className="mb-4 text-3xl font-bold text-gray-800">Expenses</h1>
-      <div className="mb-4">
+    <div className="space-y-6">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 border-b border-canvas-soft pb-4">
+        <div>
+          <h1 className="text-display-sm text-ink font-bold">Expenses</h1>
+        </div>
+      </div>
+
+      <div className="bg-canvas border border-canvas-soft rounded-xl p-6 shadow-sm max-w-md w-full">
         <label
           htmlFor="groupSelect"
-          className="mb-2 block font-semibold text-gray-700"
+          className="text-body-sm-strong text-ink block mb-2"
         >
           Select Group:
         </label>
@@ -120,7 +125,7 @@ const Expenses = () => {
           id="groupSelect"
           value={selectedGroupId}
           onChange={handleGroupChange}
-          className="rounded-lg border border-gray-300 bg-white px-4 py-2"
+          className="w-full bg-canvas text-ink border border-ink text-body-md rounded-md py-3 px-4 focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
         >
           <option value="" disabled>
             Select a group
@@ -137,88 +142,92 @@ const Expenses = () => {
         </select>
       </div>
 
-      <div>
-        <h2 className="mb-2 text-2xl font-semibold text-gray-800">
+      <div className="space-y-3">
+        <h2 className="text-display-xs text-ink font-semibold">
           {group ? group.name : "Select a group to view expenses"}
         </h2>
 
-        <table className="w-full border-collapse border border-gray-400 text-center">
-          <thead>
-            <tr className="bg-gray-200">
-              <th className="border border-gray-300 p-2">Date</th>
-              <th className="border border-gray-300 p-2">Description</th>
-              <th className="border border-gray-300 p-2">Paid By</th>
-              <th className="border border-gray-300 p-2">Amount</th>
-              <th className="border border-gray-300 p-2">Split Type</th>
-              <th className="border border-gray-300 p-2">Splits</th>
-              <th className="border border-gray-300 p-2">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {expenses && expenses.length > 0 ? (
-              expenses.map((expense) => (
-                <tr key={expense.id}>
-                  <td className="border border-gray-300 p-2">
-                    {new Date(expense.date).toLocaleDateString()}
-                  </td>
-                  <td className="border border-gray-300 p-2">
-                    {expense.description}
-                  </td>
-                  <td className="border border-gray-300 p-2">
-                    {expense.payer.name}
-                  </td>
-                  <td className="border border-gray-300 p-2">
-                    ₹{expense.amount}
-                  </td>
-                  <td className="border border-gray-300 p-2">
-                    <span className={`${setSplitTypeColor(expense.splitType)}`}>
-                      {expense.splitType}
-                    </span>
-                  </td>
-                  <td className="border border-gray-300 p-2 text-sm">
-                    {expense.splits &&
-                      expense.splits.length > 0 &&
-                      expense.splits
-                        .map(
-                          (split) =>
-                            `${split.member.name} - ₹${split.amountOwed}`,
-                        )
-                        .join(", ")}
-                  </td>
-                  <td className="border border-gray-300 p-2">
-                    <button
-                      className="cursor-pointer rounded-md bg-red-500 px-2 py-1 text-white hover:bg-red-600"
-                      onClick={() => {
-                        if (
-                          window.confirm(
-                            "Are you sure you want to delete this expense?",
-                          )
-                        ) {
-                          handleDeleteExpense(expense.id);
-                        }
-                      }}
-                    >
-                      Delete
-                    </button>
-                  </td>
+        <div className="bg-canvas border border-canvas-soft rounded-xl overflow-hidden shadow-sm">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-canvas-soft border-b border-canvas-soft">
+                  <th className="py-4 px-6 text-caption text-mute font-semibold uppercase tracking-wider">Date</th>
+                  <th className="py-4 px-6 text-caption text-mute font-semibold uppercase tracking-wider">Description</th>
+                  <th className="py-4 px-6 text-caption text-mute font-semibold uppercase tracking-wider">Paid By</th>
+                  <th className="py-4 px-6 text-caption text-mute font-semibold uppercase tracking-wider">Amount</th>
+                  <th className="py-4 px-6 text-caption text-mute font-semibold uppercase tracking-wider">Split Type</th>
+                  <th className="py-4 px-6 text-caption text-mute font-semibold uppercase tracking-wider">Splits</th>
+                  <th className="py-4 px-6 text-caption text-mute font-semibold uppercase tracking-wider">Action</th>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td
-                  colSpan="7"
-                  className="border border-gray-300 p-2 text-center"
-                >
-                  {selectedGroupId
-                    ? expenses.length > 0
-                      ? "No expenses match the selected filters"
-                      : "No expenses for this group"
-                    : "Select a group to view expenses"}
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+              </thead>
+              <tbody className="divide-y divide-canvas-soft">
+                {expenses && expenses.length > 0 ? (
+                  expenses.map((expense) => (
+                    <tr key={expense.id} className="hover:bg-canvas-soft/20 transition-colors">
+                      <td className="py-4 px-6 text-body-sm text-ink font-medium whitespace-nowrap">
+                        {new Date(expense.date).toLocaleDateString()}
+                      </td>
+                      <td className="py-4 px-6 text-body-sm text-ink font-semibold">
+                        {expense.description}
+                      </td>
+                      <td className="py-4 px-6 text-body-sm text-body">
+                        {expense.payer.name}
+                      </td>
+                      <td className="py-4 px-6 text-body-sm text-ink font-bold">
+                        ₹{expense.amount}
+                      </td>
+                      <td className="py-4 px-6 text-body-sm">
+                        <span className={`${setSplitTypeColor(expense.splitType)}`}>
+                          {expense.splitType}
+                        </span>
+                      </td>
+                      <td className="py-4 px-6 text-body-sm text-mute">
+                        {expense.splits &&
+                          expense.splits.length > 0 &&
+                          expense.splits
+                            .map(
+                              (split) =>
+                                `${split.member.name} - ₹${split.amountOwed}`,
+                            )
+                            .join(", ")}
+                      </td>
+                      <td className="py-4 px-6 text-body-sm">
+                        <button
+                          className="cursor-pointer text-negative hover:underline text-body-sm-strong transition-colors"
+                          onClick={() => {
+                            if (
+                              window.confirm(
+                                "Are you sure you want to delete this expense?",
+                              )
+                            ) {
+                              handleDeleteExpense(expense.id);
+                            }
+                          }}
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan="7"
+                      className="py-6 px-6 text-body-md text-mute text-center"
+                    >
+                      {selectedGroupId
+                        ? expenses.length > 0
+                          ? "No expenses match the selected filters"
+                          : "No expenses for this group"
+                        : "Select a group to view expenses"}
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -40,11 +40,11 @@ const Dashboard = () => {
   const setSplitTypeColor = (splitType) => {
     switch (splitType) {
       case "equal":
-        return "bg-blue-100 text-blue-800 px-2 py-1 rounded-full";
+        return "bg-canvas-soft text-body px-3 py-1 rounded-full text-caption font-semibold";
       case "exact":
-        return "bg-green-100 text-green-800 px-2 py-1 rounded-full";
+        return "bg-primary-pale text-positive-deep px-3 py-1 rounded-full text-caption font-semibold";
       default:
-        return "bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full";
+        return "bg-accent-orange/20 text-ink px-3 py-1 rounded-full text-caption font-semibold";
     }
   };
 
@@ -161,24 +161,24 @@ const Dashboard = () => {
   }, [selectedGroupId]);
 
   return (
-    <div className="m-4">
-      <div className="mb-4">
-        <h1 className="mb-2 text-3xl font-bold text-gray-800">Dashboard</h1>
-        <div className="flex gap-3">
-          <p className="text-sm text-gray-600">{totalMembers} Members</p>
-          <p className="text-sm text-gray-600">
-            ₹{totalExpenses.toFixed(2)} Expenses
-          </p>
-          <p className="text-sm text-gray-600">
-            {suggestions.length} Pending Settlements
-          </p>
+    <div className="space-y-6">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 border-b border-canvas-soft pb-4">
+        <div>
+          <h1 className="text-display-sm text-ink font-bold mb-1">Dashboard</h1>
+          <div className="flex flex-wrap gap-3 text-body-sm text-mute">
+            <span>{totalMembers} Members</span>
+            <span className="text-canvas-soft font-bold">•</span>
+            <span>₹{totalExpenses.toFixed(2)} Expenses</span>
+            <span className="text-canvas-soft font-bold">•</span>
+            <span>{suggestions.length} Pending Settlements</span>
+          </div>
         </div>
       </div>
 
-      <div className="mb-6">
+      <div className="bg-canvas border border-canvas-soft rounded-xl p-6 shadow-sm max-w-md w-full">
         <label
           htmlFor="groupSelect"
-          className="mb-2 block font-semibold text-gray-700"
+          className="text-body-sm-strong text-ink block mb-2"
         >
           Select Group:
         </label>
@@ -186,7 +186,7 @@ const Dashboard = () => {
           id="groupSelect"
           value={selectedGroupId}
           onChange={handleGroupChange}
-          className="rounded-lg border border-gray-300 bg-white px-4 py-2"
+          className="w-full bg-canvas text-ink border border-ink text-body-md rounded-md py-3 px-4 focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
         >
           <option value="" disabled>
             Select a group
@@ -204,7 +204,7 @@ const Dashboard = () => {
       </div>
 
       {group && group.members && group.members.length > 0 ? (
-        <div className="mb-4 grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {balances.map((bal) => {
             const amount = Number(bal.balance);
             const isOwed = amount > 0;
@@ -214,66 +214,64 @@ const Dashboard = () => {
             return (
               <div
                 key={bal.member_id}
-                className={`rounded-2xl border p-5 ${
-                  isSettled
-                    ? "border-gray-300 bg-gray-100"
-                    : isOwed
-                      ? "border-gray-300 bg-green-100"
-                      : "border-gray-300 bg-red-100"
-                }`}
+                className="bg-canvas rounded-xl p-6 border border-canvas-soft shadow-sm flex flex-col justify-between"
               >
-                <div className="mb-3 text-sm font-medium text-gray-600">
-                  {bal.name}
+                <div>
+                  <div className="text-body-sm-strong text-mute mb-2">
+                    {bal.name}
+                  </div>
+                  <div className="text-display-xs text-ink font-bold mb-3">
+                    ₹{absAmount.toFixed(2)}
+                  </div>
                 </div>
-                <div className="mb-3 text-3xl font-semibold text-gray-900">
-                  ₹{absAmount.toFixed(2)}
-                </div>
-                <div
-                  className={`text-sm font-medium ${
-                    isSettled
-                      ? "text-gray-700"
-                      : isOwed
-                        ? "text-green-700"
-                        : "text-red-700"
-                  }`}
-                >
-                  {isSettled ? "SETTLED" : isOwed ? "IS OWED" : "OWES"}
+                <div>
+                  <span
+                    className={`text-body-sm-strong px-3 py-1 rounded-full inline-block ${
+                      isSettled
+                        ? "bg-canvas-soft text-mute"
+                        : isOwed
+                          ? "bg-primary-pale text-positive-deep"
+                          : "bg-negative-pale text-negative-deep"
+                    }`}
+                  >
+                    {isSettled ? "SETTLED" : isOwed ? "IS OWED" : "OWES"}
+                  </span>
                 </div>
               </div>
             );
           })}
         </div>
       ) : (
-        <div className="mb-4 rounded-xl border border-gray-300 bg-gray-100 p-5 text-center">
-          <p className="text-sm font-medium text-gray-600">
+        <div className="rounded-xl border border-canvas-soft bg-canvas p-6 text-center shadow-sm">
+          <p className="text-body-sm-strong text-mute">
             No members in this group.
           </p>
         </div>
       )}
 
-      <div className="mb-4">
-        <h2 className="mt-4 mb-2 text-2xl font-semibold text-gray-800">
+      <div className="space-y-3">
+        <h2 className="text-display-xs text-ink font-semibold">
           Simplified Settlements
         </h2>
         {suggestions && suggestions.length > 0 ? (
-          <div className="max-w-150 space-y-2">
+          <div className="max-w-xl space-y-3 w-full">
             {suggestions.map((suggestion, index) => (
               <div
                 key={index}
-                className="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 p-4"
+                className="flex items-center justify-between rounded-xl border border-canvas-soft bg-canvas p-4 shadow-sm"
               >
-                <p className="text-lg">
+                <p className="text-body-md text-ink">
                   <span className="font-semibold">{suggestion.from.name}</span>{" "}
                   should pay{" "}
                   <span className="font-semibold">{suggestion.to.name}</span>{" "}
-                  <span className="font-bold text-green-600">
+                  <span className="font-semibold text-positive-deep bg-primary-pale px-2 py-0.5 rounded-full text-body-sm-strong">
                     ₹{suggestion.amount.toFixed(2)}
                   </span>
                 </p>
                 <button
                   type="button"
                   onClick={() => navigate(`/settle-up`)}
-                  className="text-md cursor-pointer rounded-md bg-green-500 px-4 py-2 text-white hover:bg-green-600"
+                  className="cursor-pointer bg-canvas-soft text-ink hover:bg-canvas-soft/80 rounded-xl py-3 px-6 text-button-md font-semibold transition-colors"
                 >
                   Settle
                 </button>
@@ -281,27 +279,37 @@ const Dashboard = () => {
             ))}
           </div>
         ) : (
-          <div className="mb-4 max-w-150 rounded-lg border border-gray-300 bg-gray-100 p-5">
-            <p className="text-md font-medium text-gray-600">
+          <div className="max-w-xl rounded-xl border border-canvas-soft bg-canvas p-6 text-center shadow-sm w-full">
+            <p className="text-body-md text-mute font-semibold">
               All balances are settled!
             </p>
           </div>
         )}
       </div>
 
-      <div>
-        <h2 className="mb-2 text-2xl font-semibold text-gray-800">
-          {group ? group.name : "Select a group to view expenses"}
-        </h2>
+      <div className="space-y-3">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+          <h2 className="text-display-xs text-ink font-semibold">
+            {group ? group.name : "Select a group to view expenses"}
+          </h2>
 
-        <div className="flex items-center justify-between">
-          <form className="flex flex-wrap gap-4">
+          <button
+            type="button"
+            onClick={() => navigate(`/add-expense/${selectedGroupId}`)}
+            className="cursor-pointer bg-primary text-on-primary hover:bg-primary-active rounded-xl py-3 px-6 text-button-md font-semibold transition-colors self-start md:self-auto shadow-sm"
+          >
+            Add Expense
+          </button>
+        </div>
+
+        <div className="bg-canvas border border-canvas-soft rounded-xl p-4 shadow-sm">
+          <form className="flex flex-wrap items-center gap-3">
             <input
               type="text"
               placeholder="Expense Description"
               value={filterDescription}
               onChange={(e) => setFilterDescription(e.target.value)}
-              className="mb-4 rounded border border-gray-400 p-2"
+              className="bg-canvas text-ink border border-ink text-body-md rounded-md py-3 px-4 focus:outline-none focus:ring-2 focus:ring-primary w-full md:w-64"
             />
 
             <select
@@ -309,7 +317,7 @@ const Dashboard = () => {
               id="splitType"
               value={filterSplitType}
               onChange={(e) => setFilterSplitType(e.target.value)}
-              className="mb-4 rounded border border-gray-400 p-2"
+              className="bg-canvas text-ink border border-ink text-body-md rounded-md py-3 px-4 focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer w-full md:w-48"
             >
               <option value="all">All Type</option>
               <option value="equal">Equal Split</option>
@@ -322,7 +330,7 @@ const Dashboard = () => {
               id="paidBy"
               value={filterPaidBy}
               onChange={(e) => setFilterPaidBy(e.target.value)}
-              className="mb-4 w-30 rounded border border-gray-400 p-2"
+              className="bg-canvas text-ink border border-ink text-body-md rounded-md py-3 px-4 focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer w-full md:w-48"
             >
               <option value="all">All Payers</option>
               {group && group.members && group.members.length > 0 ? (
@@ -336,76 +344,72 @@ const Dashboard = () => {
               )}
             </select>
           </form>
-
-          <button
-            type="button"
-            onClick={() => navigate(`/add-expense/${selectedGroupId}`)}
-            className="text-md cursor-pointer rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
-          >
-            Add Expense
-          </button>
         </div>
 
-        <table className="w-full border-collapse border border-gray-400 text-center">
-          <thead>
-            <tr className="bg-gray-200">
-              <th className="border border-gray-300 p-2">Date</th>
-              <th className="border border-gray-300 p-2">Description</th>
-              <th className="border border-gray-300 p-2">Paid By</th>
-              <th className="border border-gray-300 p-2">Amount</th>
-              <th className="border border-gray-300 p-2">Split Type</th>
-              <th className="border border-gray-300 p-2">Splits</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredExpenses && filteredExpenses.length > 0 ? (
-              filteredExpenses.map((expense) => (
-                <tr key={expense.id}>
-                  <td className="border border-gray-300 p-2">
-                    {new Date(expense.date).toLocaleDateString()}
-                  </td>
-                  <td className="border border-gray-300 p-2">
-                    {expense.description}
-                  </td>
-                  <td className="border border-gray-300 p-2">
-                    {expense.payer.name}
-                  </td>
-                  <td className="border border-gray-300 p-2">
-                    ₹{expense.amount}
-                  </td>
-                  <td className="border border-gray-300 p-2">
-                    <span className={`${setSplitTypeColor(expense.splitType)}`}>
-                      {expense.splitType}
-                    </span>
-                  </td>
-                  <td className="border border-gray-300 p-2">
-                    {expense.splits &&
-                      expense.splits.length > 0 &&
-                      expense.splits
-                        .map(
-                          (split) =>
-                            `${split.member.name} - ₹${split.amountOwed}`,
-                        )
-                        .join(", ")}
-                  </td>
+        <div className="bg-canvas border border-canvas-soft rounded-xl overflow-hidden shadow-sm">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-canvas-soft border-b border-canvas-soft">
+                  <th className="py-4 px-6 text-caption text-mute font-semibold uppercase tracking-wider">Date</th>
+                  <th className="py-4 px-6 text-caption text-mute font-semibold uppercase tracking-wider">Description</th>
+                  <th className="py-4 px-6 text-caption text-mute font-semibold uppercase tracking-wider">Paid By</th>
+                  <th className="py-4 px-6 text-caption text-mute font-semibold uppercase tracking-wider">Amount</th>
+                  <th className="py-4 px-6 text-caption text-mute font-semibold uppercase tracking-wider">Split Type</th>
+                  <th className="py-4 px-6 text-caption text-mute font-semibold uppercase tracking-wider">Splits</th>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td
-                  colSpan="6"
-                  className="border border-gray-300 p-2 text-center"
-                >
-                  {selectedGroupId
-                    ? expenses.length > 0
-                      ? "No expenses match the selected filters"
-                      : "No expenses for this group"
-                    : "Select a group to view expenses"}
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+              </thead>
+              <tbody className="divide-y divide-canvas-soft">
+                {filteredExpenses && filteredExpenses.length > 0 ? (
+                  filteredExpenses.map((expense) => (
+                    <tr key={expense.id} className="hover:bg-canvas-soft/20 transition-colors">
+                      <td className="py-4 px-6 text-body-sm text-ink font-medium whitespace-nowrap">
+                        {new Date(expense.date).toLocaleDateString()}
+                      </td>
+                      <td className="py-4 px-6 text-body-sm text-ink font-semibold">
+                        {expense.description}
+                      </td>
+                      <td className="py-4 px-6 text-body-sm text-body">
+                        {expense.payer.name}
+                      </td>
+                      <td className="py-4 px-6 text-body-sm text-ink font-bold">
+                        ₹{expense.amount}
+                      </td>
+                      <td className="py-4 px-6 text-body-sm">
+                        <span className={`${setSplitTypeColor(expense.splitType)}`}>
+                          {expense.splitType}
+                        </span>
+                      </td>
+                      <td className="py-4 px-6 text-body-sm text-mute">
+                        {expense.splits &&
+                          expense.splits.length > 0 &&
+                          expense.splits
+                            .map(
+                              (split) =>
+                                `${split.member.name} - ₹${split.amountOwed}`,
+                            )
+                            .join(", ")}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan="6"
+                      className="py-6 px-6 text-body-md text-mute text-center"
+                    >
+                      {selectedGroupId
+                        ? expenses.length > 0
+                          ? "No expenses match the selected filters"
+                          : "No expenses for this group"
+                        : "Select a group to view expenses"}
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   );

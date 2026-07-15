@@ -71,16 +71,16 @@ const AddExpense = () => {
   }, [groupId]);
 
   return (
-    <div className="m-4 grid grid-cols-4 gap-4">
-      <div className="w-full rounded-2xl bg-gray-100 p-8">
-        <h1 className="mb-5 text-2xl font-semibold text-gray-800">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="bg-canvas rounded-xl p-6 shadow-sm border border-canvas-soft w-full">
+        <h1 className="text-display-xs text-ink font-bold mb-4">
           Add Expense
         </h1>
-        <form onSubmit={handleFormSubmit} className="flex flex-col gap-4">
+        <form onSubmit={handleFormSubmit} className="space-y-3">
           <div className="flex flex-col">
             <label
               htmlFor="description"
-              className="mb-2 text-sm font-semibold text-gray-700"
+              className="text-body-sm-strong text-ink mb-1"
             >
               Description
             </label>
@@ -92,14 +92,14 @@ const AddExpense = () => {
               value={inputs.description}
               onChange={handleInputChange}
               required
-              className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm"
+              className="bg-canvas text-ink border border-ink text-body-md rounded-md py-3 px-4 focus:outline-none focus:ring-2 focus:ring-primary w-full"
             />
           </div>
 
           <div className="flex flex-col">
             <label
               htmlFor="amount"
-              className="mb-2 text-sm font-semibold text-gray-700"
+              className="text-body-sm-strong text-ink mb-1"
             >
               Total Amount
             </label>
@@ -112,14 +112,14 @@ const AddExpense = () => {
               value={inputs.amount}
               onChange={handleInputChange}
               required
-              className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm"
+              className="bg-canvas text-ink border border-ink text-body-md rounded-md py-3 px-4 focus:outline-none focus:ring-2 focus:ring-primary w-full"
             />
           </div>
 
           <div className="flex flex-col">
             <label
               htmlFor="paid_by"
-              className="mb-2 text-sm font-semibold text-gray-700"
+              className="text-body-sm-strong text-ink mb-1"
             >
               Paid By
             </label>
@@ -129,7 +129,7 @@ const AddExpense = () => {
               value={inputs.paid_by}
               onChange={handleInputChange}
               required
-              className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm"
+              className="bg-canvas text-ink border border-ink text-body-md rounded-md py-3 px-4 focus:outline-none focus:ring-2 focus:ring-primary w-full cursor-pointer"
             >
               <option value="" disabled>
                 Select Payer
@@ -151,7 +151,7 @@ const AddExpense = () => {
           <div className="flex flex-col">
             <label
               htmlFor="date"
-              className="mb-2 text-sm font-semibold text-gray-700"
+              className="text-body-sm-strong text-ink mb-1"
             >
               Date
             </label>
@@ -162,14 +162,14 @@ const AddExpense = () => {
               value={inputs.date}
               onChange={handleInputChange}
               required
-              className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm"
+              className="bg-canvas text-ink border border-ink text-body-md rounded-md py-3 px-4 focus:outline-none focus:ring-2 focus:ring-primary w-full"
             />
           </div>
 
           <div className="flex flex-col">
             <label
               htmlFor="split_type"
-              className="mb-2 text-sm font-semibold text-gray-700"
+              className="text-body-sm-strong text-ink mb-1"
             >
               Split Type
             </label>
@@ -179,7 +179,7 @@ const AddExpense = () => {
               value={inputs.split_type}
               onChange={handleInputChange}
               required
-              className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm"
+              className="bg-canvas text-ink border border-ink text-body-md rounded-md py-3 px-4 focus:outline-none focus:ring-2 focus:ring-primary w-full cursor-pointer"
             >
               <option value="" disabled>
                 Select Split Type
@@ -192,7 +192,7 @@ const AddExpense = () => {
 
           <button
             type="submit"
-            className="mt-2 cursor-pointer rounded-lg bg-blue-500 px-4 py-2 font-semibold text-white hover:bg-blue-600"
+            className="cursor-pointer bg-primary text-on-primary hover:bg-primary-active rounded-xl py-3 px-6 text-button-md font-semibold transition-colors mt-4 w-full shadow-sm"
           >
             Add Expense
           </button>
@@ -202,100 +202,104 @@ const AddExpense = () => {
       {(inputs.split_type === "exact" ||
         inputs.split_type === "percentage" ||
         inputs.split_type === "equal") && (
-        <div className="max-w-md rounded-2xl bg-gray-100 p-8">
-          <h1 className="mb-2 text-2xl font-bold text-gray-800">
+        <div className="bg-canvas rounded-xl p-6 shadow-sm border border-canvas-soft w-full space-y-3">
+          <h1 className="text-display-xs text-ink font-bold">
             Split Details
           </h1>
           {inputs.split_type === "exact" && (
-            <>
-              <p className="text-md mb-2 font-semibold text-gray-700">
+            <div className="space-y-3">
+              <p className="text-body-sm text-mute">
                 Enter the exact amount each person owes:
               </p>
               {group && group.members && group.members.length > 0 ? (
-                group.members.map((member) => (
-                  <div
-                    key={member.id}
-                    className="m-3 flex items-center justify-between"
-                  >
-                    <label
-                      htmlFor={`split-${member.id}`}
-                      className="mb-2 text-xl font-semibold text-gray-700"
+                <div className="space-y-2">
+                  {group.members.map((member) => (
+                    <div
+                      key={member.id}
+                      className="flex items-center justify-between gap-3"
                     >
-                      {member.name}
-                    </label>
-                    <input
-                      type="number"
-                      id={`split-${member.id}`}
-                      name={`split-${member.id}`}
-                      value={inputs.splits[member.id] || ""}
-                      onChange={(e) =>
-                        handleSplitChange(member.id, e.target.value)
-                      }
-                      placeholder="₹ 0.00"
-                      step="0.01"
-                      className="max-w-30 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm"
-                    />
-                  </div>
-                ))
+                      <label
+                        htmlFor={`split-${member.id}`}
+                        className="text-body-md-strong text-ink"
+                      >
+                        {member.name}
+                      </label>
+                      <input
+                        type="number"
+                        id={`split-${member.id}`}
+                        name={`split-${member.id}`}
+                        value={inputs.splits[member.id] || ""}
+                        onChange={(e) =>
+                          handleSplitChange(member.id, e.target.value)
+                        }
+                        placeholder="₹ 0.00"
+                        step="0.01"
+                        className="bg-canvas text-ink border border-ink text-body-md rounded-md py-3 px-4 focus:outline-none focus:ring-2 focus:ring-primary w-28"
+                      />
+                    </div>
+                  ))}
+                </div>
               ) : (
-                <p className="text-md mb-2 font-semibold text-gray-700">
+                <p className="text-body-sm text-mute">
                   No members available to split the expense.
                 </p>
               )}
               {inputs.split_type === "exact" &&
                 inputs.splits &&
                 Object.keys(inputs.splits).length > 0 && (
-                  <p className="mt-2 text-sm text-gray-600">
+                  <p className="text-body-sm-strong text-mute pt-2 border-t border-canvas-soft">
                     Total: ₹{" "}
                     {Object.values(inputs.splits)
                       .reduce((sum, val) => sum + (Number(val) || 0), 0)
                       .toFixed(2)}
                   </p>
                 )}
-            </>
+            </div>
           )}
           {inputs.split_type === "percentage" && (
-            <>
-              <p className="text-md mb-2 font-semibold text-gray-700">
+            <div className="space-y-3">
+              <p className="text-body-sm text-mute">
                 Enter the percentage each person owes (must sum to 100%):
               </p>
               {group && group.members && group.members.length > 0 ? (
-                group.members.map((member) => (
-                  <div
-                    key={member.id}
-                    className="m-3 flex items-center justify-between"
-                  >
-                    <label
-                      htmlFor={`split-${member.id}`}
-                      className="mb-2 text-xl font-semibold text-gray-700"
+                <div className="space-y-2">
+                  {group.members.map((member) => (
+                    <div
+                      key={member.id}
+                      className="flex items-center justify-between gap-3"
                     >
-                      {member.name}
-                    </label>
-                    <input
-                      type="number"
-                      id={`split-${member.id}`}
-                      name={`split-${member.id}`}
-                      value={inputs.splits[member.id] || ""}
-                      onChange={(e) =>
-                        handleSplitChange(member.id, e.target.value)
-                      }
-                      placeholder="0%"
-                      min="0"
-                      max="100"
-                      step="0.01"
-                      className="max-w-30 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm"
-                    />
-                  </div>
-                ))
+                      <label
+                        htmlFor={`split-${member.id}`}
+                        className="text-body-md-strong text-ink"
+                      >
+                        {member.name}
+                      </label>
+                      <input
+                        type="number"
+                        id={`split-${member.id}`}
+                        name={`split-${member.id}`}
+                        value={inputs.splits[member.id] || ""}
+                        onChange={(e) =>
+                          handleSplitChange(member.id, e.target.value)
+                        }
+                        placeholder="0%"
+                        min="0"
+                        max="100"
+                        step="0.01"
+                        className="bg-canvas text-ink border border-ink text-body-md rounded-md py-3 px-4 focus:outline-none focus:ring-2 focus:ring-primary w-28"
+                      />
+                    </div>
+                  ))}
+                </div>
               ) : (
-                <p className="text-md mb-2 font-semibold text-gray-700">
+                <p className="text-body-sm text-mute">
                   No members available to split the expense.
                 </p>
               )}
               {inputs.split_type === "percentage" &&
                 inputs.splits &&
                 Object.keys(inputs.splits).length > 0 && (
-                  <p className="mt-2 text-sm text-gray-600">
+                  <p className="text-body-sm-strong text-mute pt-2 border-t border-canvas-soft">
                     Total:{" "}
                     {Object.values(inputs.splits)
                       .reduce((sum, val) => sum + (Number(val) || 0), 0)
@@ -303,48 +307,50 @@ const AddExpense = () => {
                     %
                   </p>
                 )}
-            </>
+            </div>
           )}
           {inputs.split_type === "equal" && (
-            <>
-              <p className="text-md mb-2 font-semibold text-gray-700">
+            <div className="space-y-3">
+              <p className="text-body-sm text-mute">
                 Equal split amounts:
               </p>
               {group && group.members && group.members.length > 0 ? (
-                group.members.map((member) => {
-                  const equalAmount = inputs.amount
-                    ? (
-                        parseFloat(inputs.amount) / group.members.length
-                      ).toFixed(2)
-                    : "0.00";
-                  return (
-                    <div
-                      key={member.id}
-                      className="m-3 flex items-center justify-between"
-                    >
-                      <label
-                        htmlFor={`split-${member.id}`}
-                        className="mb-2 text-xl font-semibold text-gray-700"
+                <div className="space-y-2">
+                  {group.members.map((member) => {
+                    const equalAmount = inputs.amount
+                      ? (
+                          parseFloat(inputs.amount) / group.members.length
+                        ).toFixed(2)
+                      : "0.00";
+                    return (
+                      <div
+                        key={member.id}
+                        className="flex items-center justify-between gap-3"
                       >
-                        {member.name}
-                      </label>
-                      <input
-                        type="text"
-                        id={`split-${member.id}`}
-                        name={`split-${member.id}`}
-                        value={`₹ ${equalAmount}`}
-                        readOnly
-                        className="max-w-30 cursor-not-allowed rounded-lg border border-gray-300 bg-gray-50 px-4 py-2 text-sm"
-                      />
-                    </div>
-                  );
-                })
+                        <label
+                          htmlFor={`split-${member.id}`}
+                          className="text-body-md-strong text-ink"
+                        >
+                          {member.name}
+                        </label>
+                        <input
+                          type="text"
+                          id={`split-${member.id}`}
+                          name={`split-${member.id}`}
+                          value={`₹ ${equalAmount}`}
+                          readOnly
+                          className="max-w-30 cursor-not-allowed rounded-md border border-canvas-soft bg-canvas-soft px-4 py-2 text-sm text-mute focus:outline-none"
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
               ) : (
-                <p className="text-md mb-2 font-semibold text-gray-700">
+                <p className="text-body-sm text-mute">
                   No members available to split the expense.
                 </p>
               )}
-            </>
+            </div>
           )}
         </div>
       )}
