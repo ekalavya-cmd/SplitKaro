@@ -1,5 +1,6 @@
 import React from "react";
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   getExpenses,
   getGroups,
@@ -13,6 +14,8 @@ const Expenses = () => {
   const [group, setGroup] = useState(null);
   const [expenses, setExpenses] = useState([]);
   const [expandedExpenseIds, setExpandedExpenseIds] = useState({});
+
+  const navigate = useNavigate();
 
   const toggleExpenseExpand = (id) => {
     setExpandedExpenseIds((prev) => ({
@@ -151,9 +154,19 @@ const Expenses = () => {
       </div>
 
       <div className="space-y-md">
-        <h2 className="text-display-xs text-ink font-semibold">
-          {group ? group.name : "Select a group to view expenses"}
-        </h2>
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-md">
+          <h2 className="text-display-xs text-ink font-semibold">
+            {group ? group.name : "Select a group to view expenses"}
+          </h2>
+
+          <button
+            type="button"
+            onClick={() => navigate(`/add-expense/${selectedGroupId}`)}
+            className="cursor-pointer bg-primary text-on-primary hover:bg-primary-active rounded-xl py-md px-xl text-button-md font-semibold transition-colors self-start md:self-auto shadow-sm"
+          >
+            Add Expense
+          </button>
+        </div>
 
         <div className="bg-canvas border border-canvas-soft rounded-xl overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
