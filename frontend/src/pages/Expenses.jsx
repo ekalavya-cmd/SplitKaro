@@ -16,11 +16,11 @@ const Expenses = () => {
   const setSplitTypeColor = (splitType) => {
     switch (splitType) {
       case "equal":
-        return "bg-canvas-soft text-body px-3 py-1 rounded-full text-caption font-semibold";
+        return "bg-canvas-soft text-body px-md py-xs rounded-full text-caption font-semibold";
       case "exact":
-        return "bg-primary-pale text-positive-deep px-3 py-1 rounded-full text-caption font-semibold";
+        return "bg-primary-pale text-positive-deep px-md py-xs rounded-full text-caption font-semibold";
       default:
-        return "bg-accent-orange/20 text-ink px-3 py-1 rounded-full text-caption font-semibold";
+        return "bg-accent-orange/20 text-ink px-md py-xs rounded-full text-caption font-semibold";
     }
   };
 
@@ -107,17 +107,17 @@ const Expenses = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 border-b border-canvas-soft pb-4">
+    <div className="space-y-xl">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-md border-b border-canvas-soft pb-lg">
         <div>
           <h1 className="text-display-sm text-ink font-bold">Expenses</h1>
         </div>
       </div>
 
-      <div className="bg-canvas border border-canvas-soft rounded-xl p-6 shadow-sm max-w-md w-full">
+      <div className="bg-canvas border border-canvas-soft rounded-xl p-xl shadow-sm max-w-md w-full">
         <label
           htmlFor="groupSelect"
-          className="text-body-sm-strong text-ink block mb-2"
+          className="text-body-sm-strong text-ink block mb-sm"
         >
           Select Group:
         </label>
@@ -125,7 +125,7 @@ const Expenses = () => {
           id="groupSelect"
           value={selectedGroupId}
           onChange={handleGroupChange}
-          className="w-full bg-canvas text-ink border border-ink text-body-md rounded-md py-3 px-4 focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
+          className="w-full bg-canvas text-ink border border-ink text-body-md rounded-md py-md px-lg focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
         >
           <option value="" disabled>
             Select a group
@@ -142,7 +142,7 @@ const Expenses = () => {
         </select>
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-md">
         <h2 className="text-display-xs text-ink font-semibold">
           {group ? group.name : "Select a group to view expenses"}
         </h2>
@@ -152,37 +152,37 @@ const Expenses = () => {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-canvas-soft border-b border-canvas-soft">
-                  <th className="py-4 px-6 text-caption text-mute font-semibold uppercase tracking-wider">Date</th>
-                  <th className="py-4 px-6 text-caption text-mute font-semibold uppercase tracking-wider">Description</th>
-                  <th className="py-4 px-6 text-caption text-mute font-semibold uppercase tracking-wider">Paid By</th>
-                  <th className="py-4 px-6 text-caption text-mute font-semibold uppercase tracking-wider">Amount</th>
-                  <th className="py-4 px-6 text-caption text-mute font-semibold uppercase tracking-wider">Split Type</th>
-                  <th className="py-4 px-6 text-caption text-mute font-semibold uppercase tracking-wider">Splits</th>
-                  <th className="py-4 px-6 text-caption text-mute font-semibold uppercase tracking-wider">Action</th>
+                  <th className="py-lg px-xl text-caption text-mute font-semibold uppercase tracking-wider">Date</th>
+                  <th className="py-lg px-xl text-caption text-mute font-semibold uppercase tracking-wider">Description</th>
+                  <th className="py-lg px-xl text-caption text-mute font-semibold uppercase tracking-wider">Paid By</th>
+                  <th className="py-lg px-xl text-caption text-mute font-semibold uppercase tracking-wider">Amount</th>
+                  <th className="py-lg px-xl text-caption text-mute font-semibold uppercase tracking-wider">Split Type</th>
+                  <th className="py-lg px-xl text-caption text-mute font-semibold uppercase tracking-wider">Splits</th>
+                  <th className="py-lg px-xl text-caption text-mute font-semibold uppercase tracking-wider">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-canvas-soft">
                 {expenses && expenses.length > 0 ? (
                   expenses.map((expense) => (
                     <tr key={expense.id} className="hover:bg-canvas-soft/20 transition-colors">
-                      <td className="py-4 px-6 text-body-sm text-ink font-medium whitespace-nowrap">
+                      <td className="py-lg px-xl text-body-sm text-ink font-medium whitespace-nowrap">
                         {new Date(expense.date).toLocaleDateString()}
                       </td>
-                      <td className="py-4 px-6 text-body-sm text-ink font-semibold">
+                      <td className="py-lg px-xl text-body-sm text-ink font-semibold">
                         {expense.description}
                       </td>
-                      <td className="py-4 px-6 text-body-sm text-body">
+                      <td className="py-lg px-xl text-body-sm text-body">
                         {expense.payer.name}
                       </td>
-                      <td className="py-4 px-6 text-body-sm text-ink font-bold">
+                      <td className="py-lg px-xl text-body-sm text-ink font-bold">
                         ₹{expense.amount}
                       </td>
-                      <td className="py-4 px-6 text-body-sm">
+                      <td className="py-lg px-xl text-body-sm">
                         <span className={`${setSplitTypeColor(expense.splitType)}`}>
                           {expense.splitType}
                         </span>
                       </td>
-                      <td className="py-4 px-6 text-body-sm text-mute">
+                      <td className="py-lg px-xl text-body-sm text-mute">
                         {expense.splits &&
                           expense.splits.length > 0 &&
                           expense.splits
@@ -192,7 +192,7 @@ const Expenses = () => {
                             )
                             .join(", ")}
                       </td>
-                      <td className="py-4 px-6 text-body-sm">
+                      <td className="py-lg px-xl text-body-sm">
                         <button
                           className="cursor-pointer text-negative hover:underline text-body-sm-strong transition-colors"
                           onClick={() => {
@@ -214,7 +214,7 @@ const Expenses = () => {
                   <tr>
                     <td
                       colSpan="7"
-                      className="py-6 px-6 text-body-md text-mute text-center"
+                      className="py-xl px-xl text-body-md text-mute text-center"
                     >
                       {selectedGroupId
                         ? expenses.length > 0

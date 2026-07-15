@@ -144,19 +144,19 @@ const SettleUp = () => {
   }, [selectedGroupId]);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <div className="space-y-6">
-        <div className="border-b border-canvas-soft pb-4">
-          <h1 className="text-display-sm text-ink font-bold mb-1">Settle Up</h1>
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-xl">
+      <div className="space-y-xl">
+        <div className="border-b border-canvas-soft pb-lg">
+          <h1 className="text-display-sm text-ink font-bold mb-xs">Settle Up</h1>
           <p className="text-body-sm text-mute">
             Record payments between group members to clear balances
           </p>
         </div>
 
-        <div className="bg-canvas border border-canvas-soft rounded-xl p-6 shadow-sm">
+        <div className="bg-canvas border border-canvas-soft rounded-xl p-xl shadow-sm">
           <label
             htmlFor="groupSelect"
-            className="text-body-sm-strong text-ink block mb-2"
+            className="text-body-sm-strong text-ink block mb-sm"
           >
             Select Group:
           </label>
@@ -164,7 +164,7 @@ const SettleUp = () => {
             id="groupSelect"
             value={selectedGroupId}
             onChange={handleGroupChange}
-            className="w-full bg-canvas text-ink border border-ink text-body-md rounded-md py-3 px-4 focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
+            className="w-full bg-canvas text-ink border border-ink text-body-md rounded-md py-md px-lg focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
           >
             <option value="" disabled>
               Select a group
@@ -181,16 +181,16 @@ const SettleUp = () => {
           </select>
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-md">
           <h2 className="text-display-xs text-ink font-semibold">
             Simplified Settlements
           </h2>
           {suggestions && suggestions.length > 0 ? (
-            <div className="w-full space-y-3">
+            <div className="w-full space-y-md">
               {suggestions.map((suggestion, index) => (
                 <div
                   key={index}
-                  className="rounded-xl border border-canvas-soft bg-canvas p-4 shadow-sm"
+                  className="rounded-xl border border-canvas-soft bg-canvas p-lg shadow-sm"
                 >
                   <p className="text-body-md text-ink">
                     <span className="font-semibold">
@@ -198,7 +198,7 @@ const SettleUp = () => {
                     </span>{" "}
                     owes{" "}
                     <span className="font-semibold">{suggestion.to.name}</span>:{" "}
-                    <span className="font-semibold text-positive-deep bg-primary-pale px-2 py-0.5 rounded-full text-body-sm-strong inline-block">
+                    <span className="font-semibold text-positive-deep bg-primary-pale px-sm py-xxs rounded-full text-body-sm-strong inline-block">
                       ₹{suggestion.amount.toFixed(2)}
                     </span>
                   </p>
@@ -206,7 +206,7 @@ const SettleUp = () => {
               ))}
             </div>
           ) : (
-            <div className="w-full rounded-xl border border-canvas-soft bg-canvas p-6 text-center shadow-sm">
+            <div className="w-full rounded-xl border border-canvas-soft bg-canvas p-xl text-center shadow-sm">
               <p className="text-body-md text-mute font-semibold">
                 All balances are settled!
               </p>
@@ -214,7 +214,7 @@ const SettleUp = () => {
           )}
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-md">
           <h2 className="text-display-xs text-ink font-semibold">
             Settlements History
           </h2>
@@ -223,10 +223,10 @@ const SettleUp = () => {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-canvas-soft border-b border-canvas-soft">
-                    <th className="py-4 px-6 text-caption text-mute font-semibold uppercase tracking-wider">Date</th>
-                    <th className="py-4 px-6 text-caption text-mute font-semibold uppercase tracking-wider">Payer</th>
-                    <th className="py-4 px-6 text-caption text-mute font-semibold uppercase tracking-wider">Payee</th>
-                    <th className="py-4 px-6 text-caption text-mute font-semibold uppercase tracking-wider">Amount</th>
+                    <th className="py-lg px-xl text-caption text-mute font-semibold uppercase tracking-wider">Date</th>
+                    <th className="py-lg px-xl text-caption text-mute font-semibold uppercase tracking-wider">Payer</th>
+                    <th className="py-lg px-xl text-caption text-mute font-semibold uppercase tracking-wider">Payee</th>
+                    <th className="py-lg px-xl text-caption text-mute font-semibold uppercase tracking-wider">Amount</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-canvas-soft">
@@ -235,23 +235,23 @@ const SettleUp = () => {
                   settlementsData.settlements.length > 0 ? (
                     settlementsData.settlements.map((settlement) => (
                       <tr key={settlement.id} className="hover:bg-canvas-soft/20 transition-colors">
-                        <td className="py-4 px-6 text-body-sm text-ink font-medium whitespace-nowrap">
+                        <td className="py-lg px-xl text-body-sm text-ink font-medium whitespace-nowrap">
                           {new Date(settlement.date).toLocaleDateString()}
                         </td>
-                        <td className="py-4 px-6 text-body-sm text-ink font-semibold">
+                        <td className="py-lg px-xl text-body-sm text-ink font-semibold">
                           {settlement.payer.name}
                         </td>
-                        <td className="py-4 px-6 text-body-sm text-body">
+                        <td className="py-lg px-xl text-body-sm text-body">
                           {settlement.payee.name}
                         </td>
-                        <td className="py-4 px-6 text-body-sm text-ink font-bold">
+                        <td className="py-lg px-xl text-body-sm text-ink font-bold">
                           ₹{settlement.amount}
                         </td>
                       </tr>
                     ))
                   ) : (
                     <tr>
-                      <td className="py-6 px-6 text-body-md text-mute text-center" colSpan="4">
+                      <td className="py-xl px-xl text-body-md text-mute text-center" colSpan="4">
                         No settlements found.
                       </td>
                     </tr>
@@ -263,15 +263,15 @@ const SettleUp = () => {
         </div>
       </div>
 
-      <div className="bg-canvas rounded-xl p-6 shadow-sm border border-canvas-soft w-full h-fit">
-        <h1 className="text-display-xs text-ink font-bold mb-4">
+      <div className="bg-canvas rounded-xl p-xl shadow-sm border border-canvas-soft w-full h-fit">
+        <h1 className="text-display-xs text-ink font-bold mb-lg">
           Record Settlement
         </h1>
-        <form onSubmit={handleFormSubmit} className="space-y-3">
+        <form onSubmit={handleFormSubmit} className="space-y-md">
           <div className="flex flex-col">
             <label
               htmlFor="paid_by"
-              className="text-body-sm-strong text-ink mb-1"
+              className="text-body-sm-strong text-ink mb-xs"
             >
               Payer
             </label>
@@ -281,7 +281,7 @@ const SettleUp = () => {
               value={inputs.paid_by}
               onChange={handleInputChange}
               required
-              className="bg-canvas text-ink border border-ink text-body-md rounded-md py-3 px-4 focus:outline-none focus:ring-2 focus:ring-primary w-full cursor-pointer"
+              className="bg-canvas text-ink border border-ink text-body-md rounded-md py-md px-lg focus:outline-none focus:ring-2 focus:ring-primary w-full cursor-pointer"
             >
               <option value="" disabled>
                 Select Payer
@@ -303,7 +303,7 @@ const SettleUp = () => {
           <div className="flex flex-col">
             <label
               htmlFor="paid_to"
-              className="text-body-sm-strong text-ink mb-1"
+              className="text-body-sm-strong text-ink mb-xs"
             >
               Payee
             </label>
@@ -313,7 +313,7 @@ const SettleUp = () => {
               value={inputs.paid_to}
               onChange={handleInputChange}
               required
-              className="bg-canvas text-ink border border-ink text-body-md rounded-md py-3 px-4 focus:outline-none focus:ring-2 focus:ring-primary w-full cursor-pointer"
+              className="bg-canvas text-ink border border-ink text-body-md rounded-md py-md px-lg focus:outline-none focus:ring-2 focus:ring-primary w-full cursor-pointer"
             >
               <option value="" disabled>
                 Select Payee
@@ -335,7 +335,7 @@ const SettleUp = () => {
           <div className="flex flex-col">
             <label
               htmlFor="amount"
-              className="text-body-sm-strong text-ink mb-1"
+              className="text-body-sm-strong text-ink mb-xs"
             >
               Amount
             </label>
@@ -348,14 +348,14 @@ const SettleUp = () => {
               placeholder="Enter amount"
               step="0.01"
               required
-              className="bg-canvas text-ink border border-ink text-body-md rounded-md py-3 px-4 focus:outline-none focus:ring-2 focus:ring-primary w-full"
+              className="bg-canvas text-ink border border-ink text-body-md rounded-md py-md px-lg focus:outline-none focus:ring-2 focus:ring-primary w-full"
             />
           </div>
 
           <div className="flex flex-col">
             <label
               htmlFor="date"
-              className="text-body-sm-strong text-ink mb-1"
+              className="text-body-sm-strong text-ink mb-xs"
             >
               Date
             </label>
@@ -366,13 +366,13 @@ const SettleUp = () => {
               value={inputs.date}
               onChange={handleInputChange}
               required
-              className="bg-canvas text-ink border border-ink text-body-md rounded-md py-3 px-4 focus:outline-none focus:ring-2 focus:ring-primary w-full cursor-pointer"
+              className="bg-canvas text-ink border border-ink text-body-md rounded-md py-md px-lg focus:outline-none focus:ring-2 focus:ring-primary w-full cursor-pointer"
             />
           </div>
 
           <button
             type="submit"
-            className="cursor-pointer bg-primary text-on-primary hover:bg-primary-active rounded-xl py-3 px-6 text-button-md font-semibold transition-colors mt-4 w-full shadow-sm"
+            className="cursor-pointer bg-primary text-on-primary hover:bg-primary-active rounded-xl py-md px-xl text-button-md font-semibold transition-colors mt-lg w-full shadow-sm"
           >
             Record Payment
           </button>

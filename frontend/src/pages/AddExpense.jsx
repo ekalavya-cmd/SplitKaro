@@ -71,16 +71,16 @@ const AddExpense = () => {
   }, [groupId]);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <div className="bg-canvas rounded-xl p-6 shadow-sm border border-canvas-soft w-full">
-        <h1 className="text-display-xs text-ink font-bold mb-4">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-xl">
+      <div className="bg-canvas rounded-xl p-xl shadow-sm border border-canvas-soft w-full">
+        <h1 className="text-display-xs text-ink font-bold mb-lg">
           Add Expense
         </h1>
-        <form onSubmit={handleFormSubmit} className="space-y-3">
+        <form onSubmit={handleFormSubmit} className="space-y-md">
           <div className="flex flex-col">
             <label
               htmlFor="description"
-              className="text-body-sm-strong text-ink mb-1"
+              className="text-body-sm-strong text-ink mb-xs"
             >
               Description
             </label>
@@ -92,14 +92,14 @@ const AddExpense = () => {
               value={inputs.description}
               onChange={handleInputChange}
               required
-              className="bg-canvas text-ink border border-ink text-body-md rounded-md py-3 px-4 focus:outline-none focus:ring-2 focus:ring-primary w-full"
+              className="bg-canvas text-ink border border-ink text-body-md rounded-md py-md px-lg focus:outline-none focus:ring-2 focus:ring-primary w-full"
             />
           </div>
 
           <div className="flex flex-col">
             <label
               htmlFor="amount"
-              className="text-body-sm-strong text-ink mb-1"
+              className="text-body-sm-strong text-ink mb-xs"
             >
               Total Amount
             </label>
@@ -112,14 +112,14 @@ const AddExpense = () => {
               value={inputs.amount}
               onChange={handleInputChange}
               required
-              className="bg-canvas text-ink border border-ink text-body-md rounded-md py-3 px-4 focus:outline-none focus:ring-2 focus:ring-primary w-full"
+              className="bg-canvas text-ink border border-ink text-body-md rounded-md py-md px-lg focus:outline-none focus:ring-2 focus:ring-primary w-full"
             />
           </div>
 
           <div className="flex flex-col">
             <label
               htmlFor="paid_by"
-              className="text-body-sm-strong text-ink mb-1"
+              className="text-body-sm-strong text-ink mb-xs"
             >
               Paid By
             </label>
@@ -129,7 +129,7 @@ const AddExpense = () => {
               value={inputs.paid_by}
               onChange={handleInputChange}
               required
-              className="bg-canvas text-ink border border-ink text-body-md rounded-md py-3 px-4 focus:outline-none focus:ring-2 focus:ring-primary w-full cursor-pointer"
+              className="bg-canvas text-ink border border-ink text-body-md rounded-md py-md px-lg focus:outline-none focus:ring-2 focus:ring-primary w-full cursor-pointer"
             >
               <option value="" disabled>
                 Select Payer
@@ -151,7 +151,7 @@ const AddExpense = () => {
           <div className="flex flex-col">
             <label
               htmlFor="date"
-              className="text-body-sm-strong text-ink mb-1"
+              className="text-body-sm-strong text-ink mb-xs"
             >
               Date
             </label>
@@ -162,14 +162,14 @@ const AddExpense = () => {
               value={inputs.date}
               onChange={handleInputChange}
               required
-              className="bg-canvas text-ink border border-ink text-body-md rounded-md py-3 px-4 focus:outline-none focus:ring-2 focus:ring-primary w-full"
+              className="bg-canvas text-ink border border-ink text-body-md rounded-md py-md px-lg focus:outline-none focus:ring-2 focus:ring-primary w-full"
             />
           </div>
 
           <div className="flex flex-col">
             <label
               htmlFor="split_type"
-              className="text-body-sm-strong text-ink mb-1"
+              className="text-body-sm-strong text-ink mb-xs"
             >
               Split Type
             </label>
@@ -179,7 +179,7 @@ const AddExpense = () => {
               value={inputs.split_type}
               onChange={handleInputChange}
               required
-              className="bg-canvas text-ink border border-ink text-body-md rounded-md py-3 px-4 focus:outline-none focus:ring-2 focus:ring-primary w-full cursor-pointer"
+              className="bg-canvas text-ink border border-ink text-body-md rounded-md py-md px-lg focus:outline-none focus:ring-2 focus:ring-primary w-full cursor-pointer"
             >
               <option value="" disabled>
                 Select Split Type
@@ -192,7 +192,7 @@ const AddExpense = () => {
 
           <button
             type="submit"
-            className="cursor-pointer bg-primary text-on-primary hover:bg-primary-active rounded-xl py-3 px-6 text-button-md font-semibold transition-colors mt-4 w-full shadow-sm"
+            className="cursor-pointer bg-primary text-on-primary hover:bg-primary-active rounded-xl py-md px-xl text-button-md font-semibold transition-colors mt-lg w-full shadow-sm"
           >
             Add Expense
           </button>
@@ -202,21 +202,21 @@ const AddExpense = () => {
       {(inputs.split_type === "exact" ||
         inputs.split_type === "percentage" ||
         inputs.split_type === "equal") && (
-        <div className="bg-canvas rounded-xl p-6 shadow-sm border border-canvas-soft w-full space-y-3">
+        <div className="bg-canvas rounded-xl p-xl shadow-sm border border-canvas-soft w-full space-y-md">
           <h1 className="text-display-xs text-ink font-bold">
             Split Details
           </h1>
           {inputs.split_type === "exact" && (
-            <div className="space-y-3">
+            <div className="space-y-md">
               <p className="text-body-sm text-mute">
                 Enter the exact amount each person owes:
               </p>
               {group && group.members && group.members.length > 0 ? (
-                <div className="space-y-2">
+                <div className="space-y-sm">
                   {group.members.map((member) => (
                     <div
                       key={member.id}
-                      className="flex items-center justify-between gap-3"
+                      className="flex items-center justify-between gap-md"
                     >
                       <label
                         htmlFor={`split-${member.id}`}
@@ -234,7 +234,7 @@ const AddExpense = () => {
                         }
                         placeholder="₹ 0.00"
                         step="0.01"
-                        className="bg-canvas text-ink border border-ink text-body-md rounded-md py-3 px-4 focus:outline-none focus:ring-2 focus:ring-primary w-28"
+                        className="bg-canvas text-ink border border-ink text-body-md rounded-md py-md px-lg focus:outline-none focus:ring-2 focus:ring-primary w-28"
                       />
                     </div>
                   ))}
@@ -247,7 +247,7 @@ const AddExpense = () => {
               {inputs.split_type === "exact" &&
                 inputs.splits &&
                 Object.keys(inputs.splits).length > 0 && (
-                  <p className="text-body-sm-strong text-mute pt-2 border-t border-canvas-soft">
+                  <p className="text-body-sm-strong text-mute pt-sm border-t border-canvas-soft">
                     Total: ₹{" "}
                     {Object.values(inputs.splits)
                       .reduce((sum, val) => sum + (Number(val) || 0), 0)
@@ -257,16 +257,16 @@ const AddExpense = () => {
             </div>
           )}
           {inputs.split_type === "percentage" && (
-            <div className="space-y-3">
+            <div className="space-y-md">
               <p className="text-body-sm text-mute">
                 Enter the percentage each person owes (must sum to 100%):
               </p>
               {group && group.members && group.members.length > 0 ? (
-                <div className="space-y-2">
+                <div className="space-y-sm">
                   {group.members.map((member) => (
                     <div
                       key={member.id}
-                      className="flex items-center justify-between gap-3"
+                      className="flex items-center justify-between gap-md"
                     >
                       <label
                         htmlFor={`split-${member.id}`}
@@ -286,7 +286,7 @@ const AddExpense = () => {
                         min="0"
                         max="100"
                         step="0.01"
-                        className="bg-canvas text-ink border border-ink text-body-md rounded-md py-3 px-4 focus:outline-none focus:ring-2 focus:ring-primary w-28"
+                        className="bg-canvas text-ink border border-ink text-body-md rounded-md py-md px-lg focus:outline-none focus:ring-2 focus:ring-primary w-28"
                       />
                     </div>
                   ))}
@@ -299,7 +299,7 @@ const AddExpense = () => {
               {inputs.split_type === "percentage" &&
                 inputs.splits &&
                 Object.keys(inputs.splits).length > 0 && (
-                  <p className="text-body-sm-strong text-mute pt-2 border-t border-canvas-soft">
+                  <p className="text-body-sm-strong text-mute pt-sm border-t border-canvas-soft">
                     Total:{" "}
                     {Object.values(inputs.splits)
                       .reduce((sum, val) => sum + (Number(val) || 0), 0)
@@ -310,12 +310,12 @@ const AddExpense = () => {
             </div>
           )}
           {inputs.split_type === "equal" && (
-            <div className="space-y-3">
+            <div className="space-y-md">
               <p className="text-body-sm text-mute">
                 Equal split amounts:
               </p>
               {group && group.members && group.members.length > 0 ? (
-                <div className="space-y-2">
+                <div className="space-y-sm">
                   {group.members.map((member) => {
                     const equalAmount = inputs.amount
                       ? (
@@ -325,7 +325,7 @@ const AddExpense = () => {
                     return (
                       <div
                         key={member.id}
-                        className="flex items-center justify-between gap-3"
+                        className="flex items-center justify-between gap-md"
                       >
                         <label
                           htmlFor={`split-${member.id}`}

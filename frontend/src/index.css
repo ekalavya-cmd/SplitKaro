@@ -26,11 +26,23 @@
   --color-accent-orange: #ffc091;
   --color-accent-cyan: #38c8ff;
 
+  --spacing-xxs: 2px;
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-lg: 16px;
+  --spacing-xl: 24px;
+  --spacing-2xl: 32px;
+  --spacing-3xl: 48px;
 
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
   --radius-xl: 24px;
+
+  --max-width-md: 28rem;
+  --max-width-xl: 36rem;
+  --max-width-7xl: 80rem;
 }
 
 @utility text-display-sm {

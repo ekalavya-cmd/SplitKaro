@@ -40,11 +40,11 @@ const Dashboard = () => {
   const setSplitTypeColor = (splitType) => {
     switch (splitType) {
       case "equal":
-        return "bg-canvas-soft text-body px-3 py-1 rounded-full text-caption font-semibold";
+        return "bg-canvas-soft text-body px-md py-xs rounded-full text-caption font-semibold";
       case "exact":
-        return "bg-primary-pale text-positive-deep px-3 py-1 rounded-full text-caption font-semibold";
+        return "bg-primary-pale text-positive-deep px-md py-xs rounded-full text-caption font-semibold";
       default:
-        return "bg-accent-orange/20 text-ink px-3 py-1 rounded-full text-caption font-semibold";
+        return "bg-accent-orange/20 text-ink px-md py-xs rounded-full text-caption font-semibold";
     }
   };
 
@@ -161,11 +161,11 @@ const Dashboard = () => {
   }, [selectedGroupId]);
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 border-b border-canvas-soft pb-4">
+    <div className="space-y-xl">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-md border-b border-canvas-soft pb-lg">
         <div>
-          <h1 className="text-display-sm text-ink font-bold mb-1">Dashboard</h1>
-          <div className="flex flex-wrap gap-3 text-body-sm text-mute">
+          <h1 className="text-display-sm text-ink font-bold mb-xs">Dashboard</h1>
+          <div className="flex flex-wrap gap-md text-body-sm text-mute">
             <span>{totalMembers} Members</span>
             <span className="text-canvas-soft font-bold">•</span>
             <span>₹{totalExpenses.toFixed(2)} Expenses</span>
@@ -175,10 +175,10 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <div className="bg-canvas border border-canvas-soft rounded-xl p-6 shadow-sm max-w-md w-full">
+      <div className="bg-canvas border border-canvas-soft rounded-xl p-xl shadow-sm max-w-md w-full">
         <label
           htmlFor="groupSelect"
-          className="text-body-sm-strong text-ink block mb-2"
+          className="text-body-sm-strong text-ink block mb-sm"
         >
           Select Group:
         </label>
@@ -186,7 +186,7 @@ const Dashboard = () => {
           id="groupSelect"
           value={selectedGroupId}
           onChange={handleGroupChange}
-          className="w-full bg-canvas text-ink border border-ink text-body-md rounded-md py-3 px-4 focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
+          className="w-full bg-canvas text-ink border border-ink text-body-md rounded-md py-md px-lg focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
         >
           <option value="" disabled>
             Select a group
@@ -204,7 +204,7 @@ const Dashboard = () => {
       </div>
 
       {group && group.members && group.members.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-lg">
           {balances.map((bal) => {
             const amount = Number(bal.balance);
             const isOwed = amount > 0;
@@ -214,19 +214,19 @@ const Dashboard = () => {
             return (
               <div
                 key={bal.member_id}
-                className="bg-canvas rounded-xl p-6 border border-canvas-soft shadow-sm flex flex-col justify-between"
+                className="bg-canvas rounded-xl p-xl border border-canvas-soft shadow-sm flex flex-col justify-between"
               >
                 <div>
-                  <div className="text-body-sm-strong text-mute mb-2">
+                  <div className="text-body-sm-strong text-mute mb-sm">
                     {bal.name}
                   </div>
-                  <div className="text-display-xs text-ink font-bold mb-3">
+                  <div className="text-display-xs text-ink font-bold mb-md">
                     ₹{absAmount.toFixed(2)}
                   </div>
                 </div>
                 <div>
                   <span
-                    className={`text-body-sm-strong px-3 py-1 rounded-full inline-block ${
+                    className={`text-body-sm-strong px-md py-xs rounded-full inline-block ${
                       isSettled
                         ? "bg-canvas-soft text-mute"
                         : isOwed
@@ -242,36 +242,36 @@ const Dashboard = () => {
           })}
         </div>
       ) : (
-        <div className="rounded-xl border border-canvas-soft bg-canvas p-6 text-center shadow-sm">
+        <div className="rounded-xl border border-canvas-soft bg-canvas p-xl text-center shadow-sm">
           <p className="text-body-sm-strong text-mute">
             No members in this group.
           </p>
         </div>
       )}
 
-      <div className="space-y-3">
+      <div className="space-y-md">
         <h2 className="text-display-xs text-ink font-semibold">
           Simplified Settlements
         </h2>
         {suggestions && suggestions.length > 0 ? (
-          <div className="max-w-xl space-y-3 w-full">
+          <div className="max-w-xl space-y-md w-full">
             {suggestions.map((suggestion, index) => (
               <div
                 key={index}
-                className="flex items-center justify-between rounded-xl border border-canvas-soft bg-canvas p-4 shadow-sm"
+                className="flex items-center justify-between rounded-xl border border-canvas-soft bg-canvas p-lg shadow-sm"
               >
                 <p className="text-body-md text-ink">
                   <span className="font-semibold">{suggestion.from.name}</span>{" "}
                   should pay{" "}
                   <span className="font-semibold">{suggestion.to.name}</span>{" "}
-                  <span className="font-semibold text-positive-deep bg-primary-pale px-2 py-0.5 rounded-full text-body-sm-strong">
+                  <span className="font-semibold text-positive-deep bg-primary-pale px-sm py-xxs rounded-full text-body-sm-strong">
                     ₹{suggestion.amount.toFixed(2)}
                   </span>
                 </p>
                 <button
                   type="button"
                   onClick={() => navigate(`/settle-up`)}
-                  className="cursor-pointer bg-canvas-soft text-ink hover:bg-canvas-soft/80 rounded-xl py-3 px-6 text-button-md font-semibold transition-colors"
+                  className="cursor-pointer bg-canvas-soft text-ink hover:bg-canvas-soft/80 rounded-xl py-md px-xl text-button-md font-semibold transition-colors"
                 >
                   Settle
                 </button>
@@ -279,7 +279,7 @@ const Dashboard = () => {
             ))}
           </div>
         ) : (
-          <div className="max-w-xl rounded-xl border border-canvas-soft bg-canvas p-6 text-center shadow-sm w-full">
+          <div className="max-w-xl rounded-xl border border-canvas-soft bg-canvas p-xl text-center shadow-sm w-full">
             <p className="text-body-md text-mute font-semibold">
               All balances are settled!
             </p>
@@ -287,8 +287,8 @@ const Dashboard = () => {
         )}
       </div>
 
-      <div className="space-y-3">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+      <div className="space-y-md">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-md">
           <h2 className="text-display-xs text-ink font-semibold">
             {group ? group.name : "Select a group to view expenses"}
           </h2>
@@ -296,20 +296,20 @@ const Dashboard = () => {
           <button
             type="button"
             onClick={() => navigate(`/add-expense/${selectedGroupId}`)}
-            className="cursor-pointer bg-primary text-on-primary hover:bg-primary-active rounded-xl py-3 px-6 text-button-md font-semibold transition-colors self-start md:self-auto shadow-sm"
+            className="cursor-pointer bg-primary text-on-primary hover:bg-primary-active rounded-xl py-md px-xl text-button-md font-semibold transition-colors self-start md:self-auto shadow-sm"
           >
             Add Expense
           </button>
         </div>
 
-        <div className="bg-canvas border border-canvas-soft rounded-xl p-4 shadow-sm">
-          <form className="flex flex-wrap items-center gap-3">
+        <div className="bg-canvas border border-canvas-soft rounded-xl p-lg shadow-sm">
+          <form className="flex flex-wrap items-center gap-md">
             <input
               type="text"
               placeholder="Expense Description"
               value={filterDescription}
               onChange={(e) => setFilterDescription(e.target.value)}
-              className="bg-canvas text-ink border border-ink text-body-md rounded-md py-3 px-4 focus:outline-none focus:ring-2 focus:ring-primary w-full md:w-64"
+              className="bg-canvas text-ink border border-ink text-body-md rounded-md py-md px-lg focus:outline-none focus:ring-2 focus:ring-primary w-full md:w-64"
             />
 
             <select
@@ -317,7 +317,7 @@ const Dashboard = () => {
               id="splitType"
               value={filterSplitType}
               onChange={(e) => setFilterSplitType(e.target.value)}
-              className="bg-canvas text-ink border border-ink text-body-md rounded-md py-3 px-4 focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer w-full md:w-48"
+              className="bg-canvas text-ink border border-ink text-body-md rounded-md py-md px-lg focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer w-full md:w-48"
             >
               <option value="all">All Type</option>
               <option value="equal">Equal Split</option>
@@ -330,7 +330,7 @@ const Dashboard = () => {
               id="paidBy"
               value={filterPaidBy}
               onChange={(e) => setFilterPaidBy(e.target.value)}
-              className="bg-canvas text-ink border border-ink text-body-md rounded-md py-3 px-4 focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer w-full md:w-48"
+              className="bg-canvas text-ink border border-ink text-body-md rounded-md py-md px-lg focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer w-full md:w-48"
             >
               <option value="all">All Payers</option>
               {group && group.members && group.members.length > 0 ? (
@@ -351,36 +351,36 @@ const Dashboard = () => {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-canvas-soft border-b border-canvas-soft">
-                  <th className="py-4 px-6 text-caption text-mute font-semibold uppercase tracking-wider">Date</th>
-                  <th className="py-4 px-6 text-caption text-mute font-semibold uppercase tracking-wider">Description</th>
-                  <th className="py-4 px-6 text-caption text-mute font-semibold uppercase tracking-wider">Paid By</th>
-                  <th className="py-4 px-6 text-caption text-mute font-semibold uppercase tracking-wider">Amount</th>
-                  <th className="py-4 px-6 text-caption text-mute font-semibold uppercase tracking-wider">Split Type</th>
-                  <th className="py-4 px-6 text-caption text-mute font-semibold uppercase tracking-wider">Splits</th>
+                  <th className="py-lg px-xl text-caption text-mute font-semibold uppercase tracking-wider">Date</th>
+                  <th className="py-lg px-xl text-caption text-mute font-semibold uppercase tracking-wider">Description</th>
+                  <th className="py-lg px-xl text-caption text-mute font-semibold uppercase tracking-wider">Paid By</th>
+                  <th className="py-lg px-xl text-caption text-mute font-semibold uppercase tracking-wider">Amount</th>
+                  <th className="py-lg px-xl text-caption text-mute font-semibold uppercase tracking-wider">Split Type</th>
+                  <th className="py-lg px-xl text-caption text-mute font-semibold uppercase tracking-wider">Splits</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-canvas-soft">
                 {filteredExpenses && filteredExpenses.length > 0 ? (
                   filteredExpenses.map((expense) => (
                     <tr key={expense.id} className="hover:bg-canvas-soft/20 transition-colors">
-                      <td className="py-4 px-6 text-body-sm text-ink font-medium whitespace-nowrap">
+                      <td className="py-lg px-xl text-body-sm text-ink font-medium whitespace-nowrap">
                         {new Date(expense.date).toLocaleDateString()}
                       </td>
-                      <td className="py-4 px-6 text-body-sm text-ink font-semibold">
+                      <td className="py-lg px-xl text-body-sm text-ink font-semibold">
                         {expense.description}
                       </td>
-                      <td className="py-4 px-6 text-body-sm text-body">
+                      <td className="py-lg px-xl text-body-sm text-body">
                         {expense.payer.name}
                       </td>
-                      <td className="py-4 px-6 text-body-sm text-ink font-bold">
+                      <td className="py-lg px-xl text-body-sm text-ink font-bold">
                         ₹{expense.amount}
                       </td>
-                      <td className="py-4 px-6 text-body-sm">
+                      <td className="py-lg px-xl text-body-sm">
                         <span className={`${setSplitTypeColor(expense.splitType)}`}>
                           {expense.splitType}
                         </span>
                       </td>
-                      <td className="py-4 px-6 text-body-sm text-mute">
+                      <td className="py-lg px-xl text-body-sm text-mute">
                         {expense.splits &&
                           expense.splits.length > 0 &&
                           expense.splits
@@ -396,7 +396,7 @@ const Dashboard = () => {
                   <tr>
                     <td
                       colSpan="6"
-                      className="py-6 px-6 text-body-md text-mute text-center"
+                      className="py-xl px-xl text-body-md text-mute text-center"
                     >
                       {selectedGroupId
                         ? expenses.length > 0
