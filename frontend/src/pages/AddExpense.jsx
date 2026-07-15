@@ -73,7 +73,7 @@ const AddExpense = () => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-xl">
       <div className="bg-canvas rounded-xl p-xl shadow-sm border border-canvas-soft w-full">
-        <h1 className="text-display-xs text-ink font-bold mb-lg">
+        <h1 className="text-display-sm text-ink font-bold mb-lg">
           Add Expense
         </h1>
         <form onSubmit={handleFormSubmit} className="space-y-md">
@@ -339,7 +339,7 @@ const AddExpense = () => {
                           name={`split-${member.id}`}
                           value={`₹ ${equalAmount}`}
                           readOnly
-                          className="max-w-30 cursor-not-allowed rounded-md border border-canvas-soft bg-canvas-soft px-4 py-2 text-sm text-mute focus:outline-none"
+                          className="max-w-30 cursor-not-allowed rounded-md border border-canvas-soft bg-canvas-soft px-4 py-2 text-body-sm text-mute focus:outline-none"
                         />
                       </div>
                     );
