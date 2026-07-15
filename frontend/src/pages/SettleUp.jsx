@@ -22,20 +22,18 @@ const SettleUp = () => {
   const [groups, setGroups] = useState([]);
   const [selectedGroupId, setSelectedGroupId] = useState("");
   const [group, setGroup] = useState(null);
-  const [inputs, setInputs] = useState(clearInputs);
 
   const location = useLocation();
 
-  useEffect(() => {
-    if (location.state) {
-      setInputs((prev) => ({
-        ...prev,
-        paid_by: location.state.paid_by || "",
-        paid_to: location.state.paid_to || "",
-        amount: location.state.amount || "",
-      }));
-    }
-  }, [location.state]);
+  const [inputs, setInputs] = useState(() => {
+    const state = location.state || {};
+    return {
+      ...clearInputs,
+      paid_by: state.paid_by || "",
+      paid_to: state.paid_to || "",
+      amount: state.amount || "",
+    };
+  });
 
   const handleGroupChange = (e) => {
     setSelectedGroupId(e.target.value);

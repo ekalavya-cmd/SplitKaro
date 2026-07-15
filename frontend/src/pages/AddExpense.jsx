@@ -7,7 +7,7 @@ const clearInputs = {
   paid_by: "",
   amount: "",
   description: "",
-  split_type: "",
+  split_type: "equal",
   date: new Date().toISOString().split("T")[0],
   splits: {},
 };

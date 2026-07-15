@@ -72,6 +72,7 @@
 | ✅ Settlement history table | SettleUp page shows all recorded settlements for the selected group (date, payer, payee, amount) |
 | ✅ Suggestions refresh after recording | SettleUp re-fetches suggestions and settlements list immediately after a successful `createSettlement` call |
 | ✅ Form feedback via `alert()` | SettleUp shows `alert("Settlement recorded successfully!")` on success and `alert("Failed to record settlement...")` on error |
+| ✅ Pre-fill settlement form from suggestion | Dashboard "Settle" button passes payer, payee, and amount via `location.state` to pre-fill the form on SettleUp page |
 
 ### Navigation & Layout
 | Feature | Current behaviour |
@@ -106,10 +107,6 @@
 | Loading states | 🚧 | No loading indicators anywhere | Spinners or skeleton screens while fetching data |
 | Error display in UI | 🚧 | AddExpense.jsx and SettleUp.jsx show `alert()` on failure; all other pages only log to `console.error` | Dashboard and Expenses pages show no user-visible feedback when data fetching fails |
 
-### Settlement Workflow
-| Feature | Status | What exists | What is missing |
-|---|---|---|---|
-| Pre-fill settlement form from suggestion | 🚧 | Dashboard "Settle" button navigates to `/settle-up` | No data is passed; the form always opens blank — the user must manually re-select payer, payee, and enter amount |
 
 ---
 
@@ -186,7 +183,7 @@
 | Layer | ✅ Done | 🚧 Partial | ⏳ Not started |
 |---|---|---|---|
 | Backend (API endpoints) | 9 | 2 | 10+ |
-| Frontend (pages / UI flows) | 5 pages shipped | 5 gaps within shipped pages | 0 pages for missing features |
+| Frontend (pages / UI flows) | 5 pages shipped | 4 gaps within shipped pages | 0 pages for missing features |
 | Infrastructure | 0 | 0 | 7 |
 
 _§4 ⏳ total: 6 (auth) + 3 (groups) + 8 (expenses) + 3 (settlements) + 6 (data) + 6 (infra) = 32 planned items_
