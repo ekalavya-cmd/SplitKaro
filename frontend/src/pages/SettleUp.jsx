@@ -1,5 +1,6 @@
 import React from "react";
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import {
   getGroups,
   getGroup,
@@ -22,6 +23,19 @@ const SettleUp = () => {
   const [selectedGroupId, setSelectedGroupId] = useState("");
   const [group, setGroup] = useState(null);
   const [inputs, setInputs] = useState(clearInputs);
+
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.state) {
+      setInputs((prev) => ({
+        ...prev,
+        paid_by: location.state.paid_by || "",
+        paid_to: location.state.paid_to || "",
+        amount: location.state.amount || "",
+      }));
+    }
+  }, [location.state]);
 
   const handleGroupChange = (e) => {
     setSelectedGroupId(e.target.value);
@@ -190,7 +204,7 @@ const SettleUp = () => {
               {suggestions.map((suggestion, index) => (
                 <div
                   key={index}
-                  className="rounded-xl border border-canvas-soft bg-canvas p-lg shadow-sm"
+                  className="rounded-xl border border-canvas-soft bg-canvas p-lg shadow-sm flex items-center justify-between gap-md"
                 >
                   <p className="text-body-md text-ink">
                     <span className="font-semibold">
@@ -202,6 +216,18 @@ const SettleUp = () => {
                       ₹{suggestion.amount.toFixed(2)}
                     </span>
                   </p>
+                  <button
+                    type="button"
+                    onClick={() => setInputs((prev) => ({
+                      ...prev,
+                      paid_by: suggestion.from.id,
+                      paid_to: suggestion.to.id,
+                      amount: suggestion.amount.toFixed(2),
+                    }))}
+                    className="cursor-pointer bg-canvas-soft text-ink hover:bg-canvas-soft/80 rounded-xl py-md px-xl text-button-md font-semibold transition-colors"
+                  >
+                    Settle
+                  </button>
                 </div>
               ))}
             </div>

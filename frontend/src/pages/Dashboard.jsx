@@ -278,7 +278,13 @@ const Dashboard = () => {
                 </p>
                 <button
                   type="button"
-                  onClick={() => navigate(`/settle-up`)}
+                  onClick={() => navigate(`/settle-up`, {
+                    state: {
+                      paid_by: suggestion.from.id,
+                      paid_to: suggestion.to.id,
+                      amount: suggestion.amount.toFixed(2),
+                    }
+                  })}
                   className="cursor-pointer bg-canvas-soft text-ink hover:bg-canvas-soft/80 rounded-xl py-md px-xl text-button-md font-semibold transition-colors"
                 >
                   Settle
@@ -296,9 +302,19 @@ const Dashboard = () => {
       </div>
 
       <div className="space-y-md">
-        <h2 className="text-display-xs text-ink font-semibold">
-          {group ? group.name : "Select a group to view expenses"}
-        </h2>
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-md">
+          <h2 className="text-display-xs text-ink font-semibold">
+            {group ? group.name : "Select a group to view expenses"}
+          </h2>
+
+          <button
+            type="button"
+            onClick={() => navigate(`/add-expense/${selectedGroupId}`)}
+            className="cursor-pointer bg-primary text-on-primary hover:bg-primary-active rounded-xl py-md px-xl text-button-md font-semibold transition-colors self-start md:self-auto shadow-sm"
+          >
+            Add Expense
+          </button>
+        </div>
 
         <div className="bg-canvas border border-canvas-soft rounded-xl p-lg shadow-sm">
           <form className="flex flex-wrap items-center gap-md">
