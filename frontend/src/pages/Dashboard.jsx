@@ -502,9 +502,9 @@ const Dashboard = () => {
               <div className={`overflow-hidden transition-all duration-300 ${
                 isAdvancedFiltersExpanded ? "max-h-[500px] opacity-100 mt-md" : "max-h-0 opacity-0 pointer-events-none"
               }`}>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-md items-end">
+                <div className="flex flex-wrap gap-md items-end w-full">
                   {/* Date range filters */}
-                  <div className="flex flex-col">
+                  <div className="flex flex-col flex-1 min-w-[140px]">
                     <label htmlFor="datePreset" className="text-body-sm-strong text-ink mb-xs">Date Range Preset</label>
                     <select
                       id="datePreset"
@@ -522,7 +522,7 @@ const Dashboard = () => {
                     </select>
                   </div>
 
-                  <div className="flex flex-col">
+                  <div className="flex flex-col flex-1 min-w-[160px]">
                     <label htmlFor="fromDate" className="text-body-sm-strong text-ink mb-xs">From Date</label>
                     <input
                       type="date"
@@ -536,7 +536,7 @@ const Dashboard = () => {
                     />
                   </div>
 
-                  <div className="flex flex-col">
+                  <div className="flex flex-col flex-1 min-w-[160px]">
                     <label htmlFor="toDate" className="text-body-sm-strong text-ink mb-xs">To Date</label>
                     <input
                       type="date"
@@ -551,7 +551,7 @@ const Dashboard = () => {
                   </div>
 
                   {/* Amount range filters */}
-                  <div className="flex flex-col">
+                  <div className="flex flex-col flex-1 min-w-[140px]">
                     <label htmlFor="minAmount" className="text-body-sm-strong text-ink mb-xs">Min Amount (₹)</label>
                     <input
                       type="number"
@@ -565,7 +565,7 @@ const Dashboard = () => {
                     />
                   </div>
 
-                  <div className="flex flex-col">
+                  <div className="flex flex-col flex-1 min-w-[140px]">
                     <label htmlFor="maxAmount" className="text-body-sm-strong text-ink mb-xs">Max Amount (₹)</label>
                     <input
                       type="number"
@@ -579,18 +579,18 @@ const Dashboard = () => {
                     />
                   </div>
 
-                  <div className="flex justify-end h-full">
+                  <div className="flex-1 min-w-[140px] md:flex-initial">
                     <button
                       type="button"
                       onClick={handleResetFilters}
-                      className="cursor-pointer bg-canvas-soft text-body hover:bg-canvas-soft/80 border border-ink/20 rounded-xl py-md px-xl text-button-md font-semibold transition-colors w-full md:w-auto flex items-center justify-center gap-xs"
+                      className="cursor-pointer bg-canvas-soft text-body hover:bg-canvas-soft/80 border border-ink/20 rounded-xl py-md px-xl text-button-md font-semibold transition-colors w-full flex items-center justify-center gap-xs"
                     >
                       Reset Filters
                     </button>
                   </div>
 
                   {isAmountRangeInvalid && (
-                    <div className="col-span-1 md:col-span-3 text-body-sm text-negative-deep font-semibold">
+                    <div className="w-full text-body-sm text-negative-deep font-semibold mt-xs">
                       ⚠️ Min amount cannot exceed Max amount. Amount filter is currently ignored.
                     </div>
                   )}
