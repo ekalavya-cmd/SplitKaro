@@ -24,6 +24,14 @@ const Expenses = () => {
     }));
   };
 
+  const formatDateToDisplay = (dateStr) => {
+    const date = new Date(dateStr);
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
+
   const setSplitTypeColor = (splitType) => {
     switch (splitType) {
       case "equal":
@@ -191,7 +199,7 @@ const Expenses = () => {
                         className="hover:bg-canvas-soft/20 transition-colors cursor-pointer select-none"
                       >
                         <td className="py-lg px-xl text-body-sm text-ink font-medium whitespace-nowrap">
-                          {new Date(expense.date).toLocaleDateString()}
+                          {formatDateToDisplay(expense.date)}
                         </td>
                         <td className="py-lg px-xl text-body-sm text-ink font-semibold">
                           {expense.description}
@@ -255,7 +263,7 @@ const Expenses = () => {
                                   </div>
                                   <div className="pt-xs border-t border-canvas-soft text-caption text-mute flex items-center justify-between">
                                     <span>Split Type: <span className="font-semibold text-ink uppercase text-[10px] bg-canvas-soft px-sm py-xxs rounded-full">{expense.splitType}</span></span>
-                                    <span>Date: {new Date(expense.date).toLocaleDateString()}</span>
+                                    <span>Date: {formatDateToDisplay(expense.date)}</span>
                                   </div>
                                 </div>
                               </div>

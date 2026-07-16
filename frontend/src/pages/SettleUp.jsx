@@ -35,6 +35,14 @@ const SettleUp = () => {
     };
   });
 
+  const formatDateToDisplay = (dateStr) => {
+    const date = new Date(dateStr);
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
+
   const handleGroupChange = (e) => {
     setSelectedGroupId(e.target.value);
   };
@@ -260,7 +268,7 @@ const SettleUp = () => {
                     settlementsData.settlements.map((settlement) => (
                       <tr key={settlement.id} className="hover:bg-canvas-soft/20 transition-colors">
                         <td className="py-lg px-xl text-body-sm text-ink font-medium whitespace-nowrap">
-                          {new Date(settlement.date).toLocaleDateString()}
+                          {formatDateToDisplay(settlement.date)}
                         </td>
                         <td className="py-lg px-xl text-body-sm text-ink font-semibold">
                           {settlement.payer.name}
