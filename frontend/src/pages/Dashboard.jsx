@@ -26,6 +26,7 @@ const Dashboard = () => {
   const [filterMinAmount, setFilterMinAmount] = useState("");
   const [filterMaxAmount, setFilterMaxAmount] = useState("");
   const [expandedExpenseIds, setExpandedExpenseIds] = useState({});
+  const [isAdvancedFiltersExpanded, setIsAdvancedFiltersExpanded] = useState(false);
 
   const toggleExpenseExpand = (id) => {
     setExpandedExpenseIds((prev) => ({
@@ -101,6 +102,11 @@ const Dashboard = () => {
     filterMinAmount !== "" &&
     filterMaxAmount !== "" &&
     parseFloat(filterMinAmount) > parseFloat(filterMaxAmount);
+
+  const activeAdvancedFiltersCount =
+    (filterDatePreset !== "all" ? 1 : 0) +
+    (filterMinAmount !== "" ? 1 : 0) +
+    (filterMaxAmount !== "" ? 1 : 0);
 
   const filteredExpenses = expenses.filter((expense) => {
     const descriptionMatch = expense.description
@@ -473,99 +479,122 @@ const Dashboard = () => {
 
             {/* Advanced Filters Section */}
             <div className="border-t border-canvas-soft pt-lg">
-              <h3 className="text-body-sm-strong text-ink uppercase tracking-wider mb-md">Advanced Filters</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-md items-end">
-                {/* Date range filters */}
-                <div className="flex flex-col">
-                  <label htmlFor="datePreset" className="text-body-sm-strong text-ink mb-xs">Date Range Preset</label>
-                  <select
-                    id="datePreset"
-                    value={filterDatePreset}
-                    onChange={(e) => handleDatePresetChange(e.target.value)}
-                    className="bg-canvas text-ink border border-ink text-body-md rounded-md py-md px-lg focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer w-full"
-                  >
-                    <option value="all">All Time</option>
-                    <option value="today">Today</option>
-                    <option value="this-week">This Week</option>
-                    <option value="this-month">This Month</option>
-                    <option value="last-30-days">Last 30 Days</option>
-                    <option value="this-year">This Year</option>
-                    <option value="custom">Custom Range</option>
-                  </select>
-                </div>
+              <button
+                type="button"
+                onClick={() => setIsAdvancedFiltersExpanded(!isAdvancedFiltersExpanded)}
+                className="w-full flex items-center justify-between text-left text-body-sm-strong text-ink uppercase tracking-wider focus:outline-none hover:text-primary transition-colors cursor-pointer group"
+              >
+                <span className="flex items-center gap-xs font-bold">
+                  Advanced Filters
+                  {!isAdvancedFiltersExpanded && activeAdvancedFiltersCount > 0 && (
+                    <span className="bg-primary text-on-primary text-[10px] font-bold px-md py-xxs rounded-full lowercase normal-case tracking-normal">
+                      {activeAdvancedFiltersCount} active
+                    </span>
+                  )}
+                </span>
+                <span className={`transform transition-transform duration-300 font-bold ${
+                  isAdvancedFiltersExpanded ? "rotate-180" : ""
+                }`}>
+                  ▼
+                </span>
+              </button>
 
-                <div className="flex flex-col">
-                  <label htmlFor="fromDate" className="text-body-sm-strong text-ink mb-xs">From Date</label>
-                  <input
-                    type="date"
-                    id="fromDate"
-                    value={filterFromDate}
-                    onChange={(e) => {
-                      setFilterFromDate(e.target.value);
-                      setFilterDatePreset("custom");
-                    }}
-                    className="bg-canvas text-ink border border-ink text-body-md rounded-md py-md px-lg focus:outline-none focus:ring-2 focus:ring-primary w-full"
-                  />
-                </div>
-
-                <div className="flex flex-col">
-                  <label htmlFor="toDate" className="text-body-sm-strong text-ink mb-xs">To Date</label>
-                  <input
-                    type="date"
-                    id="toDate"
-                    value={filterToDate}
-                    onChange={(e) => {
-                      setFilterToDate(e.target.value);
-                      setFilterDatePreset("custom");
-                    }}
-                    className="bg-canvas text-ink border border-ink text-body-md rounded-md py-md px-lg focus:outline-none focus:ring-2 focus:ring-primary w-full"
-                  />
-                </div>
-
-                {/* Amount range filters */}
-                <div className="flex flex-col">
-                  <label htmlFor="minAmount" className="text-body-sm-strong text-ink mb-xs">Min Amount (₹)</label>
-                  <input
-                    type="number"
-                    id="minAmount"
-                    placeholder="Min amount"
-                    value={filterMinAmount}
-                    onChange={(e) => setFilterMinAmount(e.target.value)}
-                    className={`bg-canvas text-ink border text-body-md rounded-md py-md px-lg focus:outline-none focus:ring-2 focus:ring-primary w-full ${
-                      isAmountRangeInvalid ? "border-negative-deep" : "border-ink"
-                    }`}
-                  />
-                </div>
-
-                <div className="flex flex-col">
-                  <label htmlFor="maxAmount" className="text-body-sm-strong text-ink mb-xs">Max Amount (₹)</label>
-                  <input
-                    type="number"
-                    id="maxAmount"
-                    placeholder="Max amount"
-                    value={filterMaxAmount}
-                    onChange={(e) => setFilterMaxAmount(e.target.value)}
-                    className={`bg-canvas text-ink border text-body-md rounded-md py-md px-lg focus:outline-none focus:ring-2 focus:ring-primary w-full ${
-                      isAmountRangeInvalid ? "border-negative-deep" : "border-ink"
-                    }`}
-                  />
-                </div>
-
-                <div className="flex justify-end h-full">
-                  <button
-                    type="button"
-                    onClick={handleResetFilters}
-                    className="cursor-pointer bg-canvas-soft text-body hover:bg-canvas-soft/80 border border-ink/20 rounded-xl py-md px-xl text-button-md font-semibold transition-colors w-full md:w-auto flex items-center justify-center gap-xs"
-                  >
-                    Reset Filters
-                  </button>
-                </div>
-
-                {isAmountRangeInvalid && (
-                  <div className="col-span-1 md:col-span-3 text-body-sm text-negative-deep font-semibold">
-                    ⚠️ Min amount cannot exceed Max amount. Amount filter is currently ignored.
+              <div className={`overflow-hidden transition-all duration-300 ${
+                isAdvancedFiltersExpanded ? "max-h-[500px] opacity-100 mt-md" : "max-h-0 opacity-0 pointer-events-none"
+              }`}>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-md items-end">
+                  {/* Date range filters */}
+                  <div className="flex flex-col">
+                    <label htmlFor="datePreset" className="text-body-sm-strong text-ink mb-xs">Date Range Preset</label>
+                    <select
+                      id="datePreset"
+                      value={filterDatePreset}
+                      onChange={(e) => handleDatePresetChange(e.target.value)}
+                      className="bg-canvas text-ink border border-ink text-body-md rounded-md py-md px-lg focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer w-full"
+                    >
+                      <option value="all">All Time</option>
+                      <option value="today">Today</option>
+                      <option value="this-week">This Week</option>
+                      <option value="this-month">This Month</option>
+                      <option value="last-30-days">Last 30 Days</option>
+                      <option value="this-year">This Year</option>
+                      <option value="custom">Custom Range</option>
+                    </select>
                   </div>
-                )}
+
+                  <div className="flex flex-col">
+                    <label htmlFor="fromDate" className="text-body-sm-strong text-ink mb-xs">From Date</label>
+                    <input
+                      type="date"
+                      id="fromDate"
+                      value={filterFromDate}
+                      onChange={(e) => {
+                        setFilterFromDate(e.target.value);
+                        setFilterDatePreset("custom");
+                      }}
+                      className="bg-canvas text-ink border border-ink text-body-md rounded-md py-md px-lg focus:outline-none focus:ring-2 focus:ring-primary w-full"
+                    />
+                  </div>
+
+                  <div className="flex flex-col">
+                    <label htmlFor="toDate" className="text-body-sm-strong text-ink mb-xs">To Date</label>
+                    <input
+                      type="date"
+                      id="toDate"
+                      value={filterToDate}
+                      onChange={(e) => {
+                        setFilterToDate(e.target.value);
+                        setFilterDatePreset("custom");
+                      }}
+                      className="bg-canvas text-ink border border-ink text-body-md rounded-md py-md px-lg focus:outline-none focus:ring-2 focus:ring-primary w-full"
+                    />
+                  </div>
+
+                  {/* Amount range filters */}
+                  <div className="flex flex-col">
+                    <label htmlFor="minAmount" className="text-body-sm-strong text-ink mb-xs">Min Amount (₹)</label>
+                    <input
+                      type="number"
+                      id="minAmount"
+                      placeholder="Min amount"
+                      value={filterMinAmount}
+                      onChange={(e) => setFilterMinAmount(e.target.value)}
+                      className={`bg-canvas text-ink border text-body-md rounded-md py-md px-lg focus:outline-none focus:ring-2 focus:ring-primary w-full ${
+                        isAmountRangeInvalid ? "border-negative-deep" : "border-ink"
+                      }`}
+                    />
+                  </div>
+
+                  <div className="flex flex-col">
+                    <label htmlFor="maxAmount" className="text-body-sm-strong text-ink mb-xs">Max Amount (₹)</label>
+                    <input
+                      type="number"
+                      id="maxAmount"
+                      placeholder="Max amount"
+                      value={filterMaxAmount}
+                      onChange={(e) => setFilterMaxAmount(e.target.value)}
+                      className={`bg-canvas text-ink border text-body-md rounded-md py-md px-lg focus:outline-none focus:ring-2 focus:ring-primary w-full ${
+                        isAmountRangeInvalid ? "border-negative-deep" : "border-ink"
+                      }`}
+                    />
+                  </div>
+
+                  <div className="flex justify-end h-full">
+                    <button
+                      type="button"
+                      onClick={handleResetFilters}
+                      className="cursor-pointer bg-canvas-soft text-body hover:bg-canvas-soft/80 border border-ink/20 rounded-xl py-md px-xl text-button-md font-semibold transition-colors w-full md:w-auto flex items-center justify-center gap-xs"
+                    >
+                      Reset Filters
+                    </button>
+                  </div>
+
+                  {isAmountRangeInvalid && (
+                    <div className="col-span-1 md:col-span-3 text-body-sm text-negative-deep font-semibold">
+                      ⚠️ Min amount cannot exceed Max amount. Amount filter is currently ignored.
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </form>
