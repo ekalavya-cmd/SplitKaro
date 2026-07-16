@@ -7,6 +7,8 @@ import {
   getGroup,
   deleteExpense,
 } from "../services/splitKaroService";
+import { useExpenseFilters } from "../hooks/useExpenseFilters";
+import { ExpenseFilters } from "../components/ExpenseFilters";
 
 const Expenses = () => {
   const [selectedGroupId, setSelectedGroupId] = useState("");
@@ -14,6 +16,7 @@ const Expenses = () => {
   const [group, setGroup] = useState(null);
   const [expenses, setExpenses] = useState([]);
   const [expandedExpenseIds, setExpandedExpenseIds] = useState({});
+  const { filteredExpenses, filterProps } = useExpenseFilters(expenses);
 
   const navigate = useNavigate();
 
@@ -176,6 +179,8 @@ const Expenses = () => {
           </button>
         </div>
 
+        <ExpenseFilters filterProps={filterProps} members={group ? group.members : []} />
+
         <div className="bg-canvas border border-canvas-soft rounded-xl overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
@@ -191,8 +196,8 @@ const Expenses = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-canvas-soft">
-                {expenses && expenses.length > 0 ? (
-                  expenses.map((expense) => (
+                {filteredExpenses && filteredExpenses.length > 0 ? (
+                  filteredExpenses.map((expense) => (
                     <React.Fragment key={expense.id}>
                       <tr 
                         onClick={() => toggleExpenseExpand(expense.id)}

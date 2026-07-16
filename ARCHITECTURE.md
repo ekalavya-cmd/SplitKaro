@@ -98,8 +98,11 @@ splitKaro/
 │   ├── src/
 │   │   ├── api/
 │   │   │   └── splitKaroAPI.js # Axios instance with base URL + error interceptor
+│   │   ├── components/
+│   │   │   └── ExpenseFilters.jsx # Reusable expense filtering UI component
 │   │   ├── hooks/
-│   │   │   └── useDebounce.js  # Generic debounce hook (used for expense description filter)
+│   │   │   ├── useDebounce.js  # Generic debounce hook (used for expense description filter)
+│   │   │   └── useExpenseFilters.js # Reusable expense filtering state and logic hook
 │   │   ├── pages/
 │   │   │   ├── Layout.jsx      # Shell: top nav bar + <Outlet />
 │   │   │   ├── Dashboard.jsx   # Group selector, balances, settlement suggestions, expense table

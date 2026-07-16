@@ -50,11 +50,11 @@
 ### Expense Filtering (client-side only)
 | Feature | Current behaviour |
 |---|---|
-| ✅ Filter by description | Debounced (300 ms) text search on Dashboard; filters `expense.description` case-insensitively |
-| ✅ Filter by split type | Dropdown filter (all / equal / exact / percentage) on Dashboard |
-| ✅ Filter by payer | Dropdown filter populated from current group's members on Dashboard |
-| ✅ Filter by Date (Preset / Custom) | Preset selectors (Today, This Week, This Month, Last 30 Days, This Year) or custom calendar selectors (From/To dates) using local timezone-safe dates |
-| ✅ Filter by Amount | Min and Max amount boundaries to filter the expense table |
+| ✅ Filter by description | Shared component/hook (`ExpenseFilters`); debounced (300 ms) case-insensitive text search on Dashboard and Expenses pages |
+| ✅ Filter by split type | Shared dropdown filter (all / equal / exact / percentage) on Dashboard and Expenses pages |
+| ✅ Filter by payer | Shared dropdown filter populated from current group's members on Dashboard and Expenses pages |
+| ✅ Filter by Date (Preset / Custom) | Shared preset selectors (Today, This Week, This Month, Last 30 Days, This Year) or custom calendar selectors (From/To dates) using local timezone-safe dates on Dashboard and Expenses pages |
+| ✅ Filter by Amount | Shared Min and Max amount boundaries to filter the expense table on Dashboard and Expenses pages |
 
 ### Balance Tracking
 | Feature | Current behaviour |

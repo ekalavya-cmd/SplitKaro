@@ -8,7 +8,8 @@ import {
   getBalances,
   getSettlementSuggestions,
 } from "../services/splitKaroService";
-import useDebounce from "../hooks/useDebounce";
+import { useExpenseFilters } from "../hooks/useExpenseFilters";
+import { ExpenseFilters } from "../components/ExpenseFilters";
 
 const Dashboard = () => {
   const [selectedGroupId, setSelectedGroupId] = useState("");
@@ -17,16 +18,7 @@ const Dashboard = () => {
   const [expenses, setExpenses] = useState([]);
   const [balances, setBalances] = useState([]);
   const [suggestions, setSuggestions] = useState([]);
-  const [filterDescription, setFilterDescription] = useState("");
-  const [filterSplitType, setFilterSplitType] = useState("all");
-  const [filterPaidBy, setFilterPaidBy] = useState("all");
-  const [filterFromDate, setFilterFromDate] = useState("");
-  const [filterToDate, setFilterToDate] = useState("");
-  const [filterDatePreset, setFilterDatePreset] = useState("all");
-  const [filterMinAmount, setFilterMinAmount] = useState("");
-  const [filterMaxAmount, setFilterMaxAmount] = useState("");
   const [expandedExpenseIds, setExpandedExpenseIds] = useState({});
-  const [isAdvancedFiltersExpanded, setIsAdvancedFiltersExpanded] = useState(false);
 
   const toggleExpenseExpand = (id) => {
     setExpandedExpenseIds((prev) => ({
@@ -37,111 +29,7 @@ const Dashboard = () => {
 
   const navigate = useNavigate();
 
-  const formatDateToLocalYMD = (date) => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  };
-
-  const handleDatePresetChange = (preset) => {
-    setFilterDatePreset(preset);
-    const today = new Date();
-    
-    if (preset === "all") {
-      setFilterFromDate("");
-      setFilterToDate("");
-    } else if (preset === "today") {
-      const todayStr = formatDateToLocalYMD(today);
-      setFilterFromDate(todayStr);
-      setFilterToDate(todayStr);
-    } else if (preset === "this-week") {
-      const dayOfWeek = today.getDay();
-      const sunday = new Date(today);
-      sunday.setDate(today.getDate() - dayOfWeek);
-      const sundayStr = formatDateToLocalYMD(sunday);
-      const todayStr = formatDateToLocalYMD(today);
-      setFilterFromDate(sundayStr);
-      setFilterToDate(todayStr);
-    } else if (preset === "this-month") {
-      const firstOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-      const firstOfMonthStr = formatDateToLocalYMD(firstOfMonth);
-      const todayStr = formatDateToLocalYMD(today);
-      setFilterFromDate(firstOfMonthStr);
-      setFilterToDate(todayStr);
-    } else if (preset === "last-30-days") {
-      const thirtyDaysAgo = new Date(today);
-      thirtyDaysAgo.setDate(today.getDate() - 30);
-      const thirtyDaysAgoStr = formatDateToLocalYMD(thirtyDaysAgo);
-      const todayStr = formatDateToLocalYMD(today);
-      setFilterFromDate(thirtyDaysAgoStr);
-      setFilterToDate(todayStr);
-    } else if (preset === "this-year") {
-      const firstOfYear = new Date(today.getFullYear(), 0, 1);
-      const firstOfYearStr = formatDateToLocalYMD(firstOfYear);
-      const todayStr = formatDateToLocalYMD(today);
-      setFilterFromDate(firstOfYearStr);
-      setFilterToDate(todayStr);
-    }
-  };
-
-  const handleResetFilters = () => {
-    setFilterDescription("");
-    setFilterSplitType("all");
-    setFilterPaidBy("all");
-    setFilterDatePreset("all");
-    setFilterFromDate("");
-    setFilterToDate("");
-    setFilterMinAmount("");
-    setFilterMaxAmount("");
-  };
-
-  const debouncedDescription = useDebounce(filterDescription, 300);
-
-  const isAmountRangeInvalid =
-    filterMinAmount !== "" &&
-    filterMaxAmount !== "" &&
-    parseFloat(filterMinAmount) > parseFloat(filterMaxAmount);
-
-  const activeAdvancedFiltersCount =
-    (filterDatePreset !== "all" ? 1 : 0) +
-    (filterMinAmount !== "" ? 1 : 0) +
-    (filterMaxAmount !== "" ? 1 : 0);
-
-  const filteredExpenses = expenses.filter((expense) => {
-    const descriptionMatch = expense.description
-      .toLowerCase()
-      .includes(debouncedDescription.toLowerCase());
-    const splitTypeMatch =
-      filterSplitType === "all" || expense.splitType === filterSplitType;
-    const paidByMatch =
-      filterPaidBy === "all" || String(expense.paidBy) === filterPaidBy;
-
-    // Parse expense date to local YYYY-MM-DD
-    const expDateString = formatDateToLocalYMD(new Date(expense.date));
-    const matchesFromDate = filterFromDate === "" || expDateString >= filterFromDate;
-    const matchesToDate = filterToDate === "" || expDateString <= filterToDate;
-
-    // Ignore min/max amount filter when range is invalid
-    const matchesMinAmount =
-      isAmountRangeInvalid ||
-      filterMinAmount === "" ||
-      Number(expense.amount) >= parseFloat(filterMinAmount);
-    const matchesMaxAmount =
-      isAmountRangeInvalid ||
-      filterMaxAmount === "" ||
-      Number(expense.amount) <= parseFloat(filterMaxAmount);
-
-    return (
-      descriptionMatch &&
-      splitTypeMatch &&
-      paidByMatch &&
-      matchesFromDate &&
-      matchesToDate &&
-      matchesMinAmount &&
-      matchesMaxAmount
-    );
-  });
+  const { filteredExpenses, filterProps } = useExpenseFilters(expenses);
 
   const formatDateToDisplay = (dateStr) => {
     const date = new Date(dateStr);
@@ -276,23 +164,25 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-xl">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-md border-b border-canvas-soft pb-lg">
+      <div className="flex flex-col gap-md border-b border-canvas-soft pb-lg md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-display-sm text-ink font-bold mb-xs">Dashboard</h1>
+          <h1 className="mb-xs text-display-sm font-bold text-ink">
+            Dashboard
+          </h1>
           <div className="flex flex-wrap gap-md text-body-sm text-mute">
             <span>{totalMembers} Members</span>
-            <span className="text-canvas-soft font-bold">•</span>
+            <span className="font-bold text-canvas-soft">•</span>
             <span>₹{totalExpenses.toFixed(2)} Expenses</span>
-            <span className="text-canvas-soft font-bold">•</span>
+            <span className="font-bold text-canvas-soft">•</span>
             <span>{suggestions.length} Pending Settlements</span>
           </div>
         </div>
       </div>
 
-      <div className="bg-canvas border border-canvas-soft rounded-xl p-xl shadow-sm max-w-md w-full">
+      <div className="w-full max-w-md rounded-xl border border-canvas-soft bg-canvas p-xl shadow-sm">
         <label
           htmlFor="groupSelect"
-          className="text-body-sm-strong text-ink block mb-sm"
+          className="mb-sm block text-body-sm-strong text-ink"
         >
           Select Group:
         </label>
@@ -300,7 +190,7 @@ const Dashboard = () => {
           id="groupSelect"
           value={selectedGroupId}
           onChange={handleGroupChange}
-          className="w-full bg-canvas text-ink border border-ink text-body-md rounded-md py-md px-lg focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
+          className="w-full cursor-pointer rounded-md border border-ink bg-canvas px-lg py-md text-body-md text-ink focus:ring-2 focus:ring-primary focus:outline-none"
         >
           <option value="" disabled>
             Select a group
@@ -318,7 +208,7 @@ const Dashboard = () => {
       </div>
 
       {group && group.members && group.members.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-lg">
+        <div className="grid grid-cols-1 gap-lg sm:grid-cols-2 lg:grid-cols-4">
           {balances.map((bal) => {
             const amount = Number(bal.balance);
             const isOwed = amount > 0;
@@ -328,19 +218,19 @@ const Dashboard = () => {
             return (
               <div
                 key={bal.member_id}
-                className="bg-canvas rounded-xl p-xl border border-canvas-soft shadow-sm flex flex-col justify-between"
+                className="flex flex-col justify-between rounded-xl border border-canvas-soft bg-canvas p-xl shadow-sm"
               >
                 <div>
-                  <div className="text-body-sm-strong text-mute mb-sm">
+                  <div className="mb-sm text-body-sm-strong text-mute">
                     {bal.name}
                   </div>
-                  <div className="text-display-xs text-ink font-bold mb-md">
+                  <div className="mb-md text-display-xs font-bold text-ink">
                     ₹{absAmount.toFixed(2)}
                   </div>
                 </div>
                 <div>
                   <span
-                    className={`text-body-sm-strong px-md py-xs rounded-full inline-block ${
+                    className={`inline-block rounded-full px-md py-xs text-body-sm-strong ${
                       isSettled
                         ? "bg-canvas-soft text-mute"
                         : isOwed
@@ -364,11 +254,11 @@ const Dashboard = () => {
       )}
 
       <div className="space-y-md">
-        <h2 className="text-display-xs text-ink font-semibold">
+        <h2 className="text-display-xs font-semibold text-ink">
           Simplified Settlements
         </h2>
         {suggestions && suggestions.length > 0 ? (
-          <div className="max-w-xl space-y-md w-full">
+          <div className="w-full max-w-xl space-y-md">
             {suggestions.map((suggestion, index) => (
               <div
                 key={index}
@@ -378,20 +268,22 @@ const Dashboard = () => {
                   <span className="font-semibold">{suggestion.from.name}</span>{" "}
                   should pay{" "}
                   <span className="font-semibold">{suggestion.to.name}</span>{" "}
-                  <span className="font-semibold text-positive-deep bg-primary-pale px-sm py-xxs rounded-full text-body-sm-strong">
+                  <span className="rounded-full bg-primary-pale px-sm py-xxs text-body-sm-strong font-semibold text-positive-deep">
                     ₹{suggestion.amount.toFixed(2)}
                   </span>
                 </p>
                 <button
                   type="button"
-                  onClick={() => navigate(`/settle-up`, {
-                    state: {
-                      paid_by: suggestion.from.id,
-                      paid_to: suggestion.to.id,
-                      amount: suggestion.amount.toFixed(2),
-                    }
-                  })}
-                  className="cursor-pointer bg-canvas-soft text-ink hover:bg-canvas-soft/80 rounded-xl py-md px-xl text-button-md font-semibold transition-colors"
+                  onClick={() =>
+                    navigate(`/settle-up`, {
+                      state: {
+                        paid_by: suggestion.from.id,
+                        paid_to: suggestion.to.id,
+                        amount: suggestion.amount.toFixed(2),
+                      },
+                    })
+                  }
+                  className="cursor-pointer rounded-xl bg-canvas-soft px-xl py-md text-button-md font-semibold text-ink transition-colors hover:bg-canvas-soft/80"
                 >
                   Settle
                 </button>
@@ -399,8 +291,8 @@ const Dashboard = () => {
             ))}
           </div>
         ) : (
-          <div className="max-w-xl rounded-xl border border-canvas-soft bg-canvas p-xl text-center shadow-sm w-full">
-            <p className="text-body-md text-mute font-semibold">
+          <div className="w-full max-w-xl rounded-xl border border-canvas-soft bg-canvas p-xl text-center shadow-sm">
+            <p className="text-body-md font-semibold text-mute">
               All balances are settled!
             </p>
           </div>
@@ -408,245 +300,86 @@ const Dashboard = () => {
       </div>
 
       <div className="space-y-md">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-md">
-          <h2 className="text-display-xs text-ink font-semibold">
+        <div className="flex flex-col gap-md md:flex-row md:items-center md:justify-between">
+          <h2 className="text-display-xs font-semibold text-ink">
             {group ? group.name : "Select a group to view expenses"}
           </h2>
 
           <button
             type="button"
             onClick={() => navigate(`/add-expense/${selectedGroupId}`)}
-            className="cursor-pointer bg-primary text-on-primary hover:bg-primary-active rounded-xl py-md px-xl text-button-md font-semibold transition-colors self-start md:self-auto shadow-sm"
+            className="cursor-pointer self-start rounded-xl bg-primary px-xl py-md text-button-md font-semibold text-on-primary shadow-sm transition-colors hover:bg-primary-active md:self-auto"
           >
             Add Expense
           </button>
         </div>
 
-        <div className="bg-canvas border border-canvas-soft rounded-xl p-lg shadow-sm">
-          <form onSubmit={(e) => e.preventDefault()} className="space-y-lg">
-            {/* Top row: Primary Filters */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-md">
-              <div className="flex flex-col">
-                <label htmlFor="filterDescription" className="text-body-sm-strong text-ink mb-xs">Search Description</label>
-                <input
-                  type="text"
-                  id="filterDescription"
-                  placeholder="Expense Description"
-                  value={filterDescription}
-                  onChange={(e) => setFilterDescription(e.target.value)}
-                  className="bg-canvas text-ink border border-ink text-body-md rounded-md py-md px-lg focus:outline-none focus:ring-2 focus:ring-primary w-full"
-                />
-              </div>
+        <ExpenseFilters filterProps={filterProps} members={group ? group.members : []} />
 
-              <div className="flex flex-col">
-                <label htmlFor="splitType" className="text-body-sm-strong text-ink mb-xs">Split Type</label>
-                <select
-                  name="splitType"
-                  id="splitType"
-                  value={filterSplitType}
-                  onChange={(e) => setFilterSplitType(e.target.value)}
-                  className="bg-canvas text-ink border border-ink text-body-md rounded-md py-md px-lg focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer w-full"
-                >
-                  <option value="all">All Types</option>
-                  <option value="equal">Equal Split</option>
-                  <option value="exact">Exact Split</option>
-                  <option value="percentage">Percentage Split</option>
-                </select>
-              </div>
-
-              <div className="flex flex-col">
-                <label htmlFor="paidBy" className="text-body-sm-strong text-ink mb-xs">Paid By</label>
-                <select
-                  name="paidBy"
-                  id="paidBy"
-                  value={filterPaidBy}
-                  onChange={(e) => setFilterPaidBy(e.target.value)}
-                  className="bg-canvas text-ink border border-ink text-body-md rounded-md py-md px-lg focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer w-full"
-                >
-                  <option value="all">All Payers</option>
-                  {group && group.members && group.members.length > 0 ? (
-                    group.members.map((member) => (
-                      <option key={member.id} value={member.id}>
-                        {member.name}
-                      </option>
-                    ))
-                  ) : (
-                    <option disabled>No members available</option>
-                  )}
-                </select>
-              </div>
-            </div>
-
-            {/* Advanced Filters Section */}
-            <div className="border-t border-canvas-soft pt-lg">
-              <button
-                type="button"
-                onClick={() => setIsAdvancedFiltersExpanded(!isAdvancedFiltersExpanded)}
-                className="w-full flex items-center justify-between text-left text-body-sm-strong text-ink uppercase tracking-wider focus:outline-none hover:text-primary transition-colors cursor-pointer group"
-              >
-                <span className="flex items-center gap-xs font-bold">
-                  Advanced Filters
-                  {!isAdvancedFiltersExpanded && activeAdvancedFiltersCount > 0 && (
-                    <span className="bg-primary text-on-primary text-[10px] font-bold px-md py-xxs rounded-full lowercase normal-case tracking-normal">
-                      {activeAdvancedFiltersCount} active
-                    </span>
-                  )}
-                </span>
-                <span className={`transform transition-transform duration-300 font-bold ${
-                  isAdvancedFiltersExpanded ? "rotate-180" : ""
-                }`}>
-                  ▼
-                </span>
-              </button>
-
-              <div className={`overflow-hidden transition-all duration-300 ${
-                isAdvancedFiltersExpanded ? "max-h-[500px] opacity-100 mt-md" : "max-h-0 opacity-0 pointer-events-none"
-              }`}>
-                <div className="flex flex-wrap gap-md items-end w-full">
-                  {/* Date range filters */}
-                  <div className="flex flex-col flex-1 min-w-[140px]">
-                    <label htmlFor="datePreset" className="text-body-sm-strong text-ink mb-xs">Date Range Preset</label>
-                    <select
-                      id="datePreset"
-                      value={filterDatePreset}
-                      onChange={(e) => handleDatePresetChange(e.target.value)}
-                      className="bg-canvas text-ink border border-ink text-body-md rounded-md py-md px-lg focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer w-full"
-                    >
-                      <option value="all">All Time</option>
-                      <option value="today">Today</option>
-                      <option value="this-week">This Week</option>
-                      <option value="this-month">This Month</option>
-                      <option value="last-30-days">Last 30 Days</option>
-                      <option value="this-year">This Year</option>
-                      <option value="custom">Custom Range</option>
-                    </select>
-                  </div>
-
-                  <div className="flex flex-col flex-1 min-w-[160px]">
-                    <label htmlFor="fromDate" className="text-body-sm-strong text-ink mb-xs">From Date</label>
-                    <input
-                      type="date"
-                      id="fromDate"
-                      value={filterFromDate}
-                      onChange={(e) => {
-                        setFilterFromDate(e.target.value);
-                        setFilterDatePreset("custom");
-                      }}
-                      className="bg-canvas text-ink border border-ink text-body-md rounded-md py-md px-lg focus:outline-none focus:ring-2 focus:ring-primary w-full"
-                    />
-                  </div>
-
-                  <div className="flex flex-col flex-1 min-w-[160px]">
-                    <label htmlFor="toDate" className="text-body-sm-strong text-ink mb-xs">To Date</label>
-                    <input
-                      type="date"
-                      id="toDate"
-                      value={filterToDate}
-                      onChange={(e) => {
-                        setFilterToDate(e.target.value);
-                        setFilterDatePreset("custom");
-                      }}
-                      className="bg-canvas text-ink border border-ink text-body-md rounded-md py-md px-lg focus:outline-none focus:ring-2 focus:ring-primary w-full"
-                    />
-                  </div>
-
-                  {/* Amount range filters */}
-                  <div className="flex flex-col flex-1 min-w-[140px]">
-                    <label htmlFor="minAmount" className="text-body-sm-strong text-ink mb-xs">Min Amount (₹)</label>
-                    <input
-                      type="number"
-                      id="minAmount"
-                      placeholder="Min amount"
-                      value={filterMinAmount}
-                      onChange={(e) => setFilterMinAmount(e.target.value)}
-                      className={`bg-canvas text-ink border text-body-md rounded-md py-md px-lg focus:outline-none focus:ring-2 focus:ring-primary w-full ${
-                        isAmountRangeInvalid ? "border-negative-deep" : "border-ink"
-                      }`}
-                    />
-                  </div>
-
-                  <div className="flex flex-col flex-1 min-w-[140px]">
-                    <label htmlFor="maxAmount" className="text-body-sm-strong text-ink mb-xs">Max Amount (₹)</label>
-                    <input
-                      type="number"
-                      id="maxAmount"
-                      placeholder="Max amount"
-                      value={filterMaxAmount}
-                      onChange={(e) => setFilterMaxAmount(e.target.value)}
-                      className={`bg-canvas text-ink border text-body-md rounded-md py-md px-lg focus:outline-none focus:ring-2 focus:ring-primary w-full ${
-                        isAmountRangeInvalid ? "border-negative-deep" : "border-ink"
-                      }`}
-                    />
-                  </div>
-
-                  <div className="flex-1 min-w-[140px] md:flex-initial">
-                    <button
-                      type="button"
-                      onClick={handleResetFilters}
-                      className="cursor-pointer bg-canvas-soft text-body hover:bg-canvas-soft/80 border border-ink/20 rounded-xl py-md px-xl text-button-md font-semibold transition-colors w-full flex items-center justify-center gap-xs"
-                    >
-                      Reset Filters
-                    </button>
-                  </div>
-
-                  {isAmountRangeInvalid && (
-                    <div className="w-full text-body-sm text-negative-deep font-semibold mt-xs">
-                      ⚠️ Min amount cannot exceed Max amount. Amount filter is currently ignored.
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </form>
-        </div>
-
-        <div className="bg-canvas border border-canvas-soft rounded-xl overflow-hidden shadow-sm">
+        <div className="overflow-hidden rounded-xl border border-canvas-soft bg-canvas shadow-sm">
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+            <table className="w-full border-collapse text-left">
               <thead>
-                <tr className="bg-canvas-soft border-b border-canvas-soft">
-                  <th className="py-lg px-xl text-caption text-mute font-semibold uppercase tracking-wider">Date</th>
-                  <th className="py-lg px-xl text-caption text-mute font-semibold uppercase tracking-wider">Description</th>
-                  <th className="py-lg px-xl text-caption text-mute font-semibold uppercase tracking-wider">Paid By</th>
-                  <th className="py-lg px-xl text-caption text-mute font-semibold uppercase tracking-wider">Amount</th>
-                  <th className="py-lg px-xl text-caption text-mute font-semibold uppercase tracking-wider">Split Type</th>
-                  <th className="py-lg px-xl text-caption text-mute font-semibold uppercase tracking-wider">Splits</th>
+                <tr className="border-b border-canvas-soft bg-canvas-soft">
+                  <th className="px-xl py-lg text-caption font-semibold tracking-wider text-mute uppercase">
+                    Date
+                  </th>
+                  <th className="px-xl py-lg text-caption font-semibold tracking-wider text-mute uppercase">
+                    Description
+                  </th>
+                  <th className="px-xl py-lg text-caption font-semibold tracking-wider text-mute uppercase">
+                    Paid By
+                  </th>
+                  <th className="px-xl py-lg text-caption font-semibold tracking-wider text-mute uppercase">
+                    Amount
+                  </th>
+                  <th className="px-xl py-lg text-caption font-semibold tracking-wider text-mute uppercase">
+                    Split Type
+                  </th>
+                  <th className="px-xl py-lg text-caption font-semibold tracking-wider text-mute uppercase">
+                    Splits
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-canvas-soft">
                 {filteredExpenses && filteredExpenses.length > 0 ? (
                   filteredExpenses.map((expense) => (
                     <React.Fragment key={expense.id}>
-                      <tr 
+                      <tr
                         onClick={() => toggleExpenseExpand(expense.id)}
-                        className="hover:bg-canvas-soft/20 transition-colors cursor-pointer select-none"
+                        className="cursor-pointer transition-colors select-none hover:bg-canvas-soft/20"
                       >
-                        <td className="py-lg px-xl text-body-sm text-ink font-medium whitespace-nowrap">
+                        <td className="px-xl py-lg text-body-sm font-medium whitespace-nowrap text-ink">
                           {formatDateToDisplay(expense.date)}
                         </td>
-                        <td className="py-lg px-xl text-body-sm text-ink font-semibold">
+                        <td className="px-xl py-lg text-body-sm font-semibold text-ink">
                           {expense.description}
                         </td>
-                        <td className="py-lg px-xl text-body-sm text-body">
+                        <td className="px-xl py-lg text-body-sm text-body">
                           {expense.payer.name}
                         </td>
-                        <td className="py-lg px-xl text-body-sm text-ink font-bold">
+                        <td className="px-xl py-lg text-body-sm font-bold text-ink">
                           ₹{expense.amount}
                         </td>
-                        <td className="py-lg px-xl text-body-sm">
-                          <span className={`${setSplitTypeColor(expense.splitType)}`}>
+                        <td className="px-xl py-lg text-body-sm">
+                          <span
+                            className={`${setSplitTypeColor(expense.splitType)}`}
+                          >
                             {expense.splitType}
                           </span>
                         </td>
-                        <td className="py-lg px-xl text-body-sm text-mute">
-                          <button 
+                        <td className="px-xl py-lg text-body-sm text-mute">
+                          <button
                             onClick={(e) => {
                               e.stopPropagation();
                               toggleExpenseExpand(expense.id);
                             }}
-                            className="cursor-pointer bg-canvas-soft text-body hover:bg-canvas-soft/80 px-md py-xs rounded-full text-caption font-semibold flex items-center gap-xs"
+                            className="flex cursor-pointer items-center gap-xs rounded-full bg-canvas-soft px-md py-xs text-caption font-semibold text-body hover:bg-canvas-soft/80"
                           >
-                            <span>{expense.splits ? expense.splits.length : 0} shares</span>
+                            <span>
+                              {expense.splits ? expense.splits.length : 0}{" "}
+                              shares
+                            </span>
                             <span className="text-[10px] text-mute">
                               {expandedExpenseIds[expense.id] ? "▲" : "▼"}
                             </span>
@@ -655,50 +388,94 @@ const Dashboard = () => {
                       </tr>
                       {expandedExpenseIds[expense.id] && (
                         <tr className="bg-canvas-soft/10">
-                          <td colSpan="6" className="p-xl border-t border-b border-canvas-soft">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-lg max-w-4xl">
+                          <td
+                            colSpan="6"
+                            className="border-t border-b border-canvas-soft p-xl"
+                          >
+                            <div className="grid max-w-4xl grid-cols-1 gap-lg md:grid-cols-2">
                               <div className="space-y-sm">
-                                <h4 className="text-body-sm-strong text-mute uppercase tracking-wider">Payment Summary</h4>
-                                <div className="bg-canvas border border-canvas-soft rounded-xl p-md space-y-xs shadow-sm">
+                                <h4 className="text-body-sm-strong tracking-wider text-mute uppercase">
+                                  Payment Summary
+                                </h4>
+                                <div className="space-y-xs rounded-xl border border-canvas-soft bg-canvas p-md shadow-sm">
                                   <div className="flex items-center gap-sm">
-                                    <span className="w-6 h-6 rounded-full bg-primary-pale text-positive-deep flex items-center justify-center font-bold text-caption">
-                                      {expense.payer.name.substring(0, 2).toUpperCase()}
+                                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary-pale text-caption font-bold text-positive-deep">
+                                      {expense.payer.name
+                                        .substring(0, 2)
+                                        .toUpperCase()}
                                     </span>
                                     <p className="text-body-md text-ink">
-                                      <span className="font-semibold">{expense.payer.name}</span> paid <span className="font-bold">₹{expense.amount}</span>
+                                      <span className="font-semibold">
+                                        {expense.payer.name}
+                                      </span>{" "}
+                                      paid{" "}
+                                      <span className="font-bold">
+                                        ₹{expense.amount}
+                                      </span>
                                     </p>
                                   </div>
-                                  <div className="pt-xs border-t border-canvas-soft text-caption text-mute flex items-center justify-between">
-                                    <span>Split Type: <span className="font-semibold text-ink uppercase text-[10px] bg-canvas-soft px-sm py-xxs rounded-full">{expense.splitType}</span></span>
-                                    <span>Date: {formatDateToDisplay(expense.date)}</span>
+                                  <div className="flex items-center justify-between border-t border-canvas-soft pt-xs text-caption text-mute">
+                                    <span>
+                                      Split Type:{" "}
+                                      <span className="rounded-full bg-canvas-soft px-sm py-xxs text-[10px] font-semibold text-ink uppercase">
+                                        {expense.splitType}
+                                      </span>
+                                    </span>
+                                    <span>
+                                      Date: {formatDateToDisplay(expense.date)}
+                                    </span>
                                   </div>
                                 </div>
                               </div>
                               <div className="space-y-sm">
-                                <h4 className="text-body-sm-strong text-mute uppercase tracking-wider">Individual Shares</h4>
-                                <div className="bg-canvas border border-canvas-soft rounded-xl p-md space-y-sm shadow-sm">
-                                  {expense.splits && expense.splits.length > 0 ? (
+                                <h4 className="text-body-sm-strong tracking-wider text-mute uppercase">
+                                  Individual Shares
+                                </h4>
+                                <div className="space-y-sm rounded-xl border border-canvas-soft bg-canvas p-md shadow-sm">
+                                  {expense.splits &&
+                                  expense.splits.length > 0 ? (
                                     <div className="divide-y divide-canvas-soft">
                                       {expense.splits.map((split) => {
-                                        const isPayer = split.memberId === expense.paidBy;
+                                        const isPayer =
+                                          split.memberId === expense.paidBy;
                                         const amountStr = `₹${parseFloat(split.amountOwed).toFixed(2)}`;
                                         return (
-                                          <div key={split.id} className="flex items-center justify-between py-xs first:pt-0 last:pb-0">
+                                          <div
+                                            key={split.id}
+                                            className="flex items-center justify-between py-xs first:pt-0 last:pb-0"
+                                          >
                                             <div className="flex items-center gap-xs">
-                                              <span className="w-5 h-5 rounded-full bg-canvas-soft text-body flex items-center justify-center font-bold text-[10px]">
-                                                {split.member.name.substring(0, 2).toUpperCase()}
+                                              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-canvas-soft text-[10px] font-bold text-body">
+                                                {split.member.name
+                                                  .substring(0, 2)
+                                                  .toUpperCase()}
                                               </span>
-                                              <span className="text-body-sm text-ink font-medium">
-                                                {split.member.name} {isPayer && <span className="text-[10px] text-mute font-normal">(Payer)</span>}
+                                              <span className="text-body-sm font-medium text-ink">
+                                                {split.member.name}{" "}
+                                                {isPayer && (
+                                                  <span className="text-[10px] font-normal text-mute">
+                                                    (Payer)
+                                                  </span>
+                                                )}
                                               </span>
                                             </div>
                                             <div className="flex items-center gap-xs">
                                               {isPayer ? (
-                                                <span className="text-caption text-mute italic mr-xs">own share</span>
+                                                <span className="mr-xs text-caption text-mute italic">
+                                                  own share
+                                                </span>
                                               ) : (
-                                                <span className="text-[10px] text-mute mr-xs">owes {expense.payer.name}</span>
+                                                <span className="mr-xs text-[10px] text-mute">
+                                                  owes {expense.payer.name}
+                                                </span>
                                               )}
-                                              <span className={isPayer ? "bg-canvas-soft text-body px-md py-xs rounded-full text-caption font-semibold" : "bg-primary-pale text-positive-deep px-md py-xs rounded-full text-caption font-semibold"}>
+                                              <span
+                                                className={
+                                                  isPayer
+                                                    ? "rounded-full bg-canvas-soft px-md py-xs text-caption font-semibold text-body"
+                                                    : "rounded-full bg-primary-pale px-md py-xs text-caption font-semibold text-positive-deep"
+                                                }
+                                              >
                                                 {amountStr}
                                               </span>
                                             </div>
@@ -707,7 +484,9 @@ const Dashboard = () => {
                                       })}
                                     </div>
                                   ) : (
-                                    <p className="text-body-sm text-mute">No split details available</p>
+                                    <p className="text-body-sm text-mute">
+                                      No split details available
+                                    </p>
                                   )}
                                 </div>
                               </div>
@@ -721,7 +500,7 @@ const Dashboard = () => {
                   <tr>
                     <td
                       colSpan="6"
-                      className="py-xl px-xl text-body-md text-mute text-center"
+                      className="px-xl py-xl text-center text-body-md text-mute"
                     >
                       {selectedGroupId
                         ? expenses.length > 0
