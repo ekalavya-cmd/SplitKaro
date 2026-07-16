@@ -20,6 +20,11 @@ const Dashboard = () => {
   const [filterDescription, setFilterDescription] = useState("");
   const [filterSplitType, setFilterSplitType] = useState("all");
   const [filterPaidBy, setFilterPaidBy] = useState("all");
+  const [filterFromDate, setFilterFromDate] = useState("");
+  const [filterToDate, setFilterToDate] = useState("");
+  const [filterDatePreset, setFilterDatePreset] = useState("all");
+  const [filterMinAmount, setFilterMinAmount] = useState("");
+  const [filterMaxAmount, setFilterMaxAmount] = useState("");
   const [expandedExpenseIds, setExpandedExpenseIds] = useState({});
 
   const toggleExpenseExpand = (id) => {
@@ -31,7 +36,71 @@ const Dashboard = () => {
 
   const navigate = useNavigate();
 
+  const formatDateToLocalYMD = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  const handleDatePresetChange = (preset) => {
+    setFilterDatePreset(preset);
+    const today = new Date();
+    
+    if (preset === "all") {
+      setFilterFromDate("");
+      setFilterToDate("");
+    } else if (preset === "today") {
+      const todayStr = formatDateToLocalYMD(today);
+      setFilterFromDate(todayStr);
+      setFilterToDate(todayStr);
+    } else if (preset === "this-week") {
+      const dayOfWeek = today.getDay();
+      const sunday = new Date(today);
+      sunday.setDate(today.getDate() - dayOfWeek);
+      const sundayStr = formatDateToLocalYMD(sunday);
+      const todayStr = formatDateToLocalYMD(today);
+      setFilterFromDate(sundayStr);
+      setFilterToDate(todayStr);
+    } else if (preset === "this-month") {
+      const firstOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+      const firstOfMonthStr = formatDateToLocalYMD(firstOfMonth);
+      const todayStr = formatDateToLocalYMD(today);
+      setFilterFromDate(firstOfMonthStr);
+      setFilterToDate(todayStr);
+    } else if (preset === "last-30-days") {
+      const thirtyDaysAgo = new Date(today);
+      thirtyDaysAgo.setDate(today.getDate() - 30);
+      const thirtyDaysAgoStr = formatDateToLocalYMD(thirtyDaysAgo);
+      const todayStr = formatDateToLocalYMD(today);
+      setFilterFromDate(thirtyDaysAgoStr);
+      setFilterToDate(todayStr);
+    } else if (preset === "this-year") {
+      const firstOfYear = new Date(today.getFullYear(), 0, 1);
+      const firstOfYearStr = formatDateToLocalYMD(firstOfYear);
+      const todayStr = formatDateToLocalYMD(today);
+      setFilterFromDate(firstOfYearStr);
+      setFilterToDate(todayStr);
+    }
+  };
+
+  const handleResetFilters = () => {
+    setFilterDescription("");
+    setFilterSplitType("all");
+    setFilterPaidBy("all");
+    setFilterDatePreset("all");
+    setFilterFromDate("");
+    setFilterToDate("");
+    setFilterMinAmount("");
+    setFilterMaxAmount("");
+  };
+
   const debouncedDescription = useDebounce(filterDescription, 300);
+
+  const isAmountRangeInvalid =
+    filterMinAmount !== "" &&
+    filterMaxAmount !== "" &&
+    parseFloat(filterMinAmount) > parseFloat(filterMaxAmount);
 
   const filteredExpenses = expenses.filter((expense) => {
     const descriptionMatch = expense.description
@@ -42,7 +111,30 @@ const Dashboard = () => {
     const paidByMatch =
       filterPaidBy === "all" || String(expense.paidBy) === filterPaidBy;
 
-    return descriptionMatch && splitTypeMatch && paidByMatch;
+    // Parse expense date to local YYYY-MM-DD
+    const expDateString = formatDateToLocalYMD(new Date(expense.date));
+    const matchesFromDate = filterFromDate === "" || expDateString >= filterFromDate;
+    const matchesToDate = filterToDate === "" || expDateString <= filterToDate;
+
+    // Ignore min/max amount filter when range is invalid
+    const matchesMinAmount =
+      isAmountRangeInvalid ||
+      filterMinAmount === "" ||
+      Number(expense.amount) >= parseFloat(filterMinAmount);
+    const matchesMaxAmount =
+      isAmountRangeInvalid ||
+      filterMaxAmount === "" ||
+      Number(expense.amount) <= parseFloat(filterMaxAmount);
+
+    return (
+      descriptionMatch &&
+      splitTypeMatch &&
+      paidByMatch &&
+      matchesFromDate &&
+      matchesToDate &&
+      matchesMinAmount &&
+      matchesMaxAmount
+    );
   });
 
   const setSplitTypeColor = (splitType) => {
@@ -317,46 +409,157 @@ const Dashboard = () => {
         </div>
 
         <div className="bg-canvas border border-canvas-soft rounded-xl p-lg shadow-sm">
-          <form className="flex flex-wrap items-center gap-md">
-            <input
-              type="text"
-              placeholder="Expense Description"
-              value={filterDescription}
-              onChange={(e) => setFilterDescription(e.target.value)}
-              className="bg-canvas text-ink border border-ink text-body-md rounded-md py-md px-lg focus:outline-none focus:ring-2 focus:ring-primary w-full md:w-64"
-            />
+          <form onSubmit={(e) => e.preventDefault()} className="space-y-lg">
+            {/* Top row: Primary Filters */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-md">
+              <div className="flex flex-col">
+                <label htmlFor="filterDescription" className="text-body-sm-strong text-ink mb-xs">Search Description</label>
+                <input
+                  type="text"
+                  id="filterDescription"
+                  placeholder="Expense Description"
+                  value={filterDescription}
+                  onChange={(e) => setFilterDescription(e.target.value)}
+                  className="bg-canvas text-ink border border-ink text-body-md rounded-md py-md px-lg focus:outline-none focus:ring-2 focus:ring-primary w-full"
+                />
+              </div>
 
-            <select
-              name="splitType"
-              id="splitType"
-              value={filterSplitType}
-              onChange={(e) => setFilterSplitType(e.target.value)}
-              className="bg-canvas text-ink border border-ink text-body-md rounded-md py-md px-lg focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer w-full md:w-48"
-            >
-              <option value="all">All Type</option>
-              <option value="equal">Equal Split</option>
-              <option value="exact">Exact Split</option>
-              <option value="percentage">Percentage Split</option>
-            </select>
+              <div className="flex flex-col">
+                <label htmlFor="splitType" className="text-body-sm-strong text-ink mb-xs">Split Type</label>
+                <select
+                  name="splitType"
+                  id="splitType"
+                  value={filterSplitType}
+                  onChange={(e) => setFilterSplitType(e.target.value)}
+                  className="bg-canvas text-ink border border-ink text-body-md rounded-md py-md px-lg focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer w-full"
+                >
+                  <option value="all">All Types</option>
+                  <option value="equal">Equal Split</option>
+                  <option value="exact">Exact Split</option>
+                  <option value="percentage">Percentage Split</option>
+                </select>
+              </div>
 
-            <select
-              name="paidBy"
-              id="paidBy"
-              value={filterPaidBy}
-              onChange={(e) => setFilterPaidBy(e.target.value)}
-              className="bg-canvas text-ink border border-ink text-body-md rounded-md py-md px-lg focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer w-full md:w-48"
-            >
-              <option value="all">All Payers</option>
-              {group && group.members && group.members.length > 0 ? (
-                group.members.map((member) => (
-                  <option key={member.id} value={member.id}>
-                    {member.name}
-                  </option>
-                ))
-              ) : (
-                <option disabled>No members available</option>
-              )}
-            </select>
+              <div className="flex flex-col">
+                <label htmlFor="paidBy" className="text-body-sm-strong text-ink mb-xs">Paid By</label>
+                <select
+                  name="paidBy"
+                  id="paidBy"
+                  value={filterPaidBy}
+                  onChange={(e) => setFilterPaidBy(e.target.value)}
+                  className="bg-canvas text-ink border border-ink text-body-md rounded-md py-md px-lg focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer w-full"
+                >
+                  <option value="all">All Payers</option>
+                  {group && group.members && group.members.length > 0 ? (
+                    group.members.map((member) => (
+                      <option key={member.id} value={member.id}>
+                        {member.name}
+                      </option>
+                    ))
+                  ) : (
+                    <option disabled>No members available</option>
+                  )}
+                </select>
+              </div>
+            </div>
+
+            {/* Advanced Filters Section */}
+            <div className="border-t border-canvas-soft pt-lg">
+              <h3 className="text-body-sm-strong text-ink uppercase tracking-wider mb-md">Advanced Filters</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-md items-end">
+                {/* Date range filters */}
+                <div className="flex flex-col">
+                  <label htmlFor="datePreset" className="text-body-sm-strong text-ink mb-xs">Date Range Preset</label>
+                  <select
+                    id="datePreset"
+                    value={filterDatePreset}
+                    onChange={(e) => handleDatePresetChange(e.target.value)}
+                    className="bg-canvas text-ink border border-ink text-body-md rounded-md py-md px-lg focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer w-full"
+                  >
+                    <option value="all">All Time</option>
+                    <option value="today">Today</option>
+                    <option value="this-week">This Week</option>
+                    <option value="this-month">This Month</option>
+                    <option value="last-30-days">Last 30 Days</option>
+                    <option value="this-year">This Year</option>
+                    <option value="custom">Custom Range</option>
+                  </select>
+                </div>
+
+                <div className="flex flex-col">
+                  <label htmlFor="fromDate" className="text-body-sm-strong text-ink mb-xs">From Date</label>
+                  <input
+                    type="date"
+                    id="fromDate"
+                    value={filterFromDate}
+                    onChange={(e) => {
+                      setFilterFromDate(e.target.value);
+                      setFilterDatePreset("custom");
+                    }}
+                    className="bg-canvas text-ink border border-ink text-body-md rounded-md py-md px-lg focus:outline-none focus:ring-2 focus:ring-primary w-full"
+                  />
+                </div>
+
+                <div className="flex flex-col">
+                  <label htmlFor="toDate" className="text-body-sm-strong text-ink mb-xs">To Date</label>
+                  <input
+                    type="date"
+                    id="toDate"
+                    value={filterToDate}
+                    onChange={(e) => {
+                      setFilterToDate(e.target.value);
+                      setFilterDatePreset("custom");
+                    }}
+                    className="bg-canvas text-ink border border-ink text-body-md rounded-md py-md px-lg focus:outline-none focus:ring-2 focus:ring-primary w-full"
+                  />
+                </div>
+
+                {/* Amount range filters */}
+                <div className="flex flex-col">
+                  <label htmlFor="minAmount" className="text-body-sm-strong text-ink mb-xs">Min Amount (₹)</label>
+                  <input
+                    type="number"
+                    id="minAmount"
+                    placeholder="Min amount"
+                    value={filterMinAmount}
+                    onChange={(e) => setFilterMinAmount(e.target.value)}
+                    className={`bg-canvas text-ink border text-body-md rounded-md py-md px-lg focus:outline-none focus:ring-2 focus:ring-primary w-full ${
+                      isAmountRangeInvalid ? "border-negative-deep" : "border-ink"
+                    }`}
+                  />
+                </div>
+
+                <div className="flex flex-col">
+                  <label htmlFor="maxAmount" className="text-body-sm-strong text-ink mb-xs">Max Amount (₹)</label>
+                  <input
+                    type="number"
+                    id="maxAmount"
+                    placeholder="Max amount"
+                    value={filterMaxAmount}
+                    onChange={(e) => setFilterMaxAmount(e.target.value)}
+                    className={`bg-canvas text-ink border text-body-md rounded-md py-md px-lg focus:outline-none focus:ring-2 focus:ring-primary w-full ${
+                      isAmountRangeInvalid ? "border-negative-deep" : "border-ink"
+                    }`}
+                  />
+                </div>
+
+                <div className="flex justify-end h-full">
+                  <button
+                    type="button"
+                    onClick={handleResetFilters}
+                    className="cursor-pointer bg-canvas-soft text-body hover:bg-canvas-soft/80 border border-ink/20 rounded-xl py-md px-xl text-button-md font-semibold transition-colors w-full md:w-auto flex items-center justify-center gap-xs"
+                  >
+                    Reset Filters
+                  </button>
+                </div>
+
+                {isAmountRangeInvalid && (
+                  <div className="col-span-1 md:col-span-3 text-body-sm text-negative-deep font-semibold">
+                    ⚠️ Min amount cannot exceed Max amount. Amount filter is currently ignored.
+                  </div>
+                )}
+              </div>
+            </div>
           </form>
         </div>
 

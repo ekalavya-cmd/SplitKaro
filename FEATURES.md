@@ -53,6 +53,8 @@
 | ✅ Filter by description | Debounced (300 ms) text search on Dashboard; filters `expense.description` case-insensitively |
 | ✅ Filter by split type | Dropdown filter (all / equal / exact / percentage) on Dashboard |
 | ✅ Filter by payer | Dropdown filter populated from current group's members on Dashboard |
+| ✅ Filter by Date (Preset / Custom) | Preset selectors (Today, This Week, This Month, Last 30 Days, This Year) or custom calendar selectors (From/To dates) using local timezone-safe dates |
+| ✅ Filter by Amount | Min and Max amount boundaries to filter the expense table |
 
 ### Balance Tracking
 | Feature | Current behaviour |
