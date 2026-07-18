@@ -27,14 +27,14 @@ export const ExpenseFilters = ({ filterProps, members }) => {
   } = filterProps;
 
   return (
-    <div className="rounded-xl border border-canvas-soft bg-canvas p-lg shadow-sm">
-      <form onSubmit={(e) => e.preventDefault()} className="space-y-lg">
+    <div className="rounded-lg border border-outline-variant bg-surface-container-lowest p-6 shadow-sm">
+      <form onSubmit={(e) => e.preventDefault()} className="flex flex-col gap-6">
         {/* Top row: Primary Filters */}
-        <div className="grid grid-cols-1 gap-md md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <div className="flex flex-col">
             <label
               htmlFor="filterDescription"
-              className="mb-xs text-body-sm-strong text-ink"
+              className="mb-2 text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider"
             >
               Search Description
             </label>
@@ -44,14 +44,14 @@ export const ExpenseFilters = ({ filterProps, members }) => {
               placeholder="Search expenses..."
               value={filterDescription}
               onChange={(e) => setFilterDescription(e.target.value)}
-              className="w-full rounded-md border border-ink bg-canvas px-lg py-md text-body-md text-ink focus:ring-2 focus:ring-primary focus:outline-none"
+              className="w-full h-10 rounded-lg border border-outline-variant bg-surface-container-lowest px-4 text-body-md font-body-md text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 transition-shadow outline-none placeholder:text-on-surface-variant"
             />
           </div>
 
           <div className="flex flex-col">
             <label
               htmlFor="splitType"
-              className="mb-xs text-body-sm-strong text-ink"
+              className="mb-2 text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider"
             >
               Split Type
             </label>
@@ -60,7 +60,7 @@ export const ExpenseFilters = ({ filterProps, members }) => {
               id="splitType"
               value={filterSplitType}
               onChange={(e) => setFilterSplitType(e.target.value)}
-              className="w-full cursor-pointer rounded-md border border-ink bg-canvas px-lg py-md text-body-md text-ink focus:ring-2 focus:ring-primary focus:outline-none"
+              className="w-full h-10 cursor-pointer rounded-lg border border-outline-variant bg-surface-container-lowest px-4 text-body-md font-body-md text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 transition-shadow outline-none"
             >
               <option value="all">All Types</option>
               <option value="equal">Equal Split</option>
@@ -72,7 +72,7 @@ export const ExpenseFilters = ({ filterProps, members }) => {
           <div className="flex flex-col">
             <label
               htmlFor="paidBy"
-              className="mb-xs text-body-sm-strong text-ink"
+              className="mb-2 text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider"
             >
               Paid By
             </label>
@@ -81,7 +81,7 @@ export const ExpenseFilters = ({ filterProps, members }) => {
               id="paidBy"
               value={filterPaidBy}
               onChange={(e) => setFilterPaidBy(e.target.value)}
-              className="w-full cursor-pointer rounded-md border border-ink bg-canvas px-lg py-md text-body-md text-ink focus:ring-2 focus:ring-primary focus:outline-none"
+              className="w-full h-10 cursor-pointer rounded-lg border border-outline-variant bg-surface-container-lowest px-4 text-body-md font-body-md text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 transition-shadow outline-none"
             >
               <option value="all">All Payers</option>
               {members && members.length > 0 ? (
@@ -98,53 +98,43 @@ export const ExpenseFilters = ({ filterProps, members }) => {
         </div>
 
         {/* Advanced Filters Section */}
-        <div className="border-t border-canvas-soft pt-lg">
+        <div className="border-t border-outline-variant pt-6">
           <button
             type="button"
-            onClick={() =>
-              setIsAdvancedFiltersExpanded(!isAdvancedFiltersExpanded)
-            }
-            className="group flex w-full cursor-pointer items-center justify-between text-left text-body-sm-strong tracking-wider text-ink uppercase transition-colors hover:text-primary focus:outline-none"
+            onClick={() => setIsAdvancedFiltersExpanded(!isAdvancedFiltersExpanded)}
+            className="group flex w-full cursor-pointer items-center justify-between text-left text-label-sm font-label-sm tracking-wider text-on-surface-variant uppercase transition-colors hover:text-primary focus:outline-none"
           >
-            <span className="flex items-center gap-xs font-bold">
+            <span className="flex items-center gap-2 font-bold">
               Advanced Filters
-              {!isAdvancedFiltersExpanded &&
-                activeAdvancedFiltersCount > 0 && (
-                  <span className="rounded-full bg-primary px-md py-xxs text-[10px] font-bold tracking-normal text-on-primary lowercase">
-                    {activeAdvancedFiltersCount} active
-                  </span>
-                )}
+              {!isAdvancedFiltersExpanded && activeAdvancedFiltersCount > 0 && (
+                <span className="rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold tracking-normal text-on-primary lowercase">
+                  {activeAdvancedFiltersCount} active
+                </span>
+              )}
             </span>
-            <span
-              className={`transform font-bold transition-transform duration-300 ${
-                isAdvancedFiltersExpanded ? "rotate-180" : ""
-              }`}
-            >
-              ▼
+            <span className={`material-symbols-outlined text-[18px] transform transition-transform duration-300 ${isAdvancedFiltersExpanded ? "rotate-180" : ""}`}>
+              expand_more
             </span>
           </button>
 
           <div
             className={`overflow-hidden transition-all duration-300 ${
               isAdvancedFiltersExpanded
-                ? "mt-md max-h-[500px] opacity-100"
+                ? "mt-4 max-h-[500px] opacity-100"
                 : "pointer-events-none max-h-0 opacity-0"
             }`}
           >
-            <div className="flex w-full flex-wrap items-end gap-md">
+            <div className="flex w-full flex-wrap items-end gap-4">
               {/* Date range filters */}
               <div className="flex min-w-[140px] flex-1 flex-col">
-                <label
-                  htmlFor="datePreset"
-                  className="mb-xs text-body-sm-strong text-ink"
-                >
+                <label htmlFor="datePreset" className="mb-2 text-label-sm font-label-sm text-on-surface-variant">
                   Date Range Preset
                 </label>
                 <select
                   id="datePreset"
                   value={filterDatePreset}
                   onChange={(e) => handleDatePresetChange(e.target.value)}
-                  className="w-full cursor-pointer rounded-md border border-ink bg-canvas px-lg py-md text-body-md text-ink focus:ring-2 focus:ring-primary focus:outline-none"
+                  className="w-full h-10 cursor-pointer rounded-lg border border-outline-variant bg-surface-container-lowest px-4 text-body-md font-body-md text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
                 >
                   <option value="all">All Time</option>
                   <option value="today">Today</option>
@@ -157,10 +147,7 @@ export const ExpenseFilters = ({ filterProps, members }) => {
               </div>
 
               <div className="flex min-w-[160px] flex-1 flex-col">
-                <label
-                  htmlFor="fromDate"
-                  className="mb-xs text-body-sm-strong text-ink"
-                >
+                <label htmlFor="fromDate" className="mb-2 text-label-sm font-label-sm text-on-surface-variant">
                   From Date
                 </label>
                 <input
@@ -171,15 +158,12 @@ export const ExpenseFilters = ({ filterProps, members }) => {
                     setFilterFromDate(e.target.value);
                     setFilterDatePreset("custom");
                   }}
-                  className="w-full rounded-md border border-ink bg-canvas px-lg py-md text-body-md text-ink focus:ring-2 focus:ring-primary focus:outline-none"
+                  className="w-full h-10 rounded-lg border border-outline-variant bg-surface-container-lowest px-4 text-body-md font-body-md text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
                 />
               </div>
 
               <div className="flex min-w-[160px] flex-1 flex-col">
-                <label
-                  htmlFor="toDate"
-                  className="mb-xs text-body-sm-strong text-ink"
-                >
+                <label htmlFor="toDate" className="mb-2 text-label-sm font-label-sm text-on-surface-variant">
                   To Date
                 </label>
                 <input
@@ -190,16 +174,13 @@ export const ExpenseFilters = ({ filterProps, members }) => {
                     setFilterToDate(e.target.value);
                     setFilterDatePreset("custom");
                   }}
-                  className="w-full rounded-md border border-ink bg-canvas px-lg py-md text-body-md text-ink focus:ring-2 focus:ring-primary focus:outline-none"
+                  className="w-full h-10 rounded-lg border border-outline-variant bg-surface-container-lowest px-4 text-body-md font-body-md text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
                 />
               </div>
 
               {/* Amount range filters */}
               <div className="flex min-w-[140px] flex-1 flex-col">
-                <label
-                  htmlFor="minAmount"
-                  className="mb-xs text-body-sm-strong text-ink"
-                >
+                <label htmlFor="minAmount" className="mb-2 text-label-sm font-label-sm text-on-surface-variant">
                   Min Amount (₹)
                 </label>
                 <input
@@ -208,19 +189,14 @@ export const ExpenseFilters = ({ filterProps, members }) => {
                   placeholder="Min amount"
                   value={filterMinAmount}
                   onChange={(e) => setFilterMinAmount(e.target.value)}
-                  className={`w-full rounded-md border bg-canvas px-lg py-md text-body-md text-ink focus:ring-2 focus:ring-primary focus:outline-none ${
-                    isAmountRangeInvalid
-                      ? "border-negative-deep"
-                      : "border-ink"
+                  className={`w-full h-10 rounded-lg border bg-surface-container-lowest px-4 text-body-md font-body-md text-on-surface focus:ring-2 focus:ring-primary/20 outline-none ${
+                    isAmountRangeInvalid ? "border-error" : "border-outline-variant focus:border-primary"
                   }`}
                 />
               </div>
 
               <div className="flex min-w-[140px] flex-1 flex-col">
-                <label
-                  htmlFor="maxAmount"
-                  className="mb-xs text-body-sm-strong text-ink"
-                >
+                <label htmlFor="maxAmount" className="mb-2 text-label-sm font-label-sm text-on-surface-variant">
                   Max Amount (₹)
                 </label>
                 <input
@@ -229,10 +205,8 @@ export const ExpenseFilters = ({ filterProps, members }) => {
                   placeholder="Max amount"
                   value={filterMaxAmount}
                   onChange={(e) => setFilterMaxAmount(e.target.value)}
-                  className={`w-full rounded-md border bg-canvas px-lg py-md text-body-md text-ink focus:ring-2 focus:ring-primary focus:outline-none ${
-                    isAmountRangeInvalid
-                      ? "border-negative-deep"
-                      : "border-ink"
+                  className={`w-full h-10 rounded-lg border bg-surface-container-lowest px-4 text-body-md font-body-md text-on-surface focus:ring-2 focus:ring-primary/20 outline-none ${
+                    isAmountRangeInvalid ? "border-error" : "border-outline-variant focus:border-primary"
                   }`}
                 />
               </div>
@@ -241,16 +215,15 @@ export const ExpenseFilters = ({ filterProps, members }) => {
                 <button
                   type="button"
                   onClick={handleResetFilters}
-                  className="flex w-full cursor-pointer items-center justify-center gap-xs rounded-xl border border-ink/20 bg-canvas-soft px-xl py-md text-button-md font-semibold text-body transition-colors hover:bg-canvas-soft/80"
+                  className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-outline-variant bg-surface px-6 h-10 text-body-md font-body-md font-medium text-on-surface transition-colors hover:bg-surface-variant"
                 >
                   Reset Filters
                 </button>
               </div>
 
               {isAmountRangeInvalid && (
-                <div className="mt-xs w-full text-body-sm font-semibold text-negative-deep">
-                  ⚠️ Min amount cannot exceed Max amount. Amount filter is
-                  currently ignored.
+                <div className="mt-2 w-full text-label-sm font-label-sm text-error">
+                  ⚠️ Min amount cannot exceed Max amount. Amount filter is currently ignored.
                 </div>
               )}
             </div>

@@ -1,5 +1,4 @@
-import React from "react";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import {
   getGroups,
@@ -22,7 +21,7 @@ const SettleUp = () => {
   const [suggestions, setSuggestions] = useState([]);
   const [settlementsData, setSettlementsData] = useState({ settlements: [] });
   const { filteredSettlements, filterProps } = useSettlementFilters(
-    settlementsData.settlements
+    settlementsData.settlements,
   );
   const [groups, setGroups] = useState([]);
   const [selectedGroupId, setSelectedGroupId] = useState("");
@@ -43,9 +42,9 @@ const SettleUp = () => {
   const formatDateToDisplay = (dateStr) => {
     const date = new Date(dateStr);
     const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const year = date.getFullYear();
-    return `${day}-${month}-${year}`;
+    const month = date.toLocaleString("en-US", { month: "short" });
+    // const year = date.getFullYear();
+    return `${month} ${day}`;
   };
 
   const handleGroupChange = (e) => {
@@ -169,19 +168,22 @@ const SettleUp = () => {
   }, [selectedGroupId]);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-xl">
-      <div className="space-y-xl">
-        <div className="border-b border-canvas-soft pb-lg">
-          <h1 className="text-display-sm text-ink font-bold mb-xs">Settle Up</h1>
-          <p className="text-body-sm text-mute">
+    <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
+      {/* Left Column */}
+      <div className="flex flex-col gap-8 lg:col-span-7">
+        <div className="border-b border-outline-variant pb-6">
+          <h1 className="mb-2 font-headline-lg text-headline-lg font-bold text-on-surface">
+            Settle Up
+          </h1>
+          <p className="text-label-md font-label-md text-on-surface-variant">
             Record payments between group members to clear balances
           </p>
         </div>
 
-        <div className="bg-canvas border border-canvas-soft rounded-xl p-xl shadow-sm">
+        <div className="rounded-lg border border-outline-variant bg-surface-container-lowest p-6 shadow-sm">
           <label
             htmlFor="groupSelect"
-            className="text-body-sm-strong text-ink block mb-sm"
+            className="mb-2 block font-label-sm text-label-sm text-on-surface-variant"
           >
             Select Group:
           </label>
@@ -189,7 +191,7 @@ const SettleUp = () => {
             id="groupSelect"
             value={selectedGroupId}
             onChange={handleGroupChange}
-            className="w-full bg-canvas text-ink border border-ink text-body-md rounded-md py-md px-lg focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
+            className="h-10 w-full cursor-pointer rounded-lg border border-outline-variant bg-surface-container-lowest px-4 font-body-md text-body-md text-on-surface transition-shadow focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
           >
             <option value="" disabled>
               Select a group
@@ -206,53 +208,59 @@ const SettleUp = () => {
           </select>
         </div>
 
-        <div className="space-y-md">
-          <h2 className="text-display-xs text-ink font-semibold">
+        <div className="flex flex-col gap-4">
+          <h2 className="font-headline-md text-headline-md text-on-surface">
             Simplified Settlements
           </h2>
-          {suggestions && suggestions.length > 0 ? (
-            <div className="w-full space-y-md">
-              {suggestions.map((suggestion, index) => (
+          <div className="flex flex-col overflow-hidden rounded-lg border border-outline-variant bg-surface-container-lowest shadow-sm">
+            {suggestions && suggestions.length > 0 ? (
+              suggestions.map((suggestion, index) => (
                 <div
                   key={index}
-                  className="rounded-xl border border-canvas-soft bg-canvas p-lg shadow-sm flex items-center justify-between gap-md"
+                  className="flex items-center justify-between border-b border-outline-variant p-4 transition-colors last:border-b-0 hover:bg-surface-container-low"
                 >
-                  <p className="text-body-md text-ink">
-                    <span className="font-semibold">
-                      {suggestion.from.name}
-                    </span>{" "}
-                    owes{" "}
-                    <span className="font-semibold">{suggestion.to.name}</span>:{" "}
-                    <span className="font-semibold text-positive-deep bg-primary-pale px-sm py-xxs rounded-full text-body-sm-strong inline-block">
+                  <div className="flex flex-col gap-1">
+                    <p className="font-body-md text-body-md text-on-surface">
+                      <span className="font-medium text-on-surface">
+                        {suggestion.from.name}
+                      </span>{" "}
+                      pays{" "}
+                      <span className="font-medium text-on-surface">
+                        {suggestion.to.name}
+                      </span>
+                    </p>
+                    <p className="font-mono-data font-medium text-secondary">
                       ₹{suggestion.amount.toFixed(2)}
-                    </span>
-                  </p>
+                    </p>
+                  </div>
                   <button
                     type="button"
-                    onClick={() => setInputs((prev) => ({
-                      ...prev,
-                      paid_by: suggestion.from.id,
-                      paid_to: suggestion.to.id,
-                      amount: suggestion.amount.toFixed(2),
-                    }))}
-                    className="cursor-pointer bg-canvas-soft text-ink hover:bg-canvas-soft/80 rounded-xl py-md px-xl text-button-md font-semibold transition-colors"
+                    onClick={() =>
+                      setInputs((prev) => ({
+                        ...prev,
+                        paid_by: suggestion.from.id,
+                        paid_to: suggestion.to.id,
+                        amount: suggestion.amount.toFixed(2),
+                      }))
+                    }
+                    className="rounded-DEFAULT border border-primary px-3 py-1.5 font-label-sm text-label-sm tracking-wide text-primary uppercase transition-colors hover:bg-primary-container/10"
                   >
                     Settle
                   </button>
                 </div>
-              ))}
-            </div>
-          ) : (
-            <div className="w-full rounded-xl border border-canvas-soft bg-canvas p-xl text-center shadow-sm">
-              <p className="text-body-md text-mute font-semibold">
-                All balances are settled!
-              </p>
-            </div>
-          )}
+              ))
+            ) : (
+              <div className="p-6 text-center">
+                <p className="font-body-md text-body-md text-on-surface-variant">
+                  All balances are settled!
+                </p>
+              </div>
+            )}
+          </div>
         </div>
 
-        <div className="space-y-md">
-          <h2 className="text-display-xs text-ink font-semibold">
+        <div className="flex flex-col gap-4">
+          <h2 className="font-headline-md text-headline-md text-on-surface">
             Settlements History
           </h2>
 
@@ -261,38 +269,52 @@ const SettleUp = () => {
             members={group ? group.members : []}
           />
 
-          <div className="bg-canvas border border-canvas-soft rounded-xl overflow-hidden shadow-sm">
+          <div className="overflow-hidden rounded-lg border border-outline-variant bg-surface-container-lowest shadow-sm">
             <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
+              <table className="w-full border-collapse text-left">
                 <thead>
-                  <tr className="bg-canvas-soft border-b border-canvas-soft">
-                    <th className="py-lg px-xl text-caption text-mute font-semibold uppercase tracking-wider">Date</th>
-                    <th className="py-lg px-xl text-caption text-mute font-semibold uppercase tracking-wider">Payer</th>
-                    <th className="py-lg px-xl text-caption text-mute font-semibold uppercase tracking-wider">Payee</th>
-                    <th className="py-lg px-xl text-caption text-mute font-semibold uppercase tracking-wider">Amount</th>
+                  <tr className="border-b border-outline-variant bg-surface-container-low">
+                    <th className="w-24 px-4 py-3 font-label-sm text-label-sm font-semibold tracking-wider text-on-surface-variant uppercase">
+                      Date
+                    </th>
+                    <th className="w-32 px-4 py-3 font-label-sm text-label-sm font-semibold tracking-wider text-on-surface-variant uppercase">
+                      Payer
+                    </th>
+                    <th className="w-32 px-4 py-3 font-label-sm text-label-sm font-semibold tracking-wider text-on-surface-variant uppercase">
+                      Payee
+                    </th>
+                    <th className="w-32 px-4 py-3 text-right font-label-sm text-label-sm font-semibold tracking-wider text-on-surface-variant uppercase">
+                      Amount
+                    </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-canvas-soft">
+                <tbody className="divide-y divide-outline-variant">
                   {filteredSettlements && filteredSettlements.length > 0 ? (
                     filteredSettlements.map((settlement) => (
-                      <tr key={settlement.id} className="hover:bg-canvas-soft/20 transition-colors">
-                        <td className="py-lg px-xl text-body-sm text-ink font-medium whitespace-nowrap">
+                      <tr
+                        key={settlement.id}
+                        className="h-row-height-compact transition-colors hover:bg-surface-container-low/50"
+                      >
+                        <td className="px-4 py-2 font-mono-data text-sm whitespace-nowrap text-on-surface-variant">
                           {formatDateToDisplay(settlement.date)}
                         </td>
-                        <td className="py-lg px-xl text-body-sm text-ink font-semibold">
+                        <td className="px-4 py-2 font-body-md font-medium text-on-surface">
                           {settlement.payer.name}
                         </td>
-                        <td className="py-lg px-xl text-body-sm text-body">
+                        <td className="px-4 py-2 font-body-md font-medium text-on-surface">
                           {settlement.payee.name}
                         </td>
-                        <td className="py-lg px-xl text-body-sm text-ink font-bold">
+                        <td className="px-4 py-2 text-right font-mono-data font-medium text-on-surface">
                           ₹{settlement.amount}
                         </td>
                       </tr>
                     ))
                   ) : (
                     <tr>
-                      <td className="py-xl px-xl text-body-md text-mute text-center" colSpan="4">
+                      <td
+                        className="px-4 py-8 text-center text-body-md text-on-surface-variant"
+                        colSpan="4"
+                      >
                         {settlementsData.settlements.length > 0
                           ? "No settlements match the selected filters"
                           : "No settlements found."}
@@ -306,120 +328,123 @@ const SettleUp = () => {
         </div>
       </div>
 
-      <div className="bg-canvas rounded-xl p-xl shadow-sm border border-canvas-soft w-full h-fit">
-        <h1 className="text-display-xs text-ink font-bold mb-lg">
-          Record Settlement
-        </h1>
-        <form onSubmit={handleFormSubmit} className="space-y-md">
-          <div className="flex flex-col">
-            <label
-              htmlFor="paid_by"
-              className="text-body-sm-strong text-ink mb-xs"
-            >
-              Payer
-            </label>
-            <select
-              id="paid_by"
-              name="paid_by"
-              value={inputs.paid_by}
-              onChange={handleInputChange}
-              required
-              className="bg-canvas text-ink border border-ink text-body-md rounded-md py-md px-lg focus:outline-none focus:ring-2 focus:ring-primary w-full cursor-pointer"
-            >
-              <option value="" disabled>
-                Select Payer
-              </option>
-              {group && group.members && group.members.length > 0 ? (
-                group.members.map((member) => (
-                  <option key={member.id} value={member.id}>
-                    {member.name}
-                  </option>
-                ))
-              ) : (
+      {/* Right Column: Record Settlement Form */}
+      <div className="relative lg:col-span-5">
+        <div className="sticky top-24 w-full rounded-lg border border-outline-variant bg-surface-container-lowest p-6 shadow-sm">
+          <h2 className="mb-6 font-headline-md text-headline-md font-bold text-on-surface">
+            Record Settlement
+          </h2>
+          <form onSubmit={handleFormSubmit} className="flex flex-col gap-4">
+            <div className="flex flex-col">
+              <label
+                htmlFor="paid_by"
+                className="mb-2 font-label-sm text-label-sm tracking-wider text-on-surface-variant uppercase"
+              >
+                Payer
+              </label>
+              <select
+                id="paid_by"
+                name="paid_by"
+                value={inputs.paid_by}
+                onChange={handleInputChange}
+                required
+                className="h-10 w-full cursor-pointer rounded-lg border border-outline-variant bg-surface-container-lowest px-4 font-body-md text-body-md text-on-surface transition-shadow focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
+              >
                 <option value="" disabled>
-                  No members available
+                  Select Payer
                 </option>
-              )}
-            </select>
-          </div>
-
-          <div className="flex flex-col">
-            <label
-              htmlFor="paid_to"
-              className="text-body-sm-strong text-ink mb-xs"
-            >
-              Payee
-            </label>
-            <select
-              id="paid_to"
-              name="paid_to"
-              value={inputs.paid_to}
-              onChange={handleInputChange}
-              required
-              className="bg-canvas text-ink border border-ink text-body-md rounded-md py-md px-lg focus:outline-none focus:ring-2 focus:ring-primary w-full cursor-pointer"
-            >
-              <option value="" disabled>
-                Select Payee
-              </option>
-              {group && group.members && group.members.length > 0 ? (
-                group.members.map((member) => (
-                  <option key={member.id} value={member.id}>
-                    {member.name}
+                {group && group.members && group.members.length > 0 ? (
+                  group.members.map((member) => (
+                    <option key={member.id} value={member.id}>
+                      {member.name}
+                    </option>
+                  ))
+                ) : (
+                  <option value="" disabled>
+                    No members available
                   </option>
-                ))
-              ) : (
+                )}
+              </select>
+            </div>
+
+            <div className="flex flex-col">
+              <label
+                htmlFor="paid_to"
+                className="mb-2 font-label-sm text-label-sm tracking-wider text-on-surface-variant uppercase"
+              >
+                Payee
+              </label>
+              <select
+                id="paid_to"
+                name="paid_to"
+                value={inputs.paid_to}
+                onChange={handleInputChange}
+                required
+                className="h-10 w-full cursor-pointer rounded-lg border border-outline-variant bg-surface-container-lowest px-4 font-body-md text-body-md text-on-surface transition-shadow focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
+              >
                 <option value="" disabled>
-                  No members available
+                  Select Payee
                 </option>
-              )}
-            </select>
-          </div>
+                {group && group.members && group.members.length > 0 ? (
+                  group.members.map((member) => (
+                    <option key={member.id} value={member.id}>
+                      {member.name}
+                    </option>
+                  ))
+                ) : (
+                  <option value="" disabled>
+                    No members available
+                  </option>
+                )}
+              </select>
+            </div>
 
-          <div className="flex flex-col">
-            <label
-              htmlFor="amount"
-              className="text-body-sm-strong text-ink mb-xs"
+            <div className="flex flex-col">
+              <label
+                htmlFor="amount"
+                className="mb-2 font-label-sm text-label-sm tracking-wider text-on-surface-variant uppercase"
+              >
+                Amount
+              </label>
+              <input
+                type="number"
+                id="amount"
+                name="amount"
+                value={inputs.amount}
+                onChange={handleInputChange}
+                placeholder="Enter amount"
+                step="0.01"
+                required
+                className="h-10 w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 font-body-md text-body-md text-on-surface transition-shadow focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
+              />
+            </div>
+
+            <div className="flex flex-col">
+              <label
+                htmlFor="date"
+                className="mb-2 font-label-sm text-label-sm tracking-wider text-on-surface-variant uppercase"
+              >
+                Date
+              </label>
+              <input
+                type="date"
+                id="date"
+                name="date"
+                value={inputs.date}
+                onChange={handleInputChange}
+                required
+                className="h-10 w-full cursor-pointer rounded-lg border border-outline-variant bg-surface-container-lowest px-4 font-body-md text-body-md text-on-surface transition-shadow focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="mt-2 flex h-10 w-full items-center justify-center rounded-lg bg-primary px-4 font-label-sm text-label-sm tracking-wide text-on-primary uppercase shadow-sm transition-colors hover:bg-primary/90"
             >
-              Amount
-            </label>
-            <input
-              type="number"
-              id="amount"
-              name="amount"
-              value={inputs.amount}
-              onChange={handleInputChange}
-              placeholder="Enter amount"
-              step="0.01"
-              required
-              className="bg-canvas text-ink border border-ink text-body-md rounded-md py-md px-lg focus:outline-none focus:ring-2 focus:ring-primary w-full"
-            />
-          </div>
-
-          <div className="flex flex-col">
-            <label
-              htmlFor="date"
-              className="text-body-sm-strong text-ink mb-xs"
-            >
-              Date
-            </label>
-            <input
-              type="date"
-              id="date"
-              name="date"
-              value={inputs.date}
-              onChange={handleInputChange}
-              required
-              className="bg-canvas text-ink border border-ink text-body-md rounded-md py-md px-lg focus:outline-none focus:ring-2 focus:ring-primary w-full cursor-pointer"
-            />
-          </div>
-
-          <button
-            type="submit"
-            className="cursor-pointer bg-primary text-on-primary hover:bg-primary-active rounded-xl py-md px-xl text-button-md font-semibold transition-colors mt-lg w-full shadow-sm"
-          >
-            Record Payment
-          </button>
-        </form>
+              Record Payment
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );

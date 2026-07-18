@@ -1,5 +1,4 @@
-import React from "react";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   getExpenses,
@@ -34,19 +33,21 @@ const Dashboard = () => {
   const formatDateToDisplay = (dateStr) => {
     const date = new Date(dateStr);
     const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const year = date.getFullYear();
-    return `${day}-${month}-${year}`;
+    const month = date.toLocaleString("en-US", { month: "short" });
+    // const year = date.getFullYear();
+    return `${month} ${day}`;
   };
 
   const setSplitTypeColor = (splitType) => {
     switch (splitType) {
       case "equal":
-        return "bg-canvas-soft text-body px-md py-xs rounded-full text-caption font-semibold";
+        return "bg-primary";
       case "exact":
-        return "bg-primary-pale text-positive-deep px-md py-xs rounded-full text-caption font-semibold";
+        return "bg-secondary";
+      case "percentage":
+        return "bg-secondary-fixed-dim";
       default:
-        return "bg-accent-orange/20 text-ink px-md py-xs rounded-full text-caption font-semibold";
+        return "bg-outline-variant";
     }
   };
 
@@ -163,320 +164,327 @@ const Dashboard = () => {
   }, [selectedGroupId]);
 
   return (
-    <div className="space-y-xl">
-      <div className="flex flex-col gap-md border-b border-canvas-soft pb-lg md:flex-row md:items-center md:justify-between">
+    <div className="flex flex-col gap-8">
+      {/* Group Selector Header */}
+      <div className="flex flex-col gap-4 border-b border-outline-variant pb-6 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="mb-xs text-display-sm font-bold text-ink">
+          <h1 className="mb-2 font-headline-lg text-headline-lg font-bold text-on-surface">
             Dashboard
           </h1>
-          <div className="flex flex-wrap gap-md text-body-sm text-mute">
+          <div className="flex flex-wrap gap-2 font-label-sm text-label-sm text-on-surface-variant">
             <span>{totalMembers} Members</span>
-            <span className="font-bold text-canvas-soft">•</span>
+            <span className="font-bold text-outline-variant">•</span>
             <span>₹{totalExpenses.toFixed(2)} Expenses</span>
-            <span className="font-bold text-canvas-soft">•</span>
+            <span className="font-bold text-outline-variant">•</span>
             <span>{suggestions.length} Pending Settlements</span>
           </div>
         </div>
-      </div>
-
-      <div className="w-full max-w-md rounded-xl border border-canvas-soft bg-canvas p-xl shadow-sm">
-        <label
-          htmlFor="groupSelect"
-          className="mb-sm block text-body-sm-strong text-ink"
-        >
-          Select Group:
-        </label>
-        <select
-          id="groupSelect"
-          value={selectedGroupId}
-          onChange={handleGroupChange}
-          className="w-full cursor-pointer rounded-md border border-ink bg-canvas px-lg py-md text-body-md text-ink focus:ring-2 focus:ring-primary focus:outline-none"
-        >
-          <option value="" disabled>
-            Select a group
-          </option>
-          {Array.isArray(groups) && groups.length > 0 ? (
-            groups.map((group) => (
-              <option key={group.id} value={group.id}>
-                {group.name}
-              </option>
-            ))
-          ) : (
-            <option disabled>No groups available</option>
-          )}
-        </select>
-      </div>
-
-      {group && group.members && group.members.length > 0 ? (
-        <div className="grid grid-cols-1 gap-lg sm:grid-cols-2 lg:grid-cols-4">
-          {balances.map((bal) => {
-            const amount = Number(bal.balance);
-            const isOwed = amount > 0;
-            const isSettled = amount === 0;
-            const absAmount = Math.abs(amount);
-
-            return (
-              <div
-                key={bal.member_id}
-                className="flex flex-col justify-between rounded-xl border border-canvas-soft bg-canvas p-xl shadow-sm"
-              >
-                <div>
-                  <div className="mb-sm text-body-sm-strong text-mute">
-                    {bal.name}
-                  </div>
-                  <div className="mb-md text-display-xs font-bold text-ink">
-                    ₹{absAmount.toFixed(2)}
-                  </div>
-                </div>
-                <div>
-                  <span
-                    className={`inline-block rounded-full px-md py-xs text-body-sm-strong ${
-                      isSettled
-                        ? "bg-canvas-soft text-mute"
-                        : isOwed
-                          ? "bg-primary-pale text-positive-deep"
-                          : "bg-negative-pale text-negative-deep"
-                    }`}
-                  >
-                    {isSettled ? "SETTLED" : isOwed ? "IS OWED" : "OWES"}
-                  </span>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      ) : (
-        <div className="rounded-xl border border-canvas-soft bg-canvas p-xl text-center shadow-sm">
-          <p className="text-body-sm-strong text-mute">
-            No members in this group.
-          </p>
-        </div>
-      )}
-
-      <div className="space-y-md">
-        <h2 className="text-display-xs font-semibold text-ink">
-          Simplified Settlements
-        </h2>
-        {suggestions && suggestions.length > 0 ? (
-          <div className="w-full max-w-xl space-y-md">
-            {suggestions.map((suggestion, index) => (
-              <div
-                key={index}
-                className="flex items-center justify-between rounded-xl border border-canvas-soft bg-canvas p-lg shadow-sm"
-              >
-                <p className="text-body-md text-ink">
-                  <span className="font-semibold">{suggestion.from.name}</span>{" "}
-                  should pay{" "}
-                  <span className="font-semibold">{suggestion.to.name}</span>{" "}
-                  <span className="rounded-full bg-primary-pale px-sm py-xxs text-body-sm-strong font-semibold text-positive-deep">
-                    ₹{suggestion.amount.toFixed(2)}
-                  </span>
-                </p>
-                <button
-                  type="button"
-                  onClick={() =>
-                    navigate(`/settle-up`, {
-                      state: {
-                        paid_by: suggestion.from.id,
-                        paid_to: suggestion.to.id,
-                        amount: suggestion.amount.toFixed(2),
-                      },
-                    })
-                  }
-                  className="cursor-pointer rounded-xl bg-canvas-soft px-xl py-md text-button-md font-semibold text-ink transition-colors hover:bg-canvas-soft/80"
-                >
-                  Settle
-                </button>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="w-full max-w-xl rounded-xl border border-canvas-soft bg-canvas p-xl text-center shadow-sm">
-            <p className="text-body-md font-semibold text-mute">
-              All balances are settled!
-            </p>
-          </div>
-        )}
-      </div>
-
-      <div className="space-y-md">
-        <div className="flex flex-col gap-md md:flex-row md:items-center md:justify-between">
-          <h2 className="text-display-xs font-semibold text-ink">
-            {group ? group.name : "Select a group to view expenses"}
-          </h2>
-
-          <button
-            type="button"
-            onClick={() => navigate(`/add-expense/${selectedGroupId}`)}
-            className="cursor-pointer self-start rounded-xl bg-primary px-xl py-md text-button-md font-semibold text-on-primary shadow-sm transition-colors hover:bg-primary-active md:self-auto"
+        <div className="flex items-center gap-4">
+          <select
+            value={selectedGroupId}
+            onChange={handleGroupChange}
+            className="h-10 cursor-pointer rounded-lg border border-outline-variant bg-surface-container-lowest px-4 font-body-md text-body-md text-on-surface focus:ring-2 focus:ring-primary/20 focus:outline-none"
           >
+            <option value="" disabled>
+              Select a group
+            </option>
+            {Array.isArray(groups) && groups.length > 0 ? (
+              groups.map((g) => (
+                <option key={g.id} value={g.id}>
+                  {g.name}
+                </option>
+              ))
+            ) : (
+              <option disabled>No groups available</option>
+            )}
+          </select>
+          <button
+            onClick={() => navigate(`/add-expense/${selectedGroupId}`)}
+            className="flex h-10 items-center justify-center gap-2 rounded-lg bg-primary px-4 font-label-sm text-label-sm tracking-wide text-on-primary uppercase shadow-sm transition-colors hover:bg-primary/90"
+          >
+            <span className="material-symbols-outlined text-[18px]">add</span>{" "}
             Add Expense
           </button>
         </div>
+      </div>
 
-        <ExpenseFilters filterProps={filterProps} members={group ? group.members : []} />
+      <div className="mb-8 grid grid-cols-1 gap-gutter lg:grid-cols-3">
+        {/* Balances */}
+        <div className="flex flex-col gap-4 lg:col-span-2">
+          <h2 className="font-headline-md text-headline-md text-on-surface">
+            Overview
+          </h2>
+          {group && group.members && group.members.length > 0 ? (
+            <div className="grid grid-cols-1 gap-gutter sm:grid-cols-3">
+              {balances.map((bal) => {
+                const amount = Number(bal.balance);
+                const isOwed = amount > 0;
+                const isSettled = amount === 0;
+                const absAmount = Math.abs(amount);
 
-        <div className="overflow-hidden rounded-xl border border-canvas-soft bg-canvas shadow-sm">
+                let borderColor = isSettled
+                  ? "border-outline-variant"
+                  : isOwed
+                    ? "border-secondary"
+                    : "border-error";
+                let accentColor = isSettled
+                  ? "bg-outline-variant/10"
+                  : isOwed
+                    ? "bg-secondary/10"
+                    : "bg-error/10";
+                let textColor = isSettled
+                  ? "text-outline"
+                  : isOwed
+                    ? "text-secondary"
+                    : "text-error";
+                let statusText = isSettled
+                  ? "Settled"
+                  : isOwed
+                    ? "Is owed"
+                    : "Owe";
+
+                return (
+                  <div
+                    key={bal.member_id}
+                    className={`border bg-surface-container-lowest ${borderColor} group relative overflow-hidden rounded-lg p-4 shadow-sm transition-shadow hover:shadow-md`}
+                  >
+                    <div
+                      className={`absolute -top-4 -right-4 h-16 w-16 ${accentColor} rounded-full transition-transform duration-500 group-hover:scale-150`}
+                    ></div>
+                    <p className="mb-1 font-label-sm text-label-sm tracking-wider text-on-surface-variant uppercase">
+                      {bal.name}
+                    </p>
+                    <p
+                      className={`font-body-md text-body-md ${textColor} mb-2`}
+                    >
+                      {statusText}
+                    </p>
+                    <p
+                      className={`font-headline-lg text-headline-lg ${textColor}`}
+                    >
+                      ₹{absAmount.toFixed(2)}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="rounded-lg border border-outline-variant bg-surface-container-lowest p-6 text-center shadow-sm">
+              <p className="font-label-sm text-label-sm text-on-surface-variant">
+                No members in this group.
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Simplified Settlements */}
+        <div className="flex flex-col gap-4">
+          <h2 className="font-headline-md text-headline-md text-on-surface">
+            Simplified Settlements
+          </h2>
+          <div className="flex flex-col overflow-hidden rounded-lg border border-outline-variant bg-surface-container-lowest shadow-sm">
+            {suggestions && suggestions.length > 0 ? (
+              suggestions.map((suggestion, index) => (
+                <div
+                  key={index}
+                  className="flex items-center justify-between border-b border-outline-variant p-4 transition-colors last:border-b-0 hover:bg-surface-container-low"
+                >
+                  <div className="flex flex-col gap-1">
+                    <p className="font-body-md text-body-md text-on-surface">
+                      <span className="font-medium text-on-surface">
+                        {suggestion.from.name}
+                      </span>{" "}
+                      pays{" "}
+                      <span className="font-medium text-on-surface">
+                        {suggestion.to.name}
+                      </span>
+                    </p>
+                    <p className="font-mono-data font-medium text-secondary">
+                      ₹{suggestion.amount.toFixed(2)}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() =>
+                      navigate(`/settle-up`, {
+                        state: {
+                          paid_by: suggestion.from.id,
+                          paid_to: suggestion.to.id,
+                          amount: suggestion.amount.toFixed(2),
+                        },
+                      })
+                    }
+                    className="rounded-DEFAULT border border-primary px-3 py-1.5 font-label-sm text-label-sm tracking-wide text-primary uppercase transition-colors hover:bg-primary-container/10"
+                  >
+                    Settle
+                  </button>
+                </div>
+              ))
+            ) : (
+              <div className="p-6 text-center">
+                <p className="font-body-md text-body-md text-on-surface-variant">
+                  All balances are settled!
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-4">
+        <h2 className="font-headline-md text-headline-md text-on-surface">
+          {group ? group.name + " Expenses" : "Select a group to view expenses"}
+        </h2>
+
+        <ExpenseFilters
+          filterProps={filterProps}
+          members={group ? group.members : []}
+        />
+
+        <div className="overflow-hidden rounded-lg border border-outline-variant bg-surface-container-lowest shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full border-collapse text-left">
               <thead>
-                <tr className="border-b border-canvas-soft bg-canvas-soft">
-                  <th className="px-xl py-lg text-caption font-semibold tracking-wider text-mute uppercase">
+                <tr className="border-b border-outline-variant bg-surface-container-low">
+                  <th className="w-24 px-4 py-3 font-label-sm text-label-sm font-semibold tracking-wider text-on-surface-variant uppercase">
                     Date
                   </th>
-                  <th className="px-xl py-lg text-caption font-semibold tracking-wider text-mute uppercase">
+                  <th className="px-4 py-3 font-label-sm text-label-sm font-semibold tracking-wider text-on-surface-variant uppercase">
                     Description
                   </th>
-                  <th className="px-xl py-lg text-caption font-semibold tracking-wider text-mute uppercase">
+                  <th className="w-32 px-4 py-3 font-label-sm text-label-sm font-semibold tracking-wider text-on-surface-variant uppercase">
                     Paid By
                   </th>
-                  <th className="px-xl py-lg text-caption font-semibold tracking-wider text-mute uppercase">
+                  <th className="w-32 px-4 py-3 text-right font-label-sm text-label-sm font-semibold tracking-wider text-on-surface-variant uppercase">
                     Amount
                   </th>
-                  <th className="px-xl py-lg text-caption font-semibold tracking-wider text-mute uppercase">
+                  <th className="w-40 px-4 py-3 font-label-sm text-label-sm font-semibold tracking-wider text-on-surface-variant uppercase">
                     Split Type
                   </th>
-                  <th className="px-xl py-lg text-caption font-semibold tracking-wider text-mute uppercase">
-                    Splits
-                  </th>
+                  <th className="w-12 px-4 py-3"></th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-canvas-soft">
+              <tbody className="divide-y divide-outline-variant">
                 {filteredExpenses && filteredExpenses.length > 0 ? (
                   filteredExpenses.map((expense) => (
                     <React.Fragment key={expense.id}>
                       <tr
                         onClick={() => toggleExpenseExpand(expense.id)}
-                        className="cursor-pointer transition-colors select-none hover:bg-canvas-soft/20"
+                        className="group h-row-height-compact cursor-pointer transition-colors select-none hover:bg-surface-container-low/50"
                       >
-                        <td className="px-xl py-lg text-body-sm font-medium whitespace-nowrap text-ink">
+                        <td className="px-4 py-2 font-mono-data text-sm text-on-surface-variant">
                           {formatDateToDisplay(expense.date)}
                         </td>
-                        <td className="px-xl py-lg text-body-sm font-semibold text-ink">
+                        <td className="px-4 py-2 font-body-md font-medium text-on-surface">
                           {expense.description}
                         </td>
-                        <td className="px-xl py-lg text-body-sm text-body">
-                          {expense.payer.name}
+                        <td className="px-4 py-2">
+                          <div className="flex items-center gap-2">
+                            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-secondary-container font-label-sm text-[10px] text-on-secondary-container">
+                              {expense.payer.name.substring(0, 2).toUpperCase()}
+                            </div>
+                            <span className="font-body-md text-on-surface">
+                              {expense.payer.name}
+                            </span>
+                          </div>
                         </td>
-                        <td className="px-xl py-lg text-body-sm font-bold text-ink">
+                        <td className="px-4 py-2 text-right font-mono-data font-medium text-on-surface">
                           ₹{expense.amount}
                         </td>
-                        <td className="px-xl py-lg text-body-sm">
-                          <span
-                            className={`${setSplitTypeColor(expense.splitType)}`}
-                          >
-                            {expense.splitType}
-                          </span>
+                        <td className="px-4 py-2">
+                          <div className="bg-surface-variant inline-flex items-center gap-1.5 rounded-DEFAULT border border-outline-variant px-2 py-0.5 text-on-surface-variant">
+                            <span
+                              className={`h-2 w-2 rounded-full ${setSplitTypeColor(expense.splitType)}`}
+                            ></span>
+                            <span className="font-label-sm text-[11px] tracking-wide uppercase">
+                              {expense.splitType}
+                            </span>
+                            <span className="ml-1 text-[10px] text-outline">
+                              ({expense.splits ? expense.splits.length : 0}{" "}
+                              shares)
+                            </span>
+                          </div>
                         </td>
-                        <td className="px-xl py-lg text-body-sm text-mute">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleExpenseExpand(expense.id);
-                            }}
-                            className="flex cursor-pointer items-center gap-xs rounded-full bg-canvas-soft px-md py-xs text-caption font-semibold text-body hover:bg-canvas-soft/80"
-                          >
-                            <span>
-                              {expense.splits ? expense.splits.length : 0}{" "}
-                              shares
-                            </span>
-                            <span className="text-[10px] text-mute">
-                              {expandedExpenseIds[expense.id] ? "▲" : "▼"}
-                            </span>
-                          </button>
+                        <td className="px-4 py-2 text-right">
+                          <span className="material-symbols-outlined text-[16px] text-on-surface-variant">
+                            {expandedExpenseIds[expense.id]
+                              ? "expand_less"
+                              : "expand_more"}
+                          </span>
                         </td>
                       </tr>
                       {expandedExpenseIds[expense.id] && (
-                        <tr className="bg-canvas-soft/10">
+                        <tr className="bg-surface-container-low/30">
                           <td
                             colSpan="6"
-                            className="border-t border-b border-canvas-soft p-xl"
+                            className="border-t border-outline-variant p-6"
                           >
-                            <div className="grid max-w-4xl grid-cols-1 gap-lg md:grid-cols-2">
-                              <div className="space-y-sm">
-                                <h4 className="text-body-sm-strong tracking-wider text-mute uppercase">
+                            <div className="mx-auto grid max-w-4xl grid-cols-1 gap-6 md:grid-cols-2">
+                              {/* Summary left */}
+                              <div className="space-y-2">
+                                <h4 className="font-label-sm text-label-sm tracking-wider text-on-surface-variant uppercase">
                                   Payment Summary
                                 </h4>
-                                <div className="space-y-xs rounded-xl border border-canvas-soft bg-canvas p-md shadow-sm">
-                                  <div className="flex items-center gap-sm">
-                                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary-pale text-caption font-bold text-positive-deep">
-                                      {expense.payer.name
-                                        .substring(0, 2)
-                                        .toUpperCase()}
+                                <div className="space-y-3 rounded-lg border border-outline-variant bg-surface-container-lowest p-4 shadow-sm">
+                                  <p className="font-body-md text-on-surface">
+                                    <span className="font-semibold text-primary">
+                                      {expense.payer.name}
+                                    </span>{" "}
+                                    paid{" "}
+                                    <span className="font-mono-data font-semibold">
+                                      ₹{expense.amount}
                                     </span>
-                                    <p className="text-body-md text-ink">
-                                      <span className="font-semibold">
-                                        {expense.payer.name}
-                                      </span>{" "}
-                                      paid{" "}
-                                      <span className="font-bold">
-                                        ₹{expense.amount}
-                                      </span>
-                                    </p>
-                                  </div>
-                                  <div className="flex items-center justify-between border-t border-canvas-soft pt-xs text-caption text-mute">
+                                  </p>
+                                  <div className="flex items-center justify-between border-t border-outline-variant pt-2 font-label-sm text-label-sm text-on-surface-variant">
                                     <span>
                                       Split Type:{" "}
-                                      <span className="rounded-full bg-canvas-soft px-sm py-xxs text-[10px] font-semibold text-ink uppercase">
+                                      <span className="bg-surface-variant ml-1 rounded-md px-2 py-0.5 uppercase">
                                         {expense.splitType}
                                       </span>
                                     </span>
                                     <span>
-                                      Date: {formatDateToDisplay(expense.date)}
+                                      {formatDateToDisplay(expense.date)}
                                     </span>
                                   </div>
                                 </div>
                               </div>
-                              <div className="space-y-sm">
-                                <h4 className="text-body-sm-strong tracking-wider text-mute uppercase">
+                              {/* Shares right */}
+                              <div className="space-y-2">
+                                <h4 className="font-label-sm text-label-sm tracking-wider text-on-surface-variant uppercase">
                                   Individual Shares
                                 </h4>
-                                <div className="space-y-sm rounded-xl border border-canvas-soft bg-canvas p-md shadow-sm">
+                                <div className="rounded-lg border border-outline-variant bg-surface-container-lowest p-4 shadow-sm">
                                   {expense.splits &&
                                   expense.splits.length > 0 ? (
-                                    <div className="divide-y divide-canvas-soft">
+                                    <div className="divide-y divide-outline-variant">
                                       {expense.splits.map((split) => {
                                         const isPayer =
                                           split.memberId === expense.paidBy;
-                                        const amountStr = `₹${parseFloat(split.amountOwed).toFixed(2)}`;
                                         return (
                                           <div
                                             key={split.id}
-                                            className="flex items-center justify-between py-xs first:pt-0 last:pb-0"
+                                            className="flex items-center justify-between py-2 first:pt-0 last:pb-0"
                                           >
-                                            <div className="flex items-center gap-xs">
-                                              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-canvas-soft text-[10px] font-bold text-body">
+                                            <div className="flex items-center gap-2">
+                                              <div className="bg-surface-variant flex h-5 w-5 items-center justify-center rounded-full font-label-sm text-[9px] text-on-surface-variant">
                                                 {split.member.name
                                                   .substring(0, 2)
                                                   .toUpperCase()}
-                                              </span>
-                                              <span className="text-body-sm font-medium text-ink">
-                                                {split.member.name}{" "}
-                                                {isPayer && (
-                                                  <span className="text-[10px] font-normal text-mute">
-                                                    (Payer)
-                                                  </span>
-                                                )}
+                                              </div>
+                                              <span className="font-body-md text-body-md text-on-surface">
+                                                {split.member.name}
                                               </span>
                                             </div>
-                                            <div className="flex items-center gap-xs">
-                                              {isPayer ? (
-                                                <span className="mr-xs text-caption text-mute italic">
-                                                  own share
-                                                </span>
-                                              ) : (
-                                                <span className="mr-xs text-[10px] text-mute">
-                                                  owes {expense.payer.name}
-                                                </span>
-                                              )}
+                                            <div className="flex items-center gap-2">
+                                              <span className="font-label-sm text-label-sm text-on-surface-variant">
+                                                {isPayer ? "own share" : "owes"}
+                                              </span>
                                               <span
-                                                className={
-                                                  isPayer
-                                                    ? "rounded-full bg-canvas-soft px-md py-xs text-caption font-semibold text-body"
-                                                    : "rounded-full bg-primary-pale px-md py-xs text-caption font-semibold text-positive-deep"
-                                                }
+                                                className={`rounded-DEFAULT px-2 py-0.5 font-mono-data font-medium ${isPayer ? "bg-surface-variant text-on-surface-variant" : "border border-secondary/20 bg-secondary/10 text-secondary"}`}
                                               >
-                                                {amountStr}
+                                                ₹
+                                                {parseFloat(
+                                                  split.amountOwed,
+                                                ).toFixed(2)}
                                               </span>
                                             </div>
                                           </div>
@@ -484,8 +492,8 @@ const Dashboard = () => {
                                       })}
                                     </div>
                                   ) : (
-                                    <p className="text-body-sm text-mute">
-                                      No split details available
+                                    <p className="text-body-md text-on-surface-variant">
+                                      No split details
                                     </p>
                                   )}
                                 </div>
@@ -500,11 +508,11 @@ const Dashboard = () => {
                   <tr>
                     <td
                       colSpan="6"
-                      className="px-xl py-xl text-center text-body-md text-mute"
+                      className="py-8 text-center text-body-md text-on-surface-variant"
                     >
                       {selectedGroupId
                         ? expenses.length > 0
-                          ? "No expenses match the selected filters"
+                          ? "No matching expenses"
                           : "No expenses for this group"
                         : "Select a group to view expenses"}
                     </td>

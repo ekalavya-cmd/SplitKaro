@@ -1,5 +1,4 @@
-import React from "react";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   getExpenses,
@@ -30,19 +29,21 @@ const Expenses = () => {
   const formatDateToDisplay = (dateStr) => {
     const date = new Date(dateStr);
     const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const year = date.getFullYear();
-    return `${day}-${month}-${year}`;
+    const month = date.toLocaleString("en-US", { month: "short" });
+    // const year = date.getFullYear();
+    return `${month} ${day}`;
   };
 
   const setSplitTypeColor = (splitType) => {
     switch (splitType) {
       case "equal":
-        return "bg-canvas-soft text-body px-md py-xs rounded-full text-caption font-semibold";
+        return "bg-primary";
       case "exact":
-        return "bg-primary-pale text-positive-deep px-md py-xs rounded-full text-caption font-semibold";
+        return "bg-secondary";
+      case "percentage":
+        return "bg-secondary-fixed-dim";
       default:
-        return "bg-accent-orange/20 text-ink px-md py-xs rounded-full text-caption font-semibold";
+        return "bg-outline-variant";
     }
   };
 
@@ -129,17 +130,19 @@ const Expenses = () => {
   };
 
   return (
-    <div className="space-y-xl">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-md border-b border-canvas-soft pb-lg">
+    <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-4 border-b border-outline-variant pb-6 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-display-sm text-ink font-bold">Expenses</h1>
+          <h1 className="mb-2 font-headline-lg text-headline-lg font-bold text-on-surface">
+            Expenses
+          </h1>
         </div>
       </div>
 
-      <div className="bg-canvas border border-canvas-soft rounded-xl p-xl shadow-sm max-w-md w-full">
+      <div className="w-full max-w-md rounded-lg border border-outline-variant bg-surface-container-lowest p-6 shadow-sm">
         <label
           htmlFor="groupSelect"
-          className="text-body-sm-strong text-ink block mb-sm"
+          className="mb-2 block font-label-sm text-label-sm text-on-surface-variant"
         >
           Select Group:
         </label>
@@ -147,7 +150,7 @@ const Expenses = () => {
           id="groupSelect"
           value={selectedGroupId}
           onChange={handleGroupChange}
-          className="w-full bg-canvas text-ink border border-ink text-body-md rounded-md py-md px-lg focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
+          className="h-10 w-full cursor-pointer rounded-lg border border-outline-variant bg-surface-container-lowest px-4 font-body-md text-body-md text-on-surface transition-shadow focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
         >
           <option value="" disabled>
             Select a group
@@ -164,79 +167,107 @@ const Expenses = () => {
         </select>
       </div>
 
-      <div className="space-y-md">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-md">
-          <h2 className="text-display-xs text-ink font-semibold">
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <h2 className="font-headline-md text-headline-md text-on-surface">
             {group ? group.name : "Select a group to view expenses"}
           </h2>
 
           <button
             type="button"
             onClick={() => navigate(`/add-expense/${selectedGroupId}`)}
-            className="cursor-pointer bg-primary text-on-primary hover:bg-primary-active rounded-xl py-md px-xl text-button-md font-semibold transition-colors self-start md:self-auto shadow-sm"
+            className="flex h-10 items-center gap-2 self-start rounded-lg bg-primary px-4 font-label-sm text-label-sm tracking-wide text-on-primary uppercase shadow-sm transition-colors hover:bg-primary/90 md:self-auto"
           >
+            <span className="material-symbols-outlined text-[18px]">add</span>{" "}
             Add Expense
           </button>
         </div>
 
-        <ExpenseFilters filterProps={filterProps} members={group ? group.members : []} />
+        <ExpenseFilters
+          filterProps={filterProps}
+          members={group ? group.members : []}
+        />
 
-        <div className="bg-canvas border border-canvas-soft rounded-xl overflow-hidden shadow-sm">
+        <div className="overflow-hidden rounded-lg border border-outline-variant bg-surface-container-lowest shadow-sm">
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+            <table className="w-full border-collapse text-left">
               <thead>
-                <tr className="bg-canvas-soft border-b border-canvas-soft">
-                  <th className="py-lg px-xl text-caption text-mute font-semibold uppercase tracking-wider">Date</th>
-                  <th className="py-lg px-xl text-caption text-mute font-semibold uppercase tracking-wider">Description</th>
-                  <th className="py-lg px-xl text-caption text-mute font-semibold uppercase tracking-wider">Paid By</th>
-                  <th className="py-lg px-xl text-caption text-mute font-semibold uppercase tracking-wider">Amount</th>
-                  <th className="py-lg px-xl text-caption text-mute font-semibold uppercase tracking-wider">Split Type</th>
-                  <th className="py-lg px-xl text-caption text-mute font-semibold uppercase tracking-wider">Splits</th>
-                  <th className="py-lg px-xl text-caption text-mute font-semibold uppercase tracking-wider">Action</th>
+                <tr className="border-b border-outline-variant bg-surface-container-low">
+                  <th className="w-24 px-4 py-3 font-label-sm text-label-sm font-semibold tracking-wider text-on-surface-variant uppercase">
+                    Date
+                  </th>
+                  <th className="px-4 py-3 font-label-sm text-label-sm font-semibold tracking-wider text-on-surface-variant uppercase">
+                    Description
+                  </th>
+                  <th className="w-32 px-4 py-3 font-label-sm text-label-sm font-semibold tracking-wider text-on-surface-variant uppercase">
+                    Paid By
+                  </th>
+                  <th className="w-32 px-4 py-3 text-right font-label-sm text-label-sm font-semibold tracking-wider text-on-surface-variant uppercase">
+                    Amount
+                  </th>
+                  <th className="w-40 px-4 py-3 font-label-sm text-label-sm font-semibold tracking-wider text-on-surface-variant uppercase">
+                    Split Type
+                  </th>
+                  <th className="w-12 px-4 py-3 text-center"></th>
+                  <th className="w-24 px-4 py-3 text-right font-label-sm text-label-sm font-semibold tracking-wider text-on-surface-variant uppercase">
+                    Action
+                  </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-canvas-soft">
+              <tbody className="divide-y divide-outline-variant">
                 {filteredExpenses && filteredExpenses.length > 0 ? (
                   filteredExpenses.map((expense) => (
                     <React.Fragment key={expense.id}>
-                      <tr 
+                      <tr
                         onClick={() => toggleExpenseExpand(expense.id)}
-                        className="hover:bg-canvas-soft/20 transition-colors cursor-pointer select-none"
+                        className="group h-row-height-compact cursor-pointer transition-colors select-none hover:bg-surface-container-low/50"
                       >
-                        <td className="py-lg px-xl text-body-sm text-ink font-medium whitespace-nowrap">
+                        <td className="px-4 py-2 font-mono-data text-sm whitespace-nowrap text-on-surface-variant">
                           {formatDateToDisplay(expense.date)}
                         </td>
-                        <td className="py-lg px-xl text-body-sm text-ink font-semibold">
+                        <td className="px-4 py-2 font-body-md font-medium text-on-surface">
                           {expense.description}
                         </td>
-                        <td className="py-lg px-xl text-body-sm text-body">
-                          {expense.payer.name}
+                        <td className="px-4 py-2">
+                          <div className="flex items-center gap-2">
+                            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-secondary-container font-label-sm text-[10px] text-on-secondary-container">
+                              {expense.payer.name.substring(0, 2).toUpperCase()}
+                            </div>
+                            <span className="font-body-md text-on-surface">
+                              {expense.payer.name}
+                            </span>
+                          </div>
                         </td>
-                        <td className="py-lg px-xl text-body-sm text-ink font-bold">
+                        <td className="px-4 py-2 text-right font-mono-data font-medium text-on-surface">
                           ₹{expense.amount}
                         </td>
-                        <td className="py-lg px-xl text-body-sm">
-                          <span className={`${setSplitTypeColor(expense.splitType)}`}>
-                            {expense.splitType}
+                        <td className="px-4 py-2">
+                          <div className="bg-surface-variant inline-flex items-center gap-1.5 rounded-DEFAULT border border-outline-variant px-2 py-0.5 text-on-surface-variant">
+                            <span
+                              className={`h-2 w-2 rounded-full ${setSplitTypeColor(expense.splitType)}`}
+                            ></span>
+                            <span className="font-label-sm text-[11px] tracking-wide uppercase">
+                              {expense.splitType}
+                            </span>
+                            <span className="ml-1 text-[10px] text-outline">
+                              ({expense.splits ? expense.splits.length : 0}{" "}
+                              shares)
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-2 text-center">
+                          <span className="material-symbols-outlined text-[16px] text-on-surface-variant">
+                            {expandedExpenseIds[expense.id]
+                              ? "expand_less"
+                              : "expand_more"}
                           </span>
                         </td>
-                        <td className="py-lg px-xl text-body-sm text-mute">
-                          <button 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleExpenseExpand(expense.id);
-                            }}
-                            className="cursor-pointer bg-canvas-soft text-body hover:bg-canvas-soft/80 px-md py-xs rounded-full text-caption font-semibold flex items-center gap-xs"
-                          >
-                            <span>{expense.splits ? expense.splits.length : 0} shares</span>
-                            <span className="text-[10px] text-mute">
-                              {expandedExpenseIds[expense.id] ? "▲" : "▼"}
-                            </span>
-                          </button>
-                        </td>
-                        <td className="py-lg px-xl text-body-sm" onClick={(e) => e.stopPropagation()}>
+                        <td
+                          className="px-4 py-2 text-right"
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           <button
-                            className="cursor-pointer text-negative hover:underline text-body-sm-strong transition-colors"
+                            className="cursor-pointer rounded-DEFAULT border border-error/50 px-3 py-1 font-label-sm text-label-sm tracking-wide text-error uppercase transition-colors hover:bg-error/10"
                             onClick={() => {
                               if (
                                 window.confirm(
@@ -252,52 +283,78 @@ const Expenses = () => {
                         </td>
                       </tr>
                       {expandedExpenseIds[expense.id] && (
-                        <tr className="bg-canvas-soft/10">
-                          <td colSpan="7" className="p-xl border-t border-b border-canvas-soft">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-lg max-w-4xl">
-                              <div className="space-y-sm">
-                                <h4 className="text-body-sm-strong text-mute uppercase tracking-wider">Payment Summary</h4>
-                                <div className="bg-canvas border border-canvas-soft rounded-xl p-md space-y-xs shadow-sm">
-                                  <div className="flex items-center gap-sm">
-                                    <span className="w-6 h-6 rounded-full bg-primary-pale text-positive-deep flex items-center justify-center font-bold text-caption">
-                                      {expense.payer.name.substring(0, 2).toUpperCase()}
+                        <tr className="bg-surface-container-low/30">
+                          <td
+                            colSpan="7"
+                            className="border-t border-outline-variant p-6"
+                          >
+                            <div className="mx-auto grid max-w-4xl grid-cols-1 gap-6 md:grid-cols-2">
+                              {/* Summary left */}
+                              <div className="space-y-2">
+                                <h4 className="font-label-sm text-label-sm tracking-wider text-on-surface-variant uppercase">
+                                  Payment Summary
+                                </h4>
+                                <div className="space-y-3 rounded-lg border border-outline-variant bg-surface-container-lowest p-4 shadow-sm">
+                                  <p className="font-body-md text-on-surface">
+                                    <span className="font-semibold text-primary">
+                                      {expense.payer.name}
+                                    </span>{" "}
+                                    paid{" "}
+                                    <span className="font-mono-data font-semibold">
+                                      ₹{expense.amount}
                                     </span>
-                                    <p className="text-body-md text-ink">
-                                      <span className="font-semibold">{expense.payer.name}</span> paid <span className="font-bold">₹{expense.amount}</span>
-                                    </p>
-                                  </div>
-                                  <div className="pt-xs border-t border-canvas-soft text-caption text-mute flex items-center justify-between">
-                                    <span>Split Type: <span className="font-semibold text-ink uppercase text-[10px] bg-canvas-soft px-sm py-xxs rounded-full">{expense.splitType}</span></span>
-                                    <span>Date: {formatDateToDisplay(expense.date)}</span>
+                                  </p>
+                                  <div className="flex items-center justify-between border-t border-outline-variant pt-2 font-label-sm text-label-sm text-on-surface-variant">
+                                    <span>
+                                      Split Type:{" "}
+                                      <span className="bg-surface-variant ml-1 rounded-md px-2 py-0.5 uppercase">
+                                        {expense.splitType}
+                                      </span>
+                                    </span>
+                                    <span>
+                                      {formatDateToDisplay(expense.date)}
+                                    </span>
                                   </div>
                                 </div>
                               </div>
-                              <div className="space-y-sm">
-                                <h4 className="text-body-sm-strong text-mute uppercase tracking-wider">Individual Shares</h4>
-                                <div className="bg-canvas border border-canvas-soft rounded-xl p-md space-y-sm shadow-sm">
-                                  {expense.splits && expense.splits.length > 0 ? (
-                                    <div className="divide-y divide-canvas-soft">
+                              {/* Shares right */}
+                              <div className="space-y-2">
+                                <h4 className="font-label-sm text-label-sm tracking-wider text-on-surface-variant uppercase">
+                                  Individual Shares
+                                </h4>
+                                <div className="rounded-lg border border-outline-variant bg-surface-container-lowest p-4 shadow-sm">
+                                  {expense.splits &&
+                                  expense.splits.length > 0 ? (
+                                    <div className="divide-y divide-outline-variant">
                                       {expense.splits.map((split) => {
-                                        const isPayer = split.memberId === expense.paidBy;
-                                        const amountStr = `₹${parseFloat(split.amountOwed).toFixed(2)}`;
+                                        const isPayer =
+                                          split.memberId === expense.paidBy;
                                         return (
-                                          <div key={split.id} className="flex items-center justify-between py-xs first:pt-0 last:pb-0">
-                                            <div className="flex items-center gap-xs">
-                                              <span className="w-5 h-5 rounded-full bg-canvas-soft text-body flex items-center justify-center font-bold text-[10px]">
-                                                {split.member.name.substring(0, 2).toUpperCase()}
-                                              </span>
-                                              <span className="text-body-sm text-ink font-medium">
-                                                {split.member.name} {isPayer && <span className="text-[10px] text-mute font-normal">(Payer)</span>}
+                                          <div
+                                            key={split.id}
+                                            className="flex items-center justify-between py-2 first:pt-0 last:pb-0"
+                                          >
+                                            <div className="flex items-center gap-2">
+                                              <div className="bg-surface-variant flex h-5 w-5 items-center justify-center rounded-full font-label-sm text-[9px] text-on-surface-variant">
+                                                {split.member.name
+                                                  .substring(0, 2)
+                                                  .toUpperCase()}
+                                              </div>
+                                              <span className="font-body-md text-body-md text-on-surface">
+                                                {split.member.name}
                                               </span>
                                             </div>
-                                            <div className="flex items-center gap-xs">
-                                              {isPayer ? (
-                                                <span className="text-caption text-mute italic mr-xs">own share</span>
-                                              ) : (
-                                                <span className="text-[10px] text-mute mr-xs">owes {expense.payer.name}</span>
-                                              )}
-                                              <span className={isPayer ? "bg-canvas-soft text-body px-md py-xs rounded-full text-caption font-semibold" : "bg-primary-pale text-positive-deep px-md py-xs rounded-full text-caption font-semibold"}>
-                                                {amountStr}
+                                            <div className="flex items-center gap-2">
+                                              <span className="font-label-sm text-label-sm text-on-surface-variant">
+                                                {isPayer ? "own share" : "owes"}
+                                              </span>
+                                              <span
+                                                className={`rounded-DEFAULT px-2 py-0.5 font-mono-data font-medium ${isPayer ? "bg-surface-variant text-on-surface-variant" : "border border-secondary/20 bg-secondary/10 text-secondary"}`}
+                                              >
+                                                ₹
+                                                {parseFloat(
+                                                  split.amountOwed,
+                                                ).toFixed(2)}
                                               </span>
                                             </div>
                                           </div>
@@ -305,7 +362,9 @@ const Expenses = () => {
                                       })}
                                     </div>
                                   ) : (
-                                    <p className="text-body-sm text-mute">No split details available</p>
+                                    <p className="text-body-md text-on-surface-variant">
+                                      No split details available
+                                    </p>
                                   )}
                                 </div>
                               </div>
@@ -319,7 +378,7 @@ const Expenses = () => {
                   <tr>
                     <td
                       colSpan="7"
-                      className="py-xl px-xl text-body-md text-mute text-center"
+                      className="px-4 py-8 text-center text-body-md text-on-surface-variant"
                     >
                       {selectedGroupId
                         ? expenses.length > 0
