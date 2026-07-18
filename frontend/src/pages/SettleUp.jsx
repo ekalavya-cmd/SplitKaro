@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useOutletContext } from "react-router-dom";
 import {
-  getGroups,
   getGroup,
   getSettlementSuggestions,
   getSettlements,
@@ -23,8 +22,7 @@ const SettleUp = () => {
   const { filteredSettlements, filterProps } = useSettlementFilters(
     settlementsData.settlements,
   );
-  const [groups, setGroups] = useState([]);
-  const [selectedGroupId, setSelectedGroupId] = useState("");
+  const { selectedGroupId } = useOutletContext();
   const [group, setGroup] = useState(null);
 
   const location = useLocation();
@@ -45,10 +43,6 @@ const SettleUp = () => {
     const month = date.toLocaleString("en-US", { month: "short" });
     // const year = date.getFullYear();
     return `${month} ${day}`;
-  };
-
-  const handleGroupChange = (e) => {
-    setSelectedGroupId(e.target.value);
   };
 
   const handleInputChange = (e) => {
@@ -88,23 +82,6 @@ const SettleUp = () => {
       alert("Failed to record settlement. Please try again.");
     }
   };
-
-  useEffect(() => {
-    const fetchGroups = async () => {
-      try {
-        const data = await getGroups();
-        if (data && data.length > 0) {
-          setGroups(data);
-          setSelectedGroupId(data[0].id);
-        }
-      } catch (error) {
-        console.error("Error fetching groups:", error);
-        setGroups([]);
-      }
-    };
-
-    fetchGroups();
-  }, []);
 
   useEffect(() => {
     const fetchSettlementSuggestions = async () => {
@@ -178,34 +155,6 @@ const SettleUp = () => {
           <p className="text-label-md font-label-md text-on-surface-variant">
             Record payments between group members to clear balances
           </p>
-        </div>
-
-        <div className="rounded-lg border border-outline-variant bg-surface-container-lowest p-6 shadow-sm">
-          <label
-            htmlFor="groupSelect"
-            className="mb-2 block font-label-sm text-label-sm text-on-surface-variant"
-          >
-            Select Group:
-          </label>
-          <select
-            id="groupSelect"
-            value={selectedGroupId}
-            onChange={handleGroupChange}
-            className="h-10 w-full cursor-pointer rounded-lg border border-outline-variant bg-surface-container-lowest px-4 font-body-md text-body-md text-on-surface transition-shadow focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
-          >
-            <option value="" disabled>
-              Select a group
-            </option>
-            {Array.isArray(groups) && groups.length > 0 ? (
-              groups.map((group) => (
-                <option key={group.id} value={group.id}>
-                  {group.name}
-                </option>
-              ))
-            ) : (
-              <option disabled>No groups available</option>
-            )}
-          </select>
         </div>
 
         <div className="flex flex-col gap-4">

@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useOutletContext } from "react-router-dom";
 import {
   getExpenses,
-  getGroups,
   getGroup,
   getBalances,
   getSettlementSuggestions,
@@ -11,8 +10,7 @@ import { useExpenseFilters } from "../hooks/useExpenseFilters";
 import { ExpenseFilters } from "../components/ExpenseFilters";
 
 const Dashboard = () => {
-  const [selectedGroupId, setSelectedGroupId] = useState("");
-  const [groups, setGroups] = useState([]);
+  const { selectedGroupId } = useOutletContext();
   const [group, setGroup] = useState(null);
   const [expenses, setExpenses] = useState([]);
   const [balances, setBalances] = useState([]);
@@ -51,34 +49,12 @@ const Dashboard = () => {
     }
   };
 
-  const totalExpenses = expenses.reduce(
-    (accumulator, expense) => accumulator + Number(expense.amount),
-    0,
-  );
+  // const totalExpenses = expenses.reduce(
+  //   (accumulator, expense) => accumulator + Number(expense.amount),
+  //   0,
+  // );
 
-  const totalMembers = group && group.members ? group.members.length : 0;
-
-  const handleGroupChange = (e) => {
-    setSelectedGroupId(e.target.value);
-  };
-
-  useEffect(() => {
-    const fetchGroups = async () => {
-      try {
-        const data = await getGroups();
-
-        if (data && data.length > 0) {
-          setGroups(data);
-          setSelectedGroupId(data[0].id);
-        }
-      } catch (error) {
-        console.error("Error fetching groups:", error);
-        setGroups([]);
-      }
-    };
-
-    fetchGroups();
-  }, []);
+  // const totalMembers = group && group.members ? group.members.length : 0;
 
   useEffect(() => {
     const fetchExpenses = async () => {
@@ -165,49 +141,6 @@ const Dashboard = () => {
 
   return (
     <div className="flex flex-col gap-8">
-      {/* Group Selector Header */}
-      <div className="flex flex-col gap-4 border-b border-outline-variant pb-6 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="mb-2 font-headline-lg text-headline-lg font-bold text-on-surface">
-            Dashboard
-          </h1>
-          <div className="flex flex-wrap gap-2 font-label-sm text-label-sm text-on-surface-variant">
-            <span>{totalMembers} Members</span>
-            <span className="font-bold text-outline-variant">•</span>
-            <span>₹{totalExpenses.toFixed(2)} Expenses</span>
-            <span className="font-bold text-outline-variant">•</span>
-            <span>{suggestions.length} Pending Settlements</span>
-          </div>
-        </div>
-        <div className="flex items-center gap-4">
-          <select
-            value={selectedGroupId}
-            onChange={handleGroupChange}
-            className="h-10 cursor-pointer rounded-lg border border-outline-variant bg-surface-container-lowest px-4 font-body-md text-body-md text-on-surface focus:ring-2 focus:ring-primary/20 focus:outline-none"
-          >
-            <option value="" disabled>
-              Select a group
-            </option>
-            {Array.isArray(groups) && groups.length > 0 ? (
-              groups.map((g) => (
-                <option key={g.id} value={g.id}>
-                  {g.name}
-                </option>
-              ))
-            ) : (
-              <option disabled>No groups available</option>
-            )}
-          </select>
-          <button
-            onClick={() => navigate(`/add-expense/${selectedGroupId}`)}
-            className="flex h-10 items-center justify-center gap-2 rounded-lg bg-primary px-4 font-label-sm text-label-sm tracking-wide text-on-primary uppercase shadow-sm transition-colors hover:bg-primary/90"
-          >
-            <span className="material-symbols-outlined text-[18px]">add</span>{" "}
-            Add Expense
-          </button>
-        </div>
-      </div>
-
       <div className="mb-8 grid grid-cols-1 gap-gutter lg:grid-cols-3">
         {/* Balances */}
         <div className="flex flex-col gap-4 lg:col-span-2">
@@ -330,9 +263,54 @@ const Dashboard = () => {
         </div>
       </div>
 
+      {/* Analytics Placeholders */}
+      <div className="grid grid-cols-1 gap-gutter lg:grid-cols-3">
+        <div className="flex flex-col gap-4">
+          <h2 className="font-headline-md text-headline-md text-on-surface">
+            Spend by Member
+          </h2>
+          <div className="flex h-64 flex-col items-center justify-center gap-2 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface-variant shadow-sm">
+            <span className="material-symbols-outlined text-[48px] opacity-20">
+              pie_chart
+            </span>
+            <span className="font-label-sm text-label-sm tracking-wider uppercase opacity-50">
+              Placeholder
+            </span>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-4">
+          <h2 className="font-headline-md text-headline-md text-on-surface">
+            Split Type Breakdown
+          </h2>
+          <div className="flex h-64 flex-col items-center justify-center gap-2 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface-variant shadow-sm">
+            <span className="material-symbols-outlined text-[48px] opacity-20">
+              donut_large
+            </span>
+            <span className="font-label-sm text-label-sm tracking-wider uppercase opacity-50">
+              Placeholder
+            </span>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-4">
+          <h2 className="font-headline-md text-headline-md text-on-surface">
+            Spending Over Time
+          </h2>
+          <div className="flex h-64 flex-col items-center justify-center gap-2 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface-variant shadow-sm">
+            <span className="material-symbols-outlined text-[48px] opacity-20">
+              show_chart
+            </span>
+            <span className="font-label-sm text-label-sm tracking-wider uppercase opacity-50">
+              Placeholder
+            </span>
+          </div>
+        </div>
+      </div>
+
       <div className="flex flex-col gap-4">
         <h2 className="font-headline-md text-headline-md text-on-surface">
-          {group ? group.name + " Expenses" : "Select a group to view expenses"}
+          {group ? group.name : "Select a group to view expenses"}
         </h2>
 
         <ExpenseFilters
@@ -357,10 +335,9 @@ const Dashboard = () => {
                   <th className="w-32 px-4 py-3 text-right font-label-sm text-label-sm font-semibold tracking-wider text-on-surface-variant uppercase">
                     Amount
                   </th>
-                  <th className="w-40 px-4 py-3 font-label-sm text-label-sm font-semibold tracking-wider text-on-surface-variant uppercase">
+                  <th className="w-55 px-4 py-3 font-label-sm text-label-sm font-semibold tracking-wider text-on-surface-variant uppercase">
                     Split Type
                   </th>
-                  <th className="w-12 px-4 py-3"></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-outline-variant">
@@ -402,20 +379,18 @@ const Dashboard = () => {
                               ({expense.splits ? expense.splits.length : 0}{" "}
                               shares)
                             </span>
+                            <span
+                              className={`material-symbols-outlined text-[12px] text-on-surface-variant transition-transform ${expandedExpenseIds[expense.id] ? "rotate-180" : ""}`}
+                            >
+                              expand_more
+                            </span>
                           </div>
-                        </td>
-                        <td className="px-4 py-2 text-right">
-                          <span className="material-symbols-outlined text-[16px] text-on-surface-variant">
-                            {expandedExpenseIds[expense.id]
-                              ? "expand_less"
-                              : "expand_more"}
-                          </span>
                         </td>
                       </tr>
                       {expandedExpenseIds[expense.id] && (
                         <tr className="bg-surface-container-low/30">
                           <td
-                            colSpan="6"
+                            colSpan="5"
                             className="border-t border-outline-variant p-6"
                           >
                             <div className="mx-auto grid max-w-4xl grid-cols-1 gap-6 md:grid-cols-2">
@@ -507,7 +482,7 @@ const Dashboard = () => {
                 ) : (
                   <tr>
                     <td
-                      colSpan="6"
+                      colSpan="5"
                       className="py-8 text-center text-body-md text-on-surface-variant"
                     >
                       {selectedGroupId

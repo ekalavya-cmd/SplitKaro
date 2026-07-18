@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useOutletContext } from "react-router-dom";
 import {
   getExpenses,
-  getGroups,
   getGroup,
   deleteExpense,
 } from "../services/splitKaroService";
@@ -10,14 +9,11 @@ import { useExpenseFilters } from "../hooks/useExpenseFilters";
 import { ExpenseFilters } from "../components/ExpenseFilters";
 
 const Expenses = () => {
-  const [selectedGroupId, setSelectedGroupId] = useState("");
-  const [groups, setGroups] = useState([]);
+  const { selectedGroupId } = useOutletContext();
   const [group, setGroup] = useState(null);
   const [expenses, setExpenses] = useState([]);
   const [expandedExpenseIds, setExpandedExpenseIds] = useState({});
   const { filteredExpenses, filterProps } = useExpenseFilters(expenses);
-
-  const navigate = useNavigate();
 
   const toggleExpenseExpand = (id) => {
     setExpandedExpenseIds((prev) => ({
@@ -46,27 +42,6 @@ const Expenses = () => {
         return "bg-outline-variant";
     }
   };
-
-  const handleGroupChange = (e) => {
-    setSelectedGroupId(e.target.value);
-  };
-
-  useEffect(() => {
-    const fetchGroups = async () => {
-      try {
-        const data = await getGroups();
-        if (data && data.length > 0) {
-          setGroups(data);
-          setSelectedGroupId(data[0].id);
-        }
-      } catch (error) {
-        console.error("Error fetching groups:", error);
-        setGroups([]);
-      }
-    };
-
-    fetchGroups();
-  }, []);
 
   useEffect(() => {
     const fetchExpenses = async () => {
@@ -131,57 +106,10 @@ const Expenses = () => {
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex flex-col gap-4 border-b border-outline-variant pb-6 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="mb-2 font-headline-lg text-headline-lg font-bold text-on-surface">
-            Expenses
-          </h1>
-        </div>
-      </div>
-
-      <div className="w-full max-w-md rounded-lg border border-outline-variant bg-surface-container-lowest p-6 shadow-sm">
-        <label
-          htmlFor="groupSelect"
-          className="mb-2 block font-label-sm text-label-sm text-on-surface-variant"
-        >
-          Select Group:
-        </label>
-        <select
-          id="groupSelect"
-          value={selectedGroupId}
-          onChange={handleGroupChange}
-          className="h-10 w-full cursor-pointer rounded-lg border border-outline-variant bg-surface-container-lowest px-4 font-body-md text-body-md text-on-surface transition-shadow focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
-        >
-          <option value="" disabled>
-            Select a group
-          </option>
-          {Array.isArray(groups) && groups.length > 0 ? (
-            groups.map((group) => (
-              <option key={group.id} value={group.id}>
-                {group.name}
-              </option>
-            ))
-          ) : (
-            <option disabled>No groups available</option>
-          )}
-        </select>
-      </div>
-
       <div className="flex flex-col gap-4">
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <h2 className="font-headline-md text-headline-md text-on-surface">
-            {group ? group.name : "Select a group to view expenses"}
-          </h2>
-
-          <button
-            type="button"
-            onClick={() => navigate(`/add-expense/${selectedGroupId}`)}
-            className="flex h-10 items-center gap-2 self-start rounded-lg bg-primary px-4 font-label-sm text-label-sm tracking-wide text-on-primary uppercase shadow-sm transition-colors hover:bg-primary/90 md:self-auto"
-          >
-            <span className="material-symbols-outlined text-[18px]">add</span>{" "}
-            Add Expense
-          </button>
-        </div>
+        <h2 className="font-headline-md text-headline-md text-on-surface">
+          {group ? group.name : "Select a group to view expenses"}
+        </h2>
 
         <ExpenseFilters
           filterProps={filterProps}
@@ -205,10 +133,9 @@ const Expenses = () => {
                   <th className="w-32 px-4 py-3 text-right font-label-sm text-label-sm font-semibold tracking-wider text-on-surface-variant uppercase">
                     Amount
                   </th>
-                  <th className="w-40 px-4 py-3 font-label-sm text-label-sm font-semibold tracking-wider text-on-surface-variant uppercase">
+                  <th className="w-55 px-4 py-3 font-label-sm text-label-sm font-semibold tracking-wider text-on-surface-variant uppercase">
                     Split Type
                   </th>
-                  <th className="w-12 px-4 py-3 text-center"></th>
                   <th className="w-24 px-4 py-3 text-right font-label-sm text-label-sm font-semibold tracking-wider text-on-surface-variant uppercase">
                     Action
                   </th>
@@ -253,21 +180,20 @@ const Expenses = () => {
                               ({expense.splits ? expense.splits.length : 0}{" "}
                               shares)
                             </span>
+                            <span
+                              className={`material-symbols-outlined text-[12px] transition-transform ${expandedExpenseIds[expense.id] ? "rotate-180" : ""}`}
+                            >
+                              expand_more
+                            </span>
                           </div>
-                        </td>
-                        <td className="px-4 py-2 text-center">
-                          <span className="material-symbols-outlined text-[16px] text-on-surface-variant">
-                            {expandedExpenseIds[expense.id]
-                              ? "expand_less"
-                              : "expand_more"}
-                          </span>
                         </td>
                         <td
                           className="px-4 py-2 text-right"
                           onClick={(e) => e.stopPropagation()}
                         >
                           <button
-                            className="cursor-pointer rounded-DEFAULT border border-error/50 px-3 py-1 font-label-sm text-label-sm tracking-wide text-error uppercase transition-colors hover:bg-error/10"
+                            className="ml-auto flex cursor-pointer items-center justify-center rounded-DEFAULT p-1 text-error transition-colors hover:bg-error/10"
+                            title="Delete Expense"
                             onClick={() => {
                               if (
                                 window.confirm(
@@ -278,14 +204,16 @@ const Expenses = () => {
                               }
                             }}
                           >
-                            Delete
+                            <span className="material-symbols-outlined text-[20px]">
+                              delete
+                            </span>
                           </button>
                         </td>
                       </tr>
                       {expandedExpenseIds[expense.id] && (
                         <tr className="bg-surface-container-low/30">
                           <td
-                            colSpan="7"
+                            colSpan="6"
                             className="border-t border-outline-variant p-6"
                           >
                             <div className="mx-auto grid max-w-4xl grid-cols-1 gap-6 md:grid-cols-2">
@@ -377,7 +305,7 @@ const Expenses = () => {
                 ) : (
                   <tr>
                     <td
-                      colSpan="7"
+                      colSpan="6"
                       className="px-4 py-8 text-center text-body-md text-on-surface-variant"
                     >
                       {selectedGroupId
