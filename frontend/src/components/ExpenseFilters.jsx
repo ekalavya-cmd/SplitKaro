@@ -95,30 +95,29 @@ export const ExpenseFilters = ({ filterProps, members }) => {
                 )}
               </select>
             </div>
-          </div>
-        </div>
 
-        {/* Advanced Filters Toggle */}
-        <div className="mt-2 flex justify-start">
-          <button
-            type="button"
-            onClick={() =>
-              setIsAdvancedFiltersExpanded(!isAdvancedFiltersExpanded)
-            }
-            className="group flex cursor-pointer items-center gap-1 font-label-sm text-label-sm tracking-wider text-on-surface-variant uppercase transition-colors hover:text-primary focus:outline-none"
-          >
-            <span className="font-bold">Advanced Filters</span>
-            {!isAdvancedFiltersExpanded && activeAdvancedFiltersCount > 0 && (
-              <span className="rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold tracking-normal text-on-primary lowercase">
-                {activeAdvancedFiltersCount} active
-              </span>
-            )}
-            <span
-              className={`material-symbols-outlined transform text-[16px] transition-transform duration-300 ${isAdvancedFiltersExpanded ? "rotate-180" : ""}`}
+            <div className="mx-2 hidden h-8 w-px bg-outline-variant sm:block"></div>
+
+            <button
+              type="button"
+              onClick={() =>
+                setIsAdvancedFiltersExpanded(!isAdvancedFiltersExpanded)
+              }
+              className="group flex cursor-pointer items-center gap-1 font-label-sm text-label-sm tracking-wider text-on-surface-variant uppercase transition-colors hover:text-primary focus:outline-none"
             >
-              expand_more
-            </span>
-          </button>
+              <span className="font-bold">Advanced Filters</span>
+              {!isAdvancedFiltersExpanded && activeAdvancedFiltersCount > 0 && (
+                <span className="rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold tracking-normal text-on-primary lowercase">
+                  {activeAdvancedFiltersCount} active
+                </span>
+              )}
+              <span
+                className={`material-symbols-outlined transform text-[16px] transition-transform duration-300 ${isAdvancedFiltersExpanded ? "rotate-180" : ""}`}
+              >
+                expand_more
+              </span>
+            </button>
+          </div>
         </div>
 
         {/* Advanced Filters Section */}

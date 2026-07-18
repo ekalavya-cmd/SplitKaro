@@ -32,22 +32,22 @@ export const SettlementFilters = ({ filterProps, members = [] }) => {
   } = filterProps;
 
   return (
-    <div className="rounded-lg border border-outline-variant bg-surface-container-lowest p-6 shadow-sm">
-      <form onSubmit={(e) => e.preventDefault()} className="flex flex-col gap-6">
-        {/* Primary row: Paid By + Paid To */}
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <div className="flex flex-col">
+    <div className="mb-6 flex flex-col gap-4">
+      <form onSubmit={(e) => e.preventDefault()} className="flex flex-col">
+        {/* Top row: Minimalist Filters Container */}
+        <div className="flex flex-wrap items-center justify-start gap-4 rounded-lg border border-outline-variant bg-surface-container-lowest p-2 shadow-sm">
+          <div className="flex items-center gap-2 pl-2">
             <label
               htmlFor="settlFilterPaidBy"
-              className="mb-2 text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider"
+              className="text-body-md whitespace-nowrap text-on-surface-variant"
             >
-              Paid By
+              Paid By:
             </label>
             <select
               id="settlFilterPaidBy"
               value={filterPaidBy}
               onChange={(e) => setFilterPaidBy(e.target.value)}
-              className="w-full h-10 cursor-pointer rounded-lg border border-outline-variant bg-surface-container-lowest px-4 text-body-md font-body-md text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 transition-shadow outline-none"
+              className="max-w-[150px] cursor-pointer truncate rounded-DEFAULT border border-outline-variant bg-surface-container-low px-2 py-1 font-body-md text-body-md font-bold text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"
             >
               <option value="all">All Payers</option>
               {members.length > 0 ? (
@@ -62,18 +62,18 @@ export const SettlementFilters = ({ filterProps, members = [] }) => {
             </select>
           </div>
 
-          <div className="flex flex-col">
+          <div className="flex items-center gap-2 pr-2">
             <label
               htmlFor="settlFilterPaidTo"
-              className="mb-2 text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider"
+              className="text-body-md whitespace-nowrap text-on-surface-variant"
             >
-              Paid To
+              Paid To:
             </label>
             <select
               id="settlFilterPaidTo"
               value={filterPaidTo}
               onChange={(e) => setFilterPaidTo(e.target.value)}
-              className="w-full h-10 cursor-pointer rounded-lg border border-outline-variant bg-surface-container-lowest px-4 text-body-md font-body-md text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 transition-shadow outline-none"
+              className="max-w-[150px] cursor-pointer truncate rounded-DEFAULT border border-outline-variant bg-surface-container-low px-2 py-1 font-body-md text-body-md font-bold text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"
             >
               <option value="all">All Payees</option>
               {members.length > 0 ? (
@@ -87,40 +87,36 @@ export const SettlementFilters = ({ filterProps, members = [] }) => {
               )}
             </select>
           </div>
-        </div>
 
-        {/* Advanced Filters collapsible section */}
-        <div className="border-t border-outline-variant pt-6">
           <button
             type="button"
             onClick={() => setIsAdvancedFiltersExpanded(!isAdvancedFiltersExpanded)}
-            className="group flex w-full cursor-pointer items-center justify-between text-left text-label-sm font-label-sm tracking-wider text-on-surface-variant uppercase transition-colors hover:text-primary focus:outline-none"
+            className="group ml-auto flex cursor-pointer items-center gap-1 font-label-sm text-label-sm tracking-wider text-on-surface-variant uppercase transition-colors hover:text-primary focus:outline-none"
           >
-            <span className="flex items-center gap-2 font-bold">
-              Advanced Filters
-              {!isAdvancedFiltersExpanded && activeAdvancedFiltersCount > 0 && (
-                <span className="rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold tracking-normal text-on-primary lowercase">
-                  {activeAdvancedFiltersCount} active
-                </span>
-              )}
-            </span>
+            <span className="font-bold">Advanced Filters</span>
+            {!isAdvancedFiltersExpanded && activeAdvancedFiltersCount > 0 && (
+              <span className="rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold tracking-normal text-on-primary lowercase">
+                {activeAdvancedFiltersCount} active
+              </span>
+            )}
             <span
-              className={`material-symbols-outlined text-[18px] transform transition-transform duration-300 ${
+              className={`material-symbols-outlined transform text-[16px] transition-transform duration-300 ${
                 isAdvancedFiltersExpanded ? "rotate-180" : ""
               }`}
             >
               expand_more
             </span>
           </button>
+        </div>
 
-          <div
+        <div
             className={`overflow-hidden transition-all duration-300 ${
               isAdvancedFiltersExpanded
                 ? "mt-4 max-h-[500px] opacity-100"
                 : "pointer-events-none max-h-0 opacity-0"
             }`}
           >
-            <div className="flex w-full flex-wrap items-end gap-4">
+            <div className="flex w-full flex-wrap items-end gap-4 rounded-lg border border-outline-variant bg-surface-container-lowest p-4 shadow-sm">
               {/* Date Preset */}
               <div className="flex min-w-[140px] flex-1 flex-col">
                 <label
@@ -237,14 +233,13 @@ export const SettlementFilters = ({ filterProps, members = [] }) => {
               </div>
 
               {isAmountRangeInvalid && (
-                <div className="mt-2 w-full text-label-sm font-label-sm text-error">
+                <div className="mt-2 w-full font-label-sm text-label-sm text-error">
                   ⚠️ Min amount cannot exceed Max amount. Amount filter is
                   currently ignored.
                 </div>
               )}
             </div>
           </div>
-        </div>
       </form>
     </div>
   );
