@@ -247,11 +247,25 @@ const SettleUp = () => {
                         <td className="px-4 py-2 font-mono-data text-sm whitespace-nowrap text-on-surface-variant">
                           {formatDateToDisplay(settlement.date)}
                         </td>
-                        <td className="px-4 py-2 font-body-md font-medium text-on-surface">
-                          {settlement.payer.name}
+                        <td className="px-4 py-2">
+                          <div className="flex items-center gap-2">
+                            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-secondary-container font-label-sm text-[10px] text-on-secondary-container">
+                              {settlement.payer.name.substring(0, 2).toUpperCase()}
+                            </div>
+                            <span className="truncate font-body-md font-medium text-on-surface">
+                              {settlement.payer.name}
+                            </span>
+                          </div>
                         </td>
-                        <td className="px-4 py-2 font-body-md font-medium text-on-surface">
-                          {settlement.payee.name}
+                        <td className="px-4 py-2">
+                          <div className="flex items-center gap-2">
+                            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-secondary-container font-label-sm text-[10px] text-on-secondary-container">
+                              {settlement.payee.name.substring(0, 2).toUpperCase()}
+                            </div>
+                            <span className="truncate font-body-md font-medium text-on-surface">
+                              {settlement.payee.name}
+                            </span>
+                          </div>
                         </td>
                         <td className="px-4 py-2 text-right font-mono-data font-medium text-on-surface">
                           ₹{settlement.amount}

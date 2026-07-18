@@ -7,8 +7,6 @@ export const useSettlementFilters = (settlements) => {
   const [filterFromDate, setFilterFromDate] = useState("");
   const [filterToDate, setFilterToDate] = useState("");
   const [filterDatePreset, setFilterDatePreset] = useState("all");
-  const [filterMinAmount, setFilterMinAmount] = useState("");
-  const [filterMaxAmount, setFilterMaxAmount] = useState("");
   const [isAdvancedFiltersExpanded, setIsAdvancedFiltersExpanded] = useState(false);
 
   const handleDatePresetChange = (preset) => {
@@ -24,22 +22,13 @@ export const useSettlementFilters = (settlements) => {
     setFilterFromDate("");
     setFilterToDate("");
     setFilterDatePreset("all");
-    setFilterMinAmount("");
-    setFilterMaxAmount("");
   };
-
-  const isAmountRangeInvalid =
-    filterMinAmount !== "" &&
-    filterMaxAmount !== "" &&
-    parseFloat(filterMinAmount) > parseFloat(filterMaxAmount);
 
   // Count how many advanced filters are currently active
   const activeAdvancedFiltersCount = [
     filterDatePreset !== "all",
     filterFromDate !== "",
     filterToDate !== "",
-    filterMinAmount !== "",
-    filterMaxAmount !== "",
   ].filter(Boolean).length;
 
   const filteredSettlements = Array.isArray(settlements)
@@ -67,23 +56,11 @@ export const useSettlementFilters = (settlements) => {
         const matchesToDate =
           filterToDate === "" || settlDateString <= filterToDate;
 
-        // Amount filters — ignore both if the range is invalid
-        const matchesMinAmount =
-          isAmountRangeInvalid ||
-          filterMinAmount === "" ||
-          Number(settlement.amount) >= parseFloat(filterMinAmount);
-        const matchesMaxAmount =
-          isAmountRangeInvalid ||
-          filterMaxAmount === "" ||
-          Number(settlement.amount) <= parseFloat(filterMaxAmount);
-
         return (
           matchesPaidBy &&
           matchesPaidTo &&
           matchesFromDate &&
-          matchesToDate &&
-          matchesMinAmount &&
-          matchesMaxAmount
+          matchesToDate
         );
       })
     : [];
@@ -100,11 +77,6 @@ export const useSettlementFilters = (settlements) => {
     filterDatePreset,
     setFilterDatePreset,
     handleDatePresetChange,
-    filterMinAmount,
-    setFilterMinAmount,
-    filterMaxAmount,
-    setFilterMaxAmount,
-    isAmountRangeInvalid,
     isAdvancedFiltersExpanded,
     setIsAdvancedFiltersExpanded,
     activeAdvancedFiltersCount,

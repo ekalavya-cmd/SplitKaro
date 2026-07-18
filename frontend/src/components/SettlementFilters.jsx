@@ -20,11 +20,6 @@ export const SettlementFilters = ({ filterProps, members = [] }) => {
     filterDatePreset,
     setFilterDatePreset,
     handleDatePresetChange,
-    filterMinAmount,
-    setFilterMinAmount,
-    filterMaxAmount,
-    setFilterMaxAmount,
-    isAmountRangeInvalid,
     isAdvancedFiltersExpanded,
     setIsAdvancedFiltersExpanded,
     activeAdvancedFiltersCount,
@@ -181,46 +176,6 @@ export const SettlementFilters = ({ filterProps, members = [] }) => {
                 />
               </div>
 
-              {/* Min Amount */}
-              <div className="flex min-w-[140px] flex-1 flex-col">
-                <label
-                  htmlFor="settlMinAmount"
-                  className="mb-2 text-label-sm font-label-sm text-on-surface-variant"
-                >
-                  Min Amount (₹)
-                </label>
-                <input
-                  type="number"
-                  id="settlMinAmount"
-                  placeholder="Min amount"
-                  value={filterMinAmount}
-                  onChange={(e) => setFilterMinAmount(e.target.value)}
-                  className={`w-full h-10 rounded-lg border bg-surface-container-lowest px-4 text-body-md font-body-md text-on-surface focus:ring-2 focus:ring-primary/20 outline-none ${
-                    isAmountRangeInvalid ? "border-error" : "border-outline-variant focus:border-primary"
-                  }`}
-                />
-              </div>
-
-              {/* Max Amount */}
-              <div className="flex min-w-[140px] flex-1 flex-col">
-                <label
-                  htmlFor="settlMaxAmount"
-                  className="mb-2 text-label-sm font-label-sm text-on-surface-variant"
-                >
-                  Max Amount (₹)
-                </label>
-                <input
-                  type="number"
-                  id="settlMaxAmount"
-                  placeholder="Max amount"
-                  value={filterMaxAmount}
-                  onChange={(e) => setFilterMaxAmount(e.target.value)}
-                  className={`w-full h-10 rounded-lg border bg-surface-container-lowest px-4 text-body-md font-body-md text-on-surface focus:ring-2 focus:ring-primary/20 outline-none ${
-                    isAmountRangeInvalid ? "border-error" : "border-outline-variant focus:border-primary"
-                  }`}
-                />
-              </div>
-
               {/* Reset Filters */}
               <div className="min-w-[140px] flex-1 md:flex-initial">
                 <button
@@ -231,13 +186,6 @@ export const SettlementFilters = ({ filterProps, members = [] }) => {
                   Reset Filters
                 </button>
               </div>
-
-              {isAmountRangeInvalid && (
-                <div className="mt-2 w-full font-label-sm text-label-sm text-error">
-                  ⚠️ Min amount cannot exceed Max amount. Amount filter is
-                  currently ignored.
-                </div>
-              )}
             </div>
           </div>
       </form>
