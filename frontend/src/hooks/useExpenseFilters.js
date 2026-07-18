@@ -1,5 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import useDebounce from "./useDebounce";
+import {
+  formatDateToLocalYMD,
+  calculatePresetDates,
+} from "../utils/dateFilters";
 
 export const useExpenseFilters = (expenses) => {
   const [filterDescription, setFilterDescription] = useState("");
@@ -10,40 +14,14 @@ export const useExpenseFilters = (expenses) => {
   const [filterDatePreset, setFilterDatePreset] = useState("all");
   const [filterMinAmount, setFilterMinAmount] = useState("");
   const [filterMaxAmount, setFilterMaxAmount] = useState("");
-  const [isAdvancedFiltersExpanded, setIsAdvancedFiltersExpanded] = useState(false);
+  const [isAdvancedFiltersExpanded, setIsAdvancedFiltersExpanded] =
+    useState(false);
 
   const handleDatePresetChange = (preset) => {
     setFilterDatePreset(preset);
-    const today = new Date();
-
-    if (preset === "all") {
-      setFilterFromDate("");
-      setFilterToDate("");
-    } else if (preset === "today") {
-      const formatted = formatDateToLocalYMD(today);
-      setFilterFromDate(formatted);
-      setFilterToDate(formatted);
-    } else if (preset === "this-week") {
-      // Start of week: Sunday
-      const dayOfWeek = today.getDay();
-      const sunday = new Date(today);
-      sunday.setDate(today.getDate() - dayOfWeek);
-      setFilterFromDate(formatDateToLocalYMD(sunday));
-      setFilterToDate(formatDateToLocalYMD(today));
-    } else if (preset === "this-month") {
-      const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
-      setFilterFromDate(formatDateToLocalYMD(firstDay));
-      setFilterToDate(formatDateToLocalYMD(today));
-    } else if (preset === "last-30-days") {
-      const thirtyDaysAgo = new Date(today);
-      thirtyDaysAgo.setDate(today.getDate() - 30);
-      setFilterFromDate(formatDateToLocalYMD(thirtyDaysAgo));
-      setFilterToDate(formatDateToLocalYMD(today));
-    } else if (preset === "this-year") {
-      const firstDayOfYear = new Date(today.getFullYear(), 0, 1);
-      setFilterFromDate(formatDateToLocalYMD(firstDayOfYear));
-      setFilterToDate(formatDateToLocalYMD(today));
-    }
+    const { fromDate, toDate } = calculatePresetDates(preset);
+    setFilterFromDate(fromDate);
+    setFilterToDate(toDate);
   };
 
   const handleResetFilters = () => {
@@ -55,13 +33,6 @@ export const useExpenseFilters = (expenses) => {
     setFilterDatePreset("all");
     setFilterMinAmount("");
     setFilterMaxAmount("");
-  };
-
-  const formatDateToLocalYMD = (date) => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
   };
 
   const debouncedDescription = useDebounce(filterDescription, 300);

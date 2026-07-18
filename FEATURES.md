@@ -76,6 +76,14 @@
 | ✅ Form feedback via `alert()` | SettleUp shows `alert("Settlement recorded successfully!")` on success and `alert("Failed to record settlement...")` on error |
 | ✅ Pre-fill settlement form from suggestion | Dashboard "Settle" button passes payer, payee, and amount via `location.state` to pre-fill the form on SettleUp page |
 
+### Settlement History Filtering (client-side only)
+| Feature | Current behaviour |
+|---|---|
+| ✅ Filter by payer | Dropdown (All Payers / per-member) on SettleUp history table |
+| ✅ Filter by payee | Dropdown (All Payees / per-member) on SettleUp history table |
+| ✅ Filter by Date (Preset / Custom) | Shared preset selectors (Today, This Week, This Month, Last 30 Days, This Year) or custom From/To date inputs — reuses `dateFilters.js` utility |
+| ✅ Filter by Amount | Min/Max amount guards using same guarded-comparison pattern as expense filters; invalid range shows warning and is ignored |
+
 ### Navigation & Layout
 | Feature | Current behaviour |
 |---|---|

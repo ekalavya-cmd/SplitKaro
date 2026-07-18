@@ -99,10 +99,14 @@ splitKaro/
 │   │   ├── api/
 │   │   │   └── splitKaroAPI.js # Axios instance with base URL + error interceptor
 │   │   ├── components/
-│   │   │   └── ExpenseFilters.jsx # Reusable expense filtering UI component
+│   │   │   ├── ExpenseFilters.jsx    # Reusable expense filtering UI component
+│   │   │   └── SettlementFilters.jsx # Reusable settlement filtering UI component
 │   │   ├── hooks/
-│   │   │   ├── useDebounce.js  # Generic debounce hook (used for expense description filter)
-│   │   │   └── useExpenseFilters.js # Reusable expense filtering state and logic hook
+│   │   │   ├── useDebounce.js          # Generic debounce hook
+│   │   │   ├── useExpenseFilters.js    # Expense filtering state + logic
+│   │   │   └── useSettlementFilters.js # Settlement filtering state + logic
+│   │   ├── utils/
+│   │   │   └── dateFilters.js  # Shared date helpers: formatDateToLocalYMD, calculatePresetDates
 │   │   ├── pages/
 │   │   │   ├── Layout.jsx      # Shell: top nav bar + <Outlet />
 │   │   │   ├── Dashboard.jsx   # Group selector, balances, settlement suggestions, expense table

@@ -8,6 +8,8 @@ import {
   getSettlements,
   createSettlement,
 } from "../services/splitKaroService";
+import { useSettlementFilters } from "../hooks/useSettlementFilters";
+import { SettlementFilters } from "../components/SettlementFilters";
 
 const clearInputs = {
   paid_by: "",
@@ -19,6 +21,9 @@ const clearInputs = {
 const SettleUp = () => {
   const [suggestions, setSuggestions] = useState([]);
   const [settlementsData, setSettlementsData] = useState({ settlements: [] });
+  const { filteredSettlements, filterProps } = useSettlementFilters(
+    settlementsData.settlements
+  );
   const [groups, setGroups] = useState([]);
   const [selectedGroupId, setSelectedGroupId] = useState("");
   const [group, setGroup] = useState(null);
@@ -250,6 +255,12 @@ const SettleUp = () => {
           <h2 className="text-display-xs text-ink font-semibold">
             Settlements History
           </h2>
+
+          <SettlementFilters
+            filterProps={filterProps}
+            members={group ? group.members : []}
+          />
+
           <div className="bg-canvas border border-canvas-soft rounded-xl overflow-hidden shadow-sm">
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
@@ -262,10 +273,8 @@ const SettleUp = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-canvas-soft">
-                  {settlementsData &&
-                  settlementsData.settlements &&
-                  settlementsData.settlements.length > 0 ? (
-                    settlementsData.settlements.map((settlement) => (
+                  {filteredSettlements && filteredSettlements.length > 0 ? (
+                    filteredSettlements.map((settlement) => (
                       <tr key={settlement.id} className="hover:bg-canvas-soft/20 transition-colors">
                         <td className="py-lg px-xl text-body-sm text-ink font-medium whitespace-nowrap">
                           {formatDateToDisplay(settlement.date)}
@@ -284,7 +293,9 @@ const SettleUp = () => {
                   ) : (
                     <tr>
                       <td className="py-xl px-xl text-body-md text-mute text-center" colSpan="4">
-                        No settlements found.
+                        {settlementsData.settlements.length > 0
+                          ? "No settlements match the selected filters"
+                          : "No settlements found."}
                       </td>
                     </tr>
                   )}
