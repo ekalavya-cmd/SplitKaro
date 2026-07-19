@@ -72,7 +72,12 @@ module.exports = (sequelize, DataTypes) => {
   );
 
   User.associate = (models) => {
-    // No associations yet — group_members join table and FK changes come in later steps.
+    User.belongsToMany(models.Groups, {
+      through: models.GroupMember,
+      foreignKey: "userId",
+      otherKey: "groupId",
+      as: "groups",
+    });
   };
 
   return User;

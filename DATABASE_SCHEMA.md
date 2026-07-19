@@ -18,6 +18,7 @@
 | `expense_splits` | `ExpenseSplits` | Per-member share of a single expense (one row per member per expense) |
 | `settlements` | `Settlements` | A direct payment from one member to another to clear a debt |
 | `users` | `User` | A platform-level identity for authentication (password or Google OAuth) |
+| `group_members` | `GroupMember` | Join table linking users to the groups they belong to (many-to-many) |
 
 ---
 
@@ -115,6 +116,21 @@
 
 ---
 
+### `group_members`
+
+| Column | JS Property | Type | Nullable | Unique | Default | Model Validation |
+|---|---|---|---|---|---|---|
+| `id` | `id` | `INT` AUTO_INCREMENT PK | No | Yes (PK) | — | `isInt`, `min: 1` |
+| `user_id` | `userId` | `INT` FK → `users.id` | No | No | — | `isInt` |
+| `group_id` | `groupId` | `INT` FK → `groups.id` | No | No | — | `isInt` |
+| `joined_at` | `joinedAt` | `DATETIME` | No | No | `CURRENT_TIMESTAMP` | — |
+| `created_at` | `createdAt` | `DATETIME` | No | No | `CURRENT_TIMESTAMP` | — |
+| `updated_at` | `updatedAt` | `DATETIME` | No | No | `CURRENT_TIMESTAMP` | — |
+
+> **Composite unique constraint:** `(user_id, group_id)` — enforced at the DB level via migration index `group_members_user_id_group_id_unique`. Prevents the same user from joining the same group twice. No `role` column — all group members share equal permissions (Splitwise model).
+
+---
+
 ## 3. Relationships
 
 | From | Cardinality | To | FK Column (in DB) | Alias | ON DELETE |
@@ -122,6 +138,8 @@
 | `groups` | 1 → N | `members` | `members.group_id` | `members` / `group` | CASCADE |
 | `groups` | 1 → N | `expenses` | `expenses.group_id` | `expenses` / `group` | CASCADE |
 | `groups` | 1 → N | `settlements` | `settlements.group_id` | `settlements` / `group` | CASCADE |
+| `groups` | M ↔ N | `users` (via `group_members`) | `group_members.group_id` | `users` / `group` | CASCADE |
+| `users` | M ↔ N | `groups` (via `group_members`) | `group_members.user_id` | `groups` / `user` | CASCADE |
 | `members` | 1 → N | `expenses` | `expenses.paid_by` | `expensesPaid` / `payer` | CASCADE |
 | `members` | 1 → N | `expense_splits` | `expense_splits.member_id` | `expenseSplits` / `member` | CASCADE |
 | `members` | 1 → N | `settlements` (as payer) | `settlements.paid_by` | `settlementsPaid` / `payer` | CASCADE |
@@ -198,7 +216,7 @@ erDiagram
 
 ## 5. Indexes
 
-The following indexes are confirmed to exist based on the migrations and Sequelize model definitions. No `queryInterface.addIndex()` calls appear anywhere in the migration files — only the implicit indexes MySQL creates automatically.
+The following indexes are confirmed to exist based on the migrations and Sequelize model definitions.
 
 | Table | Column(s) | Index Type | Source |
 |---|---|---|---|
@@ -217,6 +235,10 @@ The following indexes are confirmed to exist based on the migrations and Sequeli
 | `users` | `id` | PRIMARY KEY (clustered) | Migration |
 | `users` | `email` | UNIQUE (`users_email`) | Migration |
 | `users` | `google_id` | UNIQUE (`users_google_id`) | Migration |
+| `group_members` | `id` | PRIMARY KEY (clustered) | Migration |
+| `group_members` | `user_id` | SECONDARY (`group_members_user_id`) | Migration |
+| `group_members` | `group_id` | SECONDARY (`group_members_group_id`) | Migration |
+| `group_members` | `user_id, group_id` | UNIQUE (`group_members_user_id_group_id_unique`) | Migration |
 
 **Explicit secondary indexes and unique indexes are defined via migrations to optimize common queries and safeguard relationships.**
 
@@ -245,7 +267,7 @@ Features implied by the codebase that have no corresponding data model:
 | Feature | Evidence | What is missing |
 |---|---|---|
 | **User accounts / authentication** *(partially addressed)* | `users` table and migration added (schema + model-level validation only) | Still needed: FK from `members` → `users`, invite tokens, repointing `expenses`/`expense_splits` to `users.id`, and full auth flow (JWT, Google OAuth) |
-| **Group membership by existing users** | Members are created inline with the group | A many-to-many `user_groups` join table if users could belong to multiple groups |
+| **Group membership by existing users** *(addressed)* | `group_members` join table added | `expenses`/`expense_splits` still reference the old `members` table — repointing those FKs is a separate upcoming step |
 | **Expense categories / tags** | Not present anywhere | A `categories` table and a `category_id` FK on `expenses` |
 | **Expense receipts / attachments** | Not present anywhere | A file-reference column or separate `attachments` table on `expenses` |
 | **Audit / activity log** | No event history | An `activity_log` table recording creates, deletes, and settlements for a group timeline |
