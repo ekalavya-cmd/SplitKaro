@@ -16,8 +16,13 @@ Configured via `VITE_API_URL` in the frontend `.env`.
 The backend port is set by `PORT` in the backend `.env` (default `3000`).
 
 ### Authentication
-**Not implemented.** All endpoints are fully public. No token, session cookie,
-or API key is required or checked.
+Protected endpoints require a valid JWT access token in the `Authorization` header:
+```
+Authorization: Bearer <accessToken>
+```
+Access tokens are issued by `POST /api/auth/login` and `POST /api/auth/register` (in the JSON body).
+Refresh tokens are delivered and read via an `httpOnly` cookie named `refreshToken` and are never
+included in the JSON response body.
 
 ### Content negotiation
 All requests and responses use `Content-Type: application/json`.  
@@ -582,3 +587,158 @@ Delete a recorded settlement. Wrapped in a transaction.
 | 5 | `POST /groups` validates in the controller instead of the service | POST endpoints | **Resolved**: Field validation moved into the service layer, keeping error catching in the controller. |
 | 6 | Error string hard-codes `₹` symbol | `POST /groups/:id/settlements` | **Resolved**: Removed `₹` from the server-side error string. |
 | 7 | Routing ambiguity on `/api/groups/settlements/:id` | `DELETE /groups/settlements/:id` | **Resolved**: Moved the DELETE route above the generic dynamic ID route in the backend router file. |
+
+---
+
+## Resource: Auth
+
+All auth endpoints live under `/api/auth`.
+
+---
+
+### `POST /api/auth/register`
+
+Create a new account with email + password and auto-issue tokens (auto-login after registration).
+
+**Auth:** None  
+**Request body**
+```json
+{
+  "name": "Alice",
+  "email": "alice@example.com",
+  "password": "supersecret123"
+}
+```
+
+| Field | Required | Type | Notes |
+|---|---|---|---|
+| `name` | Yes | string | Non-empty; max 100 characters |
+| `email` | Yes | string | Must be a valid email format |
+| `password` | Yes | string | 8–72 characters (72 is bcrypt's hard truncation limit — longer passwords are rejected) |
+
+**Response `201`**
+```json
+{
+  "message": "Registration successful.",
+  "user": {
+    "id": 1,
+    "name": "Alice",
+    "email": "alice@example.com",
+    "googleId": null,
+    "avatarUrl": null,
+    "isEmailVerified": false,
+    "createdAt": "2026-07-20T00:00:00.000Z",
+    "updatedAt": "2026-07-20T00:00:00.000Z"
+  },
+  "accessToken": "<jwt>"
+}
+```
+The `refreshToken` is set as an `httpOnly` cookie named `refreshToken` — it is **not** in the JSON body.
+
+**Error responses**
+
+| Status | Body | Condition |
+|---|---|---|
+| `400` | `{ "message": "<field-specific validation message>" }` | Missing/invalid input |
+| `409` | `{ "message": "An account with this email already exists." }` | Duplicate email |
+| `500` | `{ "message": "Something went wrong. Please try again." }` | Unexpected server error |
+
+---
+
+### `POST /api/auth/login`
+
+Authenticate with email + password and receive a fresh token pair.
+
+**Auth:** None  
+**Request body**
+```json
+{
+  "email": "alice@example.com",
+  "password": "supersecret123"
+}
+```
+
+**Response `200`**
+```json
+{
+  "message": "Login successful.",
+  "user": { "id": 1, "name": "Alice", "email": "alice@example.com", ... },
+  "accessToken": "<jwt>"
+}
+```
+The `refreshToken` is set as an `httpOnly` cookie — not in the JSON body.
+
+**Error responses**
+
+| Status | Body | Condition |
+|---|---|---|
+| `400` | `{ "message": "<field-specific validation message>" }` | Missing input |
+| `401` | `{ "message": "Invalid email or password." }` | Email not found or wrong password (deliberately generic — prevents email enumeration) |
+| `401` | `{ "message": "This account uses Google Sign-In. Please log in with Google." }` | Account has no password (Google-only) |
+| `500` | `{ "message": "Something went wrong. Please try again." }` | Unexpected server error |
+
+---
+
+### `POST /api/auth/refresh`
+
+Exchange a valid refresh token cookie for a new access token + rotated refresh token.
+The old refresh token is immediately invalidated on use (rotation).
+
+**Auth:** None (reads the `refreshToken` httpOnly cookie instead)  
+**Request body:** None  
+**Cookies required:** `refreshToken` (httpOnly cookie set by login/register/refresh)
+
+The cookie value is a self-contained composite string `{userId}.{tokenId}.{rawToken}` — the endpoint extracts the `userId` from it to locate the correct Redis key without requiring a separate header or query parameter.
+
+**Response `200`**
+```json
+{ "accessToken": "<new-jwt>" }
+```
+A new `refreshToken` cookie is also set (rotated).
+
+**Error responses**
+
+| Status | Body | Condition |
+|---|---|---|
+| `401` | `{ "message": "No refresh token provided." }` | Cookie missing |
+| `401` | `{ "message": "Invalid or expired refresh token. Please log in again." }` | Cookie malformed, Redis key not found, or hash mismatch |
+| `500` | `{ "message": "Something went wrong. Please try again." }` | Unexpected server error |
+
+---
+
+### `POST /api/auth/logout`
+
+Revoke the current session's refresh token in Redis and clear the cookie.
+
+**Auth:** Required (`Authorization: Bearer <accessToken>`)  
+**Request body:** None  
+**Cookies:** `refreshToken` cookie is read and the specific Redis entry is deleted (not just the cookie cleared)
+
+**Response `200`**
+```json
+{ "message": "Logged out successfully." }
+```
+
+**Error responses**
+
+| Status | Body | Condition |
+|---|---|---|
+| `401` | `{ "message": "Access token required" }` | No/malformed Authorization header |
+| `401` | `{ "message": "Access token expired" }` | Access token past its 15-minute TTL |
+| `401` | `{ "message": "Invalid access token" }` | Bad JWT signature or other error |
+
+---
+
+### `POST /api/auth/logout-all`
+
+Revoke **all** refresh tokens for the current user across all devices.
+
+**Auth:** Required (`Authorization: Bearer <accessToken>`)  
+**Request body:** None
+
+**Response `200`**
+```json
+{ "message": "Logged out from all devices." }
+```
+
+**Error responses:** Same auth errors as `POST /api/auth/logout`.
