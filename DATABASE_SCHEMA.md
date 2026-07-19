@@ -91,8 +91,8 @@
 |---|---|---|---|---|---|---|
 | `id` | `id` | `INT` AUTO_INCREMENT PK | No | Yes (PK) | — | `isInt`, `min: 1` |
 | `group_id` | `groupId` | `INT` FK → `groups.id` | No | No | — | `isInt` |
-| `paid_by` | `paidBy` | `INT` FK → `members.id` | No | No | — | `isInt` |
-| `paid_to` | `paidTo` | `INT` FK → `members.id` | No | No | — | `isInt` |
+| `paid_by` | `paidBy` | `INT` FK → `users.id` | No | No | — | `isInt` |
+| `paid_to` | `paidTo` | `INT` FK → `users.id` | No | No | — | `isInt` |
 | `amount` | `amount` | `DECIMAL(10,2)` | No | No | — | `isDecimal`, `min: 0` |
 | `date` | `date` | `DATETIME` | No | No | `CURRENT_TIMESTAMP` | `isDate` |
 | `created_at` | `createdAt` | `DATETIME` | No | No | `CURRENT_TIMESTAMP` | — |
@@ -145,8 +145,8 @@
 | `users` | M ↔ N | `groups` (via `group_members`) | `group_members.user_id` | `groups` / `user` | CASCADE |
 | `users` | 1 → N | `expenses` | `expenses.paid_by` | `expensesPaid` / `payer` | RESTRICT |
 | `users` | 1 → N | `expense_splits` | `expense_splits.user_id` | `expenseSplits` / `user` | RESTRICT |
-| `members` | 1 → N | `settlements` (as payer) | `settlements.paid_by` | `settlementsPaid` / `payer` | CASCADE |
-| `members` | 1 → N | `settlements` (as payee) | `settlements.paid_to` | `settlementsReceived` / `payee` | CASCADE |
+| `users` | 1 → N | `settlements` (as payer) | `settlements.paid_by` | `settlementsPaid` / `payer` | RESTRICT |
+| `users` | 1 → N | `settlements` (as payee) | `settlements.paid_to` | `settlementsReceived` / `payee` | RESTRICT |
 | `expenses` | 1 → N | `expense_splits` | `expense_splits.expense_id` | `splits` / `expense` | CASCADE |
 
 
@@ -236,6 +236,8 @@ The following indexes are confirmed to exist based on the migrations and Sequeli
 | `expense_splits` | `expense_id, user_id` | UNIQUE (`expense_splits_expense_id_user_id_unique`) | Migration + Model |
 | `settlements` | `id` | PRIMARY KEY (clustered) | Migration |
 | `settlements` | `group_id` | SECONDARY (`settlements_group_id`) | Migration |
+| `settlements` | `paid_by` | SECONDARY (`settlements_paid_by`) | Migration |
+| `settlements` | `paid_to` | SECONDARY (`settlements_paid_to`) | Migration |
 | `users` | `id` | PRIMARY KEY (clustered) | Migration |
 | `users` | `email` | UNIQUE (`users_email`) | Migration |
 | `users` | `google_id` | UNIQUE (`users_google_id`) | Migration |
@@ -245,8 +247,6 @@ The following indexes are confirmed to exist based on the migrations and Sequeli
 | `group_members` | `user_id, group_id` | UNIQUE (`group_members_user_id_group_id_unique`) | Migration |
 
 **Explicit secondary indexes and unique indexes are defined via migrations to optimize common queries and safeguard relationships.**
-
-MySQL InnoDB will also create implicit indexes for any remaining foreign key columns automatically (`paid_to` in `settlements`), but all critical query-filtering columns are explicitly indexed.
 
 ---
 
@@ -270,8 +270,8 @@ Features implied by the codebase that have no corresponding data model:
 
 | Feature | Evidence | What is missing |
 |---|---|---|
-| **User accounts / authentication** *(partially addressed)* | `users` table, `group_members` join, `groups.created_by`, and FK repointing done | Still needed: full auth flow (JWT, Google OAuth), settlements repointing (4b), members table drop (4c) |
-| **Group membership by existing users** *(addressed)* | `group_members` join table added | `settlements` still reference the old `members` table — repointing and members table drop are sub-steps 4b/4c |
+| **User accounts / authentication** *(partially addressed)* | All FK repointing done (expenses, expense_splits, settlements); `group_members` join and `groups.created_by` in place | Still needed: full auth flow (JWT, Google OAuth), members table drop (4c) |
+| **Group membership by existing users** *(addressed)* | `group_members` join table added | `members` table is now fully unreferenced by expenses, expense_splits, and settlements — it is orphaned and will be dropped in sub-step 4c |
 | **Expense categories / tags** | Not present anywhere | A `categories` table and a `category_id` FK on `expenses` |
 | **Expense receipts / attachments** | Not present anywhere | A file-reference column or separate `attachments` table on `expenses` |
 | **Audit / activity log** | No event history | An `activity_log` table recording creates, deletes, and settlements for a group timeline |
