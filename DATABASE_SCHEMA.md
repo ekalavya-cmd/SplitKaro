@@ -17,6 +17,7 @@
 | `expenses` | `Expenses` | A single payment made by one member on behalf of the group |
 | `expense_splits` | `ExpenseSplits` | Per-member share of a single expense (one row per member per expense) |
 | `settlements` | `Settlements` | A direct payment from one member to another to clear a debt |
+| `users` | `User` | A platform-level identity for authentication (password or Google OAuth) |
 
 ---
 
@@ -93,6 +94,24 @@
 | `date` | `date` | `DATETIME` | No | No | `CURRENT_TIMESTAMP` | `isDate` |
 | `created_at` | `createdAt` | `DATETIME` | No | No | `CURRENT_TIMESTAMP` | — |
 | `updated_at` | `updatedAt` | `DATETIME` | No | No | `CURRENT_TIMESTAMP` | — |
+
+---
+
+### `users`
+
+| Column | JS Property | Type | Nullable | Unique | Default | Model Validation |
+|---|---|---|---|---|---|---|
+| `id` | `id` | `INT` AUTO_INCREMENT PK | No | Yes (PK) | — | `isInt`, `min: 1` |
+| `name` | `name` | `VARCHAR(255)` | No | No | — | `notEmpty` |
+| `email` | `email` | `VARCHAR(255)` | No | **Yes** | — | `isEmail`, `notEmpty` |
+| `password_hash` | `passwordHash` | `VARCHAR(255)` | **Yes** | No | — | none |
+| `google_id` | `googleId` | `VARCHAR(255)` | **Yes** | **Yes** | — | none |
+| `avatar_url` | `avatarUrl` | `VARCHAR(255)` | **Yes** | No | — | none |
+| `is_email_verified` | `isEmailVerified` | `BOOLEAN` | No | No | `false` | none |
+| `created_at` | `createdAt` | `DATETIME` | No | No | `CURRENT_TIMESTAMP` | — |
+| `updated_at` | `updatedAt` | `DATETIME` | No | No | `CURRENT_TIMESTAMP` | — |
+
+> **Model-level validation:** At least one of `password_hash` or `google_id` must be non-null. A user must have signed up via password OR Google OAuth, never neither.
 
 ---
 
@@ -195,6 +214,9 @@ The following indexes are confirmed to exist based on the migrations and Sequeli
 | `expense_splits` | `expense_id, member_id` | UNIQUE (`expense_splits_expense_id_member_id_unique`) | Migration + Model |
 | `settlements` | `id` | PRIMARY KEY (clustered) | Migration |
 | `settlements` | `group_id` | SECONDARY (`settlements_group_id`) | Migration |
+| `users` | `id` | PRIMARY KEY (clustered) | Migration |
+| `users` | `email` | UNIQUE (`users_email`) | Migration |
+| `users` | `google_id` | UNIQUE (`users_google_id`) | Migration |
 
 **Explicit secondary indexes and unique indexes are defined via migrations to optimize common queries and safeguard relationships.**
 
@@ -222,7 +244,7 @@ Features implied by the codebase that have no corresponding data model:
 
 | Feature | Evidence | What is missing |
 |---|---|---|
-| **User accounts / authentication** | No auth anywhere in backend or frontend | A `users` table with credentials; a foreign key from `members` to `users`; a sessions or JWT tokens table |
+| **User accounts / authentication** *(partially addressed)* | `users` table and migration added (schema + model-level validation only) | Still needed: FK from `members` → `users`, invite tokens, repointing `expenses`/`expense_splits` to `users.id`, and full auth flow (JWT, Google OAuth) |
 | **Group membership by existing users** | Members are created inline with the group | A many-to-many `user_groups` join table if users could belong to multiple groups |
 | **Expense categories / tags** | Not present anywhere | A `categories` table and a `category_id` FK on `expenses` |
 | **Expense receipts / attachments** | Not present anywhere | A file-reference column or separate `attachments` table on `expenses` |
