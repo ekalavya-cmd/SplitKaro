@@ -21,7 +21,8 @@ module.exports = (sequelize, DataTypes) => {
         },
       },
 
-      memberId: {
+      // Renamed from member_id — DB column is now user_id (underscored: true handles the mapping)
+      userId: {
         type: DataTypes.INTEGER,
         allowNull: false,
         validate: {
@@ -46,7 +47,7 @@ module.exports = (sequelize, DataTypes) => {
       indexes: [
         {
           unique: true,
-          fields: ["expenseId", "memberId"],
+          fields: ["expenseId", "userId"],
         },
       ],
     },
@@ -59,10 +60,10 @@ module.exports = (sequelize, DataTypes) => {
       onDelete: "CASCADE",
     });
 
-    ExpenseSplits.belongsTo(models.Members, {
-      foreignKey: "memberId",
-      as: "member",
-      onDelete: "CASCADE",
+    ExpenseSplits.belongsTo(models.User, {
+      foreignKey: "userId",
+      as: "user",
+      onDelete: "RESTRICT",
     });
   };
 

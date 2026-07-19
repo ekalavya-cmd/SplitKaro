@@ -77,10 +77,10 @@ module.exports = (sequelize, DataTypes) => {
       onDelete: "CASCADE",
     });
 
-    Expenses.belongsTo(models.Members, {
+    Expenses.belongsTo(models.User, {
       foreignKey: "paidBy",
       as: "payer",
-      onDelete: "CASCADE",
+      onDelete: "RESTRICT",
     });
 
     Expenses.hasMany(models.ExpenseSplits, {

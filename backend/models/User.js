@@ -83,6 +83,16 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: "createdBy",
       as: "createdGroups",
     });
+
+    User.hasMany(models.Expenses, {
+      foreignKey: "paidBy",
+      as: "expensesPaid",
+    });
+
+    User.hasMany(models.ExpenseSplits, {
+      foreignKey: "userId",
+      as: "expenseSplits",
+    });
   };
 
   return User;
