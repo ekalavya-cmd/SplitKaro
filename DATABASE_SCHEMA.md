@@ -31,6 +31,8 @@
 | `id` | `id` | `INT` AUTO_INCREMENT PK | No | Yes (PK) | — | `isInt`, `min: 1` |
 | `name` | `name` | `VARCHAR(255)` | No | No | — | `notEmpty` |
 | `description` | `description` | `VARCHAR(255)` | **Yes** | No | — | none |
+| `created_by` | `createdBy` | `INT` FK → `users.id` | **Yes** | No | — | `isInt` |
+| `invite_token` | `inviteToken` | `VARCHAR(255)` | No | **Yes** | — | `notEmpty` |
 | `created_at` | `createdAt` | `DATETIME` | No | No | `CURRENT_TIMESTAMP` | — |
 | `updated_at` | `updatedAt` | `DATETIME` | No | No | `CURRENT_TIMESTAMP` | — |
 
@@ -139,6 +141,7 @@
 | `groups` | 1 → N | `expenses` | `expenses.group_id` | `expenses` / `group` | CASCADE |
 | `groups` | 1 → N | `settlements` | `settlements.group_id` | `settlements` / `group` | CASCADE |
 | `groups` | M ↔ N | `users` (via `group_members`) | `group_members.group_id` | `users` / `group` | CASCADE |
+| `users` | 1 → N | `groups` (as creator) | `groups.created_by` | `createdGroups` / `creator` | SET NULL |
 | `users` | M ↔ N | `groups` (via `group_members`) | `group_members.user_id` | `groups` / `user` | CASCADE |
 | `members` | 1 → N | `expenses` | `expenses.paid_by` | `expensesPaid` / `payer` | CASCADE |
 | `members` | 1 → N | `expense_splits` | `expense_splits.member_id` | `expenseSplits` / `member` | CASCADE |
@@ -221,6 +224,7 @@ The following indexes are confirmed to exist based on the migrations and Sequeli
 | Table | Column(s) | Index Type | Source |
 |---|---|---|---|
 | `groups` | `id` | PRIMARY KEY (clustered) | Migration |
+| `groups` | `invite_token` | UNIQUE (`groups_invite_token`) | Migration |
 | `members` | `id` | PRIMARY KEY (clustered) | Migration |
 | `members` | `group_id, email` | UNIQUE (`members_group_id_email_unique`) | Migration + Model |
 | `expenses` | `id` | PRIMARY KEY (clustered) | Migration |
@@ -266,7 +270,7 @@ Features implied by the codebase that have no corresponding data model:
 
 | Feature | Evidence | What is missing |
 |---|---|---|
-| **User accounts / authentication** *(partially addressed)* | `users` table and migration added (schema + model-level validation only) | Still needed: FK from `members` → `users`, invite tokens, repointing `expenses`/`expense_splits` to `users.id`, and full auth flow (JWT, Google OAuth) |
+| **User accounts / authentication** *(partially addressed)* | `users` table and migration added (schema + model-level validation only) | Still needed: FK from `members` → `users`, repointing `expenses`/`expense_splits` to `users.id`, and full auth flow (JWT, Google OAuth) |
 | **Group membership by existing users** *(addressed)* | `group_members` join table added | `expenses`/`expense_splits` still reference the old `members` table — repointing those FKs is a separate upcoming step |
 | **Expense categories / tags** | Not present anywhere | A `categories` table and a `category_id` FK on `expenses` |
 | **Expense receipts / attachments** | Not present anywhere | A file-reference column or separate `attachments` table on `expenses` |

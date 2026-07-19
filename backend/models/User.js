@@ -78,6 +78,11 @@ module.exports = (sequelize, DataTypes) => {
       otherKey: "groupId",
       as: "groups",
     });
+
+    User.hasMany(models.Groups, {
+      foreignKey: "createdBy",
+      as: "createdGroups",
+    });
   };
 
   return User;

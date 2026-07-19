@@ -25,6 +25,24 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: true,
       },
+
+      // FK → users.id — nullable so that deleting a user doesn't cascade-delete the group
+      createdBy: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        validate: {
+          isInt: true,
+        },
+      },
+
+      // Shareable invite link token — unique per group
+      inviteToken: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notEmpty: true,
+        },
+      },
     },
 
     { tableName: "groups", timestamps: true, underscored: true },
@@ -51,6 +69,11 @@ module.exports = (sequelize, DataTypes) => {
     Groups.hasMany(models.Settlements, {
       foreignKey: "groupId",
       as: "settlements",
+    });
+
+    Groups.belongsTo(models.User, {
+      foreignKey: "createdBy",
+      as: "creator",
     });
   };
 
