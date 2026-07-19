@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
+require("./config/redis.config");
 
 const { sequelize } = require("./models");
 const groupRoutes = require("./routes/groupRoutes");
