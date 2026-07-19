@@ -13,7 +13,6 @@
 | Table | Sequelize Model | Purpose |
 |---|---|---|
 | `groups` | `Groups` | A named collection of people sharing expenses |
-| `members` | `Members` | An individual participant who belongs to exactly one group |
 | `expenses` | `Expenses` | A single payment made by one member on behalf of the group |
 | `expense_splits` | `ExpenseSplits` | Per-member share of a single expense (one row per member per expense) |
 | `settlements` | `Settlements` | A direct payment from one member to another to clear a debt |
@@ -36,23 +35,6 @@
 | `created_at` | `createdAt` | `DATETIME` | No | No | `CURRENT_TIMESTAMP` | — |
 | `updated_at` | `updatedAt` | `DATETIME` | No | No | `CURRENT_TIMESTAMP` | — |
 
----
-
-### `members`
-
-| Column | JS Property | Type | Nullable | Unique | Default | Model Validation |
-|---|---|---|---|---|---|---|
-| `id` | `id` | `INT` AUTO_INCREMENT PK | No | Yes (PK) | — | `isInt`, `min: 1` |
-| `group_id` | `groupId` | `INT` FK → `groups.id` | No | No | — | `isInt` |
-| `name` | `name` | `VARCHAR(255)` | No | No | — | `notEmpty` |
-| `email` | `email` | `VARCHAR(255)` | No | **No (composite key)** | — | `isEmail`, `notEmpty` |
-| `phone` | `phone` | `VARCHAR(255)` | No | No | — | `notEmpty` |
-| `created_at` | `createdAt` | `DATETIME` | No | No | `CURRENT_TIMESTAMP` | — |
-| `updated_at` | `updatedAt` | `DATETIME` | No | No | `CURRENT_TIMESTAMP` | — |
-
-> **Note:** `email` is unique per-group (composite unique key `(group_id, email)`). A single person can be a member of different groups using the same email address, but cannot join the same group twice with the same email.
-
----
 
 ### `expenses`
 
@@ -137,7 +119,6 @@
 
 | From | Cardinality | To | FK Column (in DB) | Alias | ON DELETE |
 |---|---|---|---|---|---|
-| `groups` | 1 → N | `members` | `members.group_id` | `members` / `group` | CASCADE |
 | `groups` | 1 → N | `expenses` | `expenses.group_id` | `expenses` / `group` | CASCADE |
 | `groups` | 1 → N | `settlements` | `settlements.group_id` | `settlements` / `group` | CASCADE |
 | `groups` | M ↔ N | `users` (via `group_members`) | `group_members.group_id` | `users` / `group` | CASCADE |
@@ -159,16 +140,6 @@ erDiagram
         int id PK
         varchar name
         varchar description
-        datetime created_at
-        datetime updated_at
-    }
-
-    members {
-        int id PK
-        int group_id FK
-        varchar name
-        varchar email "UNIQUE(group_id, email)"
-        varchar phone
         datetime created_at
         datetime updated_at
     }
@@ -205,13 +176,8 @@ erDiagram
         datetime updated_at
     }
 
-    groups ||--o{ members : "has"
     groups ||--o{ expenses : "has"
     groups ||--o{ settlements : "has"
-    members ||--o{ expenses : "paid_by"
-    members ||--o{ expense_splits : "owes"
-    members ||--o{ settlements : "paid_by"
-    members ||--o{ settlements : "paid_to"
     expenses ||--o{ expense_splits : "split into"
 ```
 
@@ -225,8 +191,6 @@ The following indexes are confirmed to exist based on the migrations and Sequeli
 |---|---|---|---|
 | `groups` | `id` | PRIMARY KEY (clustered) | Migration |
 | `groups` | `invite_token` | UNIQUE (`groups_invite_token`) | Migration |
-| `members` | `id` | PRIMARY KEY (clustered) | Migration |
-| `members` | `group_id, email` | UNIQUE (`members_group_id_email_unique`) | Migration + Model |
 | `expenses` | `id` | PRIMARY KEY (clustered) | Migration |
 | `expenses` | `group_id` | SECONDARY (`expenses_group_id`) | Migration |
 | `expenses` | `paid_by` | SECONDARY (`expenses_paid_by`) | Migration |
@@ -258,7 +222,6 @@ The following indexes are confirmed to exist based on the migrations and Sequeli
 
 | Issue | Detail |
 |---|---|
-| Members are per-group, not per-user | There is no concept of a platform-level user. The same real person can appear as multiple unlinked `members` rows across different groups. This also means a person cannot view their own balance across groups. |
 | No currency field | All monetary values are stored as plain `DECIMAL(10,2)` with no currency column. The UI hard-codes `₹` (Indian Rupee). Multi-currency support would require a schema change. |
 | `description` on `groups` and `expenses` is unbounded VARCHAR(255) | Sequelize maps `DataTypes.STRING` to `VARCHAR(255)`. Long descriptions are silently truncated. A `TEXT` column would be more appropriate for the expense description. |
 
@@ -270,9 +233,17 @@ Features implied by the codebase that have no corresponding data model:
 
 | Feature | Evidence | What is missing |
 |---|---|---|
-| **User accounts / authentication** *(partially addressed)* | All FK repointing done (expenses, expense_splits, settlements); `group_members` join and `groups.created_by` in place | Still needed: full auth flow (JWT, Google OAuth), members table drop (4c) |
-| **Group membership by existing users** *(addressed)* | `group_members` join table added | `members` table is now fully unreferenced by expenses, expense_splits, and settlements — it is orphaned and will be dropped in sub-step 4c |
+| **User accounts / authentication** *(partially addressed)* | Auth schema added, but API implementation still needed | Still needed: full auth flow (JWT, Google OAuth) |
+| **Group membership by existing users** *(addressed)* | `group_members` join table added, `users` now act as members | Fully addressed — the old `members` table concept is completely retired and dropped |
 | **Expense categories / tags** | Not present anywhere | A `categories` table and a `category_id` FK on `expenses` |
 | **Expense receipts / attachments** | Not present anywhere | A file-reference column or separate `attachments` table on `expenses` |
 | **Audit / activity log** | No event history | An `activity_log` table recording creates, deletes, and settlements for a group timeline |
 | **Notifications** | Not present anywhere | A `notifications` table or push-token column on users |
+
+---
+
+## 7. Migration Notes
+
+*   **check_settlement_self_pay**: A check constraint (`CHECK (paid_by <> paid_to)`) exists on the `settlements` table. It was dropped and recreated during the `repair-settlements-fk-repoint` migration to bypass a MySQL limitation that blocks adding a foreign key referential action to a column that is actively referenced by a check constraint.
+
+*   **Sub-step 4c - members table dropped**: The `members` table was fully retired and dropped, completing the foundational transition from group-scoped members to platform-level `users`. All relationships are now mapped properly to `users`.

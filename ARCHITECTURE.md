@@ -4,7 +4,7 @@
 
 ## 1. Project Overview
 
-SplitKaro is a bill-splitting web application that lets users create groups, add members, record shared expenses (split equally, by exact amounts, or by percentage), track per-member balances, generate optimised settlement suggestions, and record or delete actual payments between members. The project is a classic two-tier client/server application: a React + Vite single-page app communicates with an Express REST API backed by a MySQL database managed through Sequelize ORM.
+SplitKaro is a bill-splitting web application that lets users create groups, add users, record shared expenses (split equally, by exact amounts, or by percentage), track per-user balances, generate optimised settlement suggestions, and record or delete actual payments between users. The project is a classic two-tier client/server application: a React + Vite single-page app communicates with an Express REST API backed by a MySQL database managed through Sequelize ORM.
 
 ---
 
@@ -45,7 +45,7 @@ SplitKaro is a bill-splitting web application that lets users create groups, add
 ┌───────────────────────▼────────────────────────────────────────┐
 │               MySQL  (splitKaro_db)                            │
 │                                                                │
-│  Tables: groups · members · expenses · expense_splits          │
+│  Tables: groups · users · group_members · expenses             │
 │          settlements                                            │
 └────────────────────────────────────────────────────────────────┘
 ```
@@ -56,7 +56,7 @@ SplitKaro is a bill-splitting web application that lets users create groups, add
 2. `splitKaroService.createExpense()` calls `POST /api/groups/:id/expenses` via the axios instance.
 3. Express routes the request to `groupController.createExpense`.
 4. Controller calls `groupService.createExpenseForGroup()`.
-5. Service validates all inputs (payer membership, split type, amounts), computes split rows, then creates `Expenses` + `ExpenseSplits` records inside a single Sequelize transaction.
+5. Service validates all inputs (payer is part of the group, split type, amounts), computes split rows, then creates `Expenses` + `ExpenseSplits` records inside a single Sequelize transaction.
 6. Controller responds `201` with the new expense and splits.
 7. The page navigates back to the Dashboard, which re-fetches expenses and balances.
 
@@ -76,14 +76,13 @@ splitKaro/
 │   ├── models/
 │   │   ├── index.js            # Auto-loads all models, runs associations
 │   │   ├── Groups.js
-│   │   ├── Members.js
 │   │   ├── Expenses.js
 │   │   ├── ExpenseSplits.js
 │   │   └── Settlements.js
 │   ├── routes/
 │   │   ├── groupRoutes.js      # 9 routes under /api/groups
 │   │   └── expenseRoutes.js    # 1 route: DELETE /api/expenses/:id
-│   ├── seeders/                # Sequelize seed files (groups, members, expenses, splits, settlements)
+│   ├── seeders/                # Sequelize seed files
 │   ├── services/
 │   │   ├── groupService.js     # Core business logic (balance calc, settlement algorithm, transactions)
 │   │   └── expenseService.js   # Thin service: delete expense in a transaction
@@ -143,7 +142,7 @@ All database interaction goes through Sequelize models. The `models/index.js` au
 `equalSplitAmount.js` operates in integer cents (`totalAmount * 100`) and distributes penny remainders one-by-one to avoid floating-point drift. The same pattern is used in the percentage-split path in `groupService.js`.
 
 ### Server-side balance calculation
-Member balances and settlement suggestions are computed on the server in `calculateGroupBalances` and `suggestSettlementForGroup`. The suggestion algorithm is a greedy two-pointer approach (largest creditor vs. largest debtor) that minimises the number of transactions.
+User balances and settlement suggestions are computed on the server in `calculateGroupBalances` and `suggestSettlementForGroup`. The suggestion algorithm is a greedy two-pointer approach (largest creditor vs. largest debtor) that minimises the number of transactions.
 
 ### Axios instance with centralised error interceptor
 `splitKaroAPI.js` creates a single axios instance pointed at `VITE_API_URL`. A response interceptor normalises all error shapes to `{ status, message }` before they reach service or component code.
