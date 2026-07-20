@@ -250,10 +250,10 @@ row per group member, all in a single transaction.
 **`splits` object shape (for `exact` and `percentage`):**
 ```json
 {
-  "<memberId>": <value>
+  "<userId>": <value>
 }
 ```
-Keys are member ID integers serialised as strings (JavaScript object keys).
+Keys are user ID integers serialised as strings (JavaScript object keys).
 Values are the amount (for `exact`) or the percentage (for `percentage`).
 **Every member in the group must appear as a key** — partial splits are rejected.
 
@@ -278,8 +278,8 @@ Values are the amount (for `exact`) or the percentage (for `percentage`).
     "createdAt": "..."
   },
   "splits": [
-    { "expenseId": 6, "memberId": 1, "amountOwed": "400.00" },
-    { "expenseId": 6, "memberId": 2, "amountOwed": "400.00" }
+    { "expenseId": 6, "userId": 1, "amountOwed": "400.00" },
+    { "expenseId": 6, "userId": 2, "amountOwed": "400.00" }
   ]
 }
 ```

@@ -125,6 +125,7 @@
 | Bug | Status | Description |
 |---|---|---|
 | groupService.js references dropped Members model | 🐛 | The `members` table was retired during the auth schema migration. `groupService.js` read paths still query the old `Members` model. **Fix in progress:** sub-steps R1, R2, and R3 are done. Next up: R4 (activity). R5 (join via invite link) and R6 (route authorization) are separate new-functionality items. See `ARCHITECTURE.md §5 Known Gaps` for more detail. |
+| createExpenseForGroup schema reference bug | ✅ | **Resolved**: Discovered out-of-sequence during R3 testing. Expense creation was still referencing the deleted `Members` model when validating users and creating splits. Refactored to use the new `User` + `GroupMember` schema. |
 | API error key mismatch | ✅ | **Resolved**: Updated axios interceptor to read `data?.message`. Backend validation/error messages are now correctly shown in the UI. |
 | Equal split preview wrong | 🐛 | AddExpense.jsx previews `amount / members.length` (floating-point) but the server uses integer-cent math with penny-remainder distribution — the preview can show different values than what gets stored |
 | Nav links cause full-page reload | ✅ | **Resolved**: Swapped `<a href="...">` nav tags for React Router's `<Link>` components in Layout.jsx. Navigation now works client-side without full-page reloads. |

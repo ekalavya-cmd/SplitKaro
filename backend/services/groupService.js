@@ -115,20 +115,20 @@ async function createExpenseForGroup(groupId, expenseData) {
 
   const group = await Groups.findByPk(groupId, {
     include: {
-      model: Members,
-      as: "members",
+      model: User,
+      as: "users",
       attributes: ["id", "name"],
-      separate: true,
-      order: [["id", "ASC"]],
+      through: { attributes: [] },
     },
+    order: [[{ model: User, as: "users" }, "id", "ASC"]],
   });
 
   if (!group) {
     throw { status: 404, message: "Group not found" };
   }
 
-  const members = group.members;
-  if (!members || members.length === 0) {
+  const users = group.users;
+  if (!users || users.length === 0) {
     throw {
       status: 400,
       message: "Group must have members before adding expenses",
@@ -136,7 +136,7 @@ async function createExpenseForGroup(groupId, expenseData) {
   }
 
   const payerId = Number(paid_by);
-  if (!members.some((member) => member.id === payerId)) {
+  if (!users.some((user) => user.id === payerId)) {
     throw {
       status: 400,
       message: "paid_by must be a valid member of the group",
@@ -156,10 +156,10 @@ async function createExpenseForGroup(groupId, expenseData) {
   let splitsData;
 
   if (split_type === "equal") {
-    const sharedAmount = splitAmount(totalAmount, members.length);
-    splitsData = members.map((member, index) => ({
+    const sharedAmount = splitAmount(totalAmount, users.length);
+    splitsData = users.map((user, index) => ({
       expenseId: null,
-      memberId: member.id,
+      userId: user.id,
       amountOwed: (sharedAmount[index] / 100).toFixed(2),
     }));
   } else if (split_type === "exact") {
@@ -170,26 +170,26 @@ async function createExpenseForGroup(groupId, expenseData) {
       };
     }
 
-    const memberIds = members.map((member) => member.id);
-    const splitMemberIds = Object.keys(splits).map((id) => Number(id));
+    const userIds = users.map((user) => user.id);
+    const splitUserIds = Object.keys(splits).map((id) => Number(id));
 
-    const invalidMemberIds = splitMemberIds.filter(
-      (id) => !memberIds.includes(id),
+    const invalidUserIds = splitUserIds.filter(
+      (id) => !userIds.includes(id),
     );
-    if (invalidMemberIds.length > 0) {
+    if (invalidUserIds.length > 0) {
       throw {
         status: 400,
-        message: `Invalid member IDs in splits: ${invalidMemberIds.join(", ")}`,
+        message: `Invalid member IDs in splits: ${invalidUserIds.join(", ")}`,
       };
     }
 
-    const missingMemberIds = memberIds.filter(
-      (id) => !splitMemberIds.includes(id),
+    const missingUserIds = userIds.filter(
+      (id) => !splitUserIds.includes(id),
     );
-    if (missingMemberIds.length > 0) {
+    if (missingUserIds.length > 0) {
       throw {
         status: 400,
-        message: `Missing splits for member IDs: ${missingMemberIds.join(", ")}`,
+        message: `Missing splits for member IDs: ${missingUserIds.join(", ")}`,
       };
     }
 
@@ -205,10 +205,10 @@ async function createExpenseForGroup(groupId, expenseData) {
       };
     }
 
-    splitsData = memberIds.map((memberId) => ({
+    splitsData = userIds.map((userId) => ({
       expenseId: null,
-      memberId,
-      amountOwed: Number(splits[memberId]).toFixed(2),
+      userId,
+      amountOwed: Number(splits[userId]).toFixed(2),
     }));
   } else if (split_type === "percentage") {
     if (!splits || typeof splits !== "object") {
@@ -218,26 +218,26 @@ async function createExpenseForGroup(groupId, expenseData) {
       };
     }
 
-    const memberIds = members.map((member) => member.id);
-    const splitMemberIds = Object.keys(splits).map((id) => Number(id));
+    const userIds = users.map((user) => user.id);
+    const splitUserIds = Object.keys(splits).map((id) => Number(id));
 
-    const invalidMemberIds = splitMemberIds.filter(
-      (id) => !memberIds.includes(id),
+    const invalidUserIds = splitUserIds.filter(
+      (id) => !userIds.includes(id),
     );
-    if (invalidMemberIds.length > 0) {
+    if (invalidUserIds.length > 0) {
       throw {
         status: 400,
-        message: `Invalid member IDs in splits: ${invalidMemberIds.join(", ")}`,
+        message: `Invalid member IDs in splits: ${invalidUserIds.join(", ")}`,
       };
     }
 
-    const missingMemberIds = memberIds.filter(
-      (id) => !splitMemberIds.includes(id),
+    const missingUserIds = userIds.filter(
+      (id) => !splitUserIds.includes(id),
     );
-    if (missingMemberIds.length > 0) {
+    if (missingUserIds.length > 0) {
       throw {
         status: 400,
-        message: `Missing splits for member IDs: ${missingMemberIds.join(", ")}`,
+        message: `Missing splits for member IDs: ${missingUserIds.join(", ")}`,
       };
     }
 
@@ -253,8 +253,8 @@ async function createExpenseForGroup(groupId, expenseData) {
       };
     }
 
-    const percentageAmounts = memberIds.map((memberId) => {
-      const percentage = Number(splits[memberId]);
+    const percentageAmounts = userIds.map((userId) => {
+      const percentage = Number(splits[userId]);
       return Math.round((totalAmount * percentage) / 100);
     });
 
@@ -272,9 +272,9 @@ async function createExpenseForGroup(groupId, expenseData) {
       }
     }
 
-    splitsData = memberIds.map((memberId, index) => ({
+    splitsData = userIds.map((userId, index) => ({
       expenseId: null,
-      memberId,
+      userId,
       amountOwed: (percentageAmounts[index] / 100).toFixed(2),
     }));
   }
