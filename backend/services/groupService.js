@@ -365,20 +365,20 @@ async function getExpensesForGroup(groupId) {
 async function calculateGroupBalances(groupId) {
   const group = await Groups.findByPk(groupId, {
     include: {
-      model: Members,
-      as: "members",
+      model: User,
+      as: "users",
       attributes: ["id", "name"],
-      separate: true,
-      order: [["id", "ASC"]],
+      through: { attributes: [] },
     },
+    order: [[{ model: User, as: "users" }, "id", "ASC"]],
   });
 
   if (!group) {
     throw { status: 404, message: "Group not found" };
   }
 
-  const members = group.members;
-  if (!members || members.length === 0) {
+  const users = group.users;
+  if (!users || users.length === 0) {
     throw { status: 400, message: "Group must have members" };
   }
 
@@ -389,7 +389,7 @@ async function calculateGroupBalances(groupId) {
       {
         model: ExpenseSplits,
         as: "splits",
-        attributes: ["memberId", "amountOwed"],
+        attributes: ["userId", "amountOwed"],
         separate: true,
       },
     ],
@@ -401,10 +401,10 @@ async function calculateGroupBalances(groupId) {
   });
 
   const balances = new Map();
-  members.forEach((member) => {
-    balances.set(member.id, {
-      member_id: member.id,
-      name: member.name,
+  users.forEach((user) => {
+    balances.set(user.id, {
+      user_id: user.id,
+      name: user.name,
       total_paid: 0,
       total_owed: 0,
       settlements_received: 0,
@@ -422,11 +422,11 @@ async function calculateGroupBalances(groupId) {
     }
 
     expense.splits.forEach((split) => {
-      const memberId = split.memberId;
+      const userId = split.userId;
       const amountOwed = parseFloat(split.amountOwed);
 
-      if (balances.has(memberId)) {
-        balances.get(memberId).total_owed += amountOwed;
+      if (balances.has(userId)) {
+        balances.get(userId).total_owed += amountOwed;
       }
     });
   });
@@ -445,23 +445,23 @@ async function calculateGroupBalances(groupId) {
     }
   });
 
-  const result = Array.from(balances.values()).map((member) => {
-    member.balance =
+  const result = Array.from(balances.values()).map((user) => {
+    user.balance =
       Math.round(
-        (member.total_paid -
-          member.total_owed -
-          member.settlements_received +
-          member.settlements_paid) *
+        (user.total_paid -
+          user.total_owed -
+          user.settlements_received +
+          user.settlements_paid) *
           100,
       ) / 100;
     return {
-      member_id: member.member_id,
-      name: member.name,
-      balance: member.balance,
+      user_id: user.user_id,
+      name: user.name,
+      balance: user.balance,
     };
   });
 
-  const totalBalance = result.reduce((sum, member) => sum + member.balance, 0);
+  const totalBalance = result.reduce((sum, user) => sum + user.balance, 0);
   const roundedTotal = Math.round(totalBalance * 100) / 100;
 
   if (Math.abs(roundedTotal) > 0.01) {
@@ -470,6 +470,8 @@ async function calculateGroupBalances(groupId) {
       message: `Balance calculation error: sum of balances (${roundedTotal}) does not equal zero. This indicates a bug in the calculation logic.`,
     };
   }
+
+  logger.debug(`Calculated balances for group id ${groupId} with ${result.length} members`);
 
   return result;
 }
@@ -512,11 +514,11 @@ async function suggestSettlementForGroup(groupId) {
 
     settlements.push({
       from: {
-        id: debtor.member_id,
+        id: debtor.user_id,
         name: debtor.name,
       },
       to: {
-        id: creditor.member_id,
+        id: creditor.user_id,
         name: creditor.name,
       },
       amount: roundedAmount,

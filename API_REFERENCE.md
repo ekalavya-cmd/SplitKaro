@@ -352,8 +352,8 @@ A positive balance means the member is owed money; negative means they owe money
 {
   "message": "Balances calculated successfully",
   "balances": [
-    { "member_id": 1, "name": "Alice", "balance": 650.00 },
-    { "member_id": 2, "name": "Bob",   "balance": -250.00 }
+    { "user_id": 1, "name": "Alice", "balance": 650.00 },
+    { "user_id": 2, "name": "Bob",   "balance": -250.00 }
   ]
 }
 ```
