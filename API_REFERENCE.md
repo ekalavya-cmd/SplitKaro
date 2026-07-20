@@ -165,7 +165,66 @@ added as its first member, and a unique `inviteToken` is generated.
 | `500` | `{ "message": "Something went wrong. Please try again." }` | Unexpected server/DB error |
 
 > **Note:** Members are no longer added inline during group creation. Other users
-> join later using the returned `inviteToken` (join flow pending R5).
+> join later using the returned `inviteToken` via the endpoints below.
+
+---
+
+### `GET /groups/invite/:token`
+
+Retrieve basic group information to preview an invitation before joining. Does NOT return the full member list.
+
+**Auth:** None  
+**Path param:** `token` — string (the `inviteToken` returned during group creation)  
+**Query params:** None  
+**Request body:** None
+
+**Response `200`**
+```json
+{
+  "id": 3,
+  "name": "Weekend Trip",
+  "description": "Optional group description",
+  "memberCount": 1
+}
+```
+
+**Error responses**
+
+| Status | Body | Condition |
+|---|---|---|
+| `404` | `{ "message": "Invalid or expired invite link." }` | Token does not match any group |
+| `500` | `{ "message": "Something went wrong. Please try again." }` | Unexpected server/DB error |
+
+---
+
+### `POST /groups/invite/:token/join`
+
+Join a group using its invite token.
+
+**Auth:** Required (`Authorization: Bearer <accessToken>`)  
+**Path param:** `token` — string (the `inviteToken`)  
+**Request body:** None
+
+**Response `200`**
+```json
+{
+  "message": "Successfully joined the group",
+  "group": {
+    "id": 3,
+    "name": "Weekend Trip",
+    "description": "Optional group description"
+  }
+}
+```
+
+**Error responses**
+
+| Status | Body | Condition |
+|---|---|---|
+| `401` | `{ "message": "Access token required" }` | No/malformed Authorization header |
+| `404` | `{ "message": "Invalid or expired invite link." }` | Token does not match any group |
+| `409` | `{ "message": "You are already a member of this group." }` | The authenticated user is already in the group |
+| `500` | `{ "message": "Something went wrong. Please try again." }` | Unexpected server/DB error |
 
 ---
 
@@ -544,6 +603,8 @@ Delete a recorded settlement. Wrapped in a transaction.
 |---|---|---|
 | `GET` | `/api/groups` | List all groups |
 | `POST` | `/api/groups` | Create a group with members |
+| `GET` | `/api/groups/invite/:token` | Preview a group by its invite token |
+| `POST` | `/api/groups/invite/:token/join` | Join a group using its invite token |
 | `GET` | `/api/groups/:id` | Get a group with its members |
 | `GET` | `/api/groups/:id/expenses` | List all expenses for a group |
 | `POST` | `/api/groups/:id/expenses` | Add an expense to a group |
@@ -554,7 +615,7 @@ Delete a recorded settlement. Wrapped in a transaction.
 | `DELETE` | `/api/groups/settlements/:id` | Delete a settlement record |
 | `DELETE` | `/api/expenses/:id` | Delete an expense and its splits |
 
-**Total: 11 endpoints across 2 routers.**
+**Total: 13 endpoints across 2 routers.**
 
 ---
 

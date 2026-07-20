@@ -27,6 +27,7 @@
 | ✅ List all groups | GET `/api/groups` — returns all groups (no members included). Live tested and verified. |
 | ✅ View group detail | GET `/api/groups/:id` — queries group and members via `User` and `GroupMember` association (R2 refactor). |
 | ✅ Group selector (UI) | The `<select>` dropdown UI itself is fine; it will resume populating correctly once the underlying GET `/api/groups` read path is unbroken by R2. |
+| ✅ Join group via invite link | GET `/api/groups/invite/:token` previews the group (no member list), and POST `/api/groups/invite/:token/join` adds the authenticated user to the group via the `group_members` join table. |
 
 ### Member Management
 | Feature | Current behaviour |
@@ -147,7 +148,7 @@
 ### Group Management
 | Feature | Status | Notes |
 |---|---|---|
-| Invite members via link or email | ⏳ | No invite mechanism of any kind |
+| Invite members via email | ⏳ | Link-based joining is implemented (see §1), but email-based invitations are not built |
 | Member profile / avatar | ⏳ | Only name, email, phone stored |
 | Member phone validation | ⏳ | Phone is stored as free-text VARCHAR; no format validation |
 
@@ -196,7 +197,7 @@
 
 | Layer | ✅ Done | 🐛 Broken | 🚧 Partial | ⏳ Not started |
 |---|---|---|---|---|
-| Backend (API endpoints) | 5 expense/delete + 5 auth + 4 group = 14 | 0 group endpoints | 2 | 10+ |
+| Backend (API endpoints) | 5 expense/delete + 5 auth + 6 group = 16 | 0 group endpoints | 2 | 10+ |
 | Frontend (pages / UI flows) | 5 pages shipped | Group-dependent UI (balance cards, member dropdowns) | 4 gaps within shipped pages | Auth UI (login/register pages, token refresh interceptor) |
 | Infrastructure | Winston logging | — | 0 | 6 |
 

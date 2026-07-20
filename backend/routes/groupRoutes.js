@@ -6,6 +6,8 @@ const { authenticate } = require("../middleware/auth.middleware");
 router.get("/", groupcontroller.fetchGroups);
 router.post("/", authenticate, groupcontroller.createGroup);
 router.delete("/settlements/:id", groupcontroller.removeSettlement);
+router.get("/invite/:token", groupcontroller.getGroupByInviteToken);
+router.post("/invite/:token/join", authenticate, groupcontroller.joinGroupViaInvite);
 router.get("/:id", groupcontroller.fetchGroup);
 router.get("/:id/expenses", groupcontroller.fetchExpenses);
 router.get("/:id/balances", groupcontroller.fetchBalances);
