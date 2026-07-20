@@ -121,19 +121,15 @@ Members are ordered by `id ASC`.
 
 ### `POST /groups`
 
-Create a new group with its initial set of members. Both the group row and all
-member rows are inserted in a single database transaction.
+Create a new group. The authenticated user creating the group is automatically
+added as its first member, and a unique `inviteToken` is generated.
 
-**Auth:** None  
+**Auth:** Required (`Authorization: Bearer <accessToken>`)  
 **Request body**
 ```json
 {
   "name": "Weekend Trip",
-  "description": "Optional group description",
-  "members": [
-    { "name": "Alice", "email": "alice@example.com", "phone": "111-111-1111" },
-    { "name": "Bob",   "email": "bob@example.com",   "phone": "222-222-2222" }
-  ]
+  "description": "Optional group description"
 }
 ```
 
@@ -141,34 +137,19 @@ member rows are inserted in a single database transaction.
 |---|---|---|---|
 | `name` | Yes | string | Non-empty |
 | `description` | No | string | Stored as NULL if omitted |
-| `members` | Yes | array | Non-empty; each item must have `name`, `email`, and `phone` |
-| `members[].name` | Yes | string | — |
-| `members[].email` | Yes | string | Must be globally unique across all members in all groups |
-| `members[].phone` | Yes | string | No format validation at DB level |
 
 **Response `201`**
 ```json
 {
   "message": "Group created successfully",
-  "result": {
-    "group": {
-      "id": 3,
-      "name": "Weekend Trip",
-      "description": "Optional group description",
-      "updatedAt": "2026-07-15T00:00:00.000Z",
-      "createdAt": "2026-07-15T00:00:00.000Z"
-    },
-    "members": [
-      {
-        "id": 5,
-        "name": "Alice",
-        "email": "alice@example.com",
-        "phone": "111-111-1111",
-        "groupId": 3,
-        "updatedAt": "...",
-        "createdAt": "..."
-      }
-    ]
+  "group": {
+    "id": 3,
+    "name": "Weekend Trip",
+    "description": "Optional group description",
+    "createdBy": 1,
+    "inviteToken": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0",
+    "updatedAt": "2026-07-20T00:00:00.000Z",
+    "createdAt": "2026-07-20T00:00:00.000Z"
   }
 }
 ```
@@ -177,13 +158,14 @@ member rows are inserted in a single database transaction.
 
 | Status | Body | Condition |
 |---|---|---|
-| `400` | `{ "message": "Group name and at least one member is required, and members must be a non-empty array" }` | `name` missing, `members` missing, or `members` is empty |
-| `400` | `{ "message": "Each member must have name, email, and phone" }` | Any member object is missing a required field |
-| `400` | `{ "message": "A member with this email already exists" }` | Any email is already in the `members` table (`SequelizeUniqueConstraintError`) |
-| `500` | `{ "message": "Internal Server Error" }` | Unexpected DB error; transaction is rolled back |
+| `400` | `{ "message": "Group name is required." }` | `name` is missing or empty |
+| `401` | `{ "message": "Access token required" }` | No/malformed Authorization header |
+| `401` | `{ "message": "Access token expired" }` | Token expired |
+| `401` | `{ "message": "Invalid access token" }` | Token invalid |
+| `500` | `{ "message": "Something went wrong. Please try again." }` | Unexpected server/DB error |
 
-> **Note:** Validation is split between the controller (field presence) and the
-> ORM constraint (email uniqueness). There is no dedicated validation middleware.
+> **Note:** Members are no longer added inline during group creation. Other users
+> join later using the returned `inviteToken` (join flow pending R5).
 
 ---
 

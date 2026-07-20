@@ -1,7 +1,8 @@
+const logger = require("../config/logger.config");
 const {
   getGroups,
   getGroup,
-  createGroupWithMembers,
+  createGroup: createGroupService,
   createExpenseForGroup,
   getExpensesForGroup,
   calculateGroupBalances,
@@ -38,37 +39,22 @@ async function fetchGroup(req, res) {
 
 async function createGroup(req, res) {
   try {
-    const { name, description, members } = req.body;
+    const { name, description } = req.body;
+    const userId = req.userId;
 
-    const groupData = { name, description };
-    const membersData = Array.isArray(members)
-      ? members.map((member) => ({
-          name: member.name,
-          email: member.email,
-          phone: member.phone,
-        }))
-      : [];
-
-    const result = await createGroupWithMembers(groupData, membersData);
+    const group = await createGroupService(userId, { name, description });
 
     res.status(201).json({
       message: "Group created successfully",
-      result,
+      group,
     });
   } catch (err) {
-    console.error("Error creating group:", err);
-
     if (err && err.status && err.message) {
       return res.status(err.status).json({ message: err.message });
     }
 
-    if (err.name === "SequelizeUniqueConstraintError") {
-      return res.status(400).json({
-        message: "A member with this email already exists",
-      });
-    }
-
-    res.status(500).json({ message: "Internal Server Error" });
+    logger.error("Error creating group:", err);
+    res.status(500).json({ message: "Something went wrong. Please try again." });
   }
 }
 

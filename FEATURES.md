@@ -23,7 +23,7 @@
 ### Group Management
 | Feature | Current behaviour |
 |---|---|
-| 🐛 Create group | POST `/api/groups` calls `createGroupWithMembers`, which still queries the dropped `Members` model — crashes at runtime. Fix in progress: sub-step R1 of the groupService refactor. |
+| ✅ Create group | POST `/api/groups` — creator-only flow; creates group, adds creator as first member via `group_members`, and returns an `inviteToken`. Protected by auth middleware. |
 | 🐛 List all groups | GET `/api/groups` — the read path in `groupController` also references `Members`; likely fails transitively. Fix in progress: sub-step R2. |
 | 🐛 View group detail | GET `/api/groups/:id` — same `Members`-model reference; returns errors until R2 is complete. |
 | ✅ Group selector (UI) | The `<select>` dropdown UI itself is fine; it will resume populating correctly once the underlying GET `/api/groups` read path is unbroken by R2. |
@@ -124,7 +124,7 @@
 
 | Bug | Status | Description |
 |---|---|---|
-| groupService.js references dropped Members model | 🐛 | The `members` table was retired and physically dropped during the auth schema migration (sub-step 4c). However, `groupService.js` and `groupController.js` still query the old `Members` Sequelize model, which no longer maps to any table. This breaks `POST /api/groups` (create group) and, transitively, all group reads, balance calculations, and settlement suggestions that depend on member data. **Fix in progress:** sub-steps R1–R6 of the groupService refactor (R1: creator-only group creation + auto invite-token; R2: read paths; R3: balances + suggestions; R4: activity; R5: join via invite link; R6: route authorization). See `ARCHITECTURE.md §5 Known Gaps` for more detail. |
+| groupService.js references dropped Members model | 🐛 | The `members` table was retired during the auth schema migration. `groupService.js` read paths still query the old `Members` model. **Fix in progress:** sub-step R1 (create group) is done. Next up: R2 (read paths), R3 (balances + suggestions), R4 (activity), R5 (join via invite link), R6 (route authorization). See `ARCHITECTURE.md §5 Known Gaps` for more detail. |
 | API error key mismatch | ✅ | **Resolved**: Updated axios interceptor to read `data?.message`. Backend validation/error messages are now correctly shown in the UI. |
 | Equal split preview wrong | 🐛 | AddExpense.jsx previews `amount / members.length` (floating-point) but the server uses integer-cent math with penny-remainder distribution — the preview can show different values than what gets stored |
 | Nav links cause full-page reload | ✅ | **Resolved**: Swapped `<a href="...">` nav tags for React Router's `<Link>` components in Layout.jsx. Navigation now works client-side without full-page reloads. |

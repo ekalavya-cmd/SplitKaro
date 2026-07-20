@@ -1,7 +1,10 @@
+const crypto = require("crypto");
+const logger = require("../config/logger.config");
 const {
   Expenses,
   Groups,
   Members,
+  GroupMember,
   ExpenseSplits,
   Settlements,
   sequelize,
@@ -28,46 +31,39 @@ async function getGroup(groupId) {
   });
 }
 
-async function createGroupWithMembers(groupData, membersData) {
-  if (
-    !groupData.name ||
-    !membersData ||
-    !Array.isArray(membersData) ||
-    membersData.length === 0
-  ) {
-    throw {
-      status: 400,
-      message:
-        "Group name and at least one member is required, and members must be a non-empty array",
-    };
-  }
-
-  for (const member of membersData) {
-    if (!member.name || !member.email || !member.phone) {
-      throw {
-        status: 400,
-        message: "Each member must have name, email, and phone",
-      };
-    }
+async function createGroup(userId, { name, description }) {
+  if (!name || name.trim() === "") {
+    throw { status: 400, message: "Group name is required." };
   }
 
   const transaction = await sequelize.transaction();
 
   try {
-    const group = await Groups.create(groupData, { transaction });
+    const inviteToken = crypto.randomBytes(20).toString("hex");
 
-    const members = await Promise.all(
-      membersData.map((memberData) =>
-        Members.create({ ...memberData, groupId: group.id }, { transaction }),
-      ),
+    const group = await Groups.create(
+      {
+        name,
+        description,
+        createdBy: userId,
+        inviteToken,
+      },
+      { transaction }
+    );
+
+    await GroupMember.create(
+      {
+        userId,
+        groupId: group.id,
+      },
+      { transaction }
     );
 
     await transaction.commit();
 
-    return {
-      group,
-      members,
-    };
+    logger.info(`Group created: groupId=${group.id}, createdBy=${userId}`);
+
+    return group;
   } catch (error) {
     await transaction.rollback();
     throw error;
@@ -696,7 +692,7 @@ async function deleteSettlement(settlementId) {
 module.exports = {
   getGroups,
   getGroup,
-  createGroupWithMembers,
+  createGroup,
   createExpenseForGroup,
   getExpensesForGroup,
   calculateGroupBalances,

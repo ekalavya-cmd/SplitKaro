@@ -1,9 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const groupcontroller = require("../controllers/groupController");
+const { authenticate } = require("../middleware/auth.middleware");
 
 router.get("/", groupcontroller.fetchGroups);
-router.post("/", groupcontroller.createGroup);
+router.post("/", authenticate, groupcontroller.createGroup);
 router.delete("/settlements/:id", groupcontroller.removeSettlement);
 router.get("/:id", groupcontroller.fetchGroup);
 router.get("/:id/expenses", groupcontroller.fetchExpenses);
