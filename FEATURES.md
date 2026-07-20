@@ -24,15 +24,15 @@
 | Feature | Current behaviour |
 |---|---|
 | ✅ Create group | POST `/api/groups` — creator-only flow; creates group, adds creator as first member via `group_members`, and returns an `inviteToken`. Protected by auth middleware. |
-| 🐛 List all groups | GET `/api/groups` — the read path in `groupController` also references `Members`; likely fails transitively. Fix in progress: sub-step R2. |
-| 🐛 View group detail | GET `/api/groups/:id` — same `Members`-model reference; returns errors until R2 is complete. |
+| ✅ List all groups | GET `/api/groups` — returns all groups (no members included). Live tested and verified. |
+| ✅ View group detail | GET `/api/groups/:id` — queries group and members via `User` and `GroupMember` association (R2 refactor). |
 | ✅ Group selector (UI) | The `<select>` dropdown UI itself is fine; it will resume populating correctly once the underlying GET `/api/groups` read path is unbroken by R2. |
 
 ### Member Management
 | Feature | Current behaviour |
 |---|---|
 | 🚧 Create members at group creation | **No longer exists under new schema.** Group creation is now creator-only (planned sub-step R1). Joining a group happens via invite link (planned sub-step R5 — not yet built). |
-| 🐛 View members in group | Member lists are fetched as part of `GET /api/groups/:id` — broken because that path still references the dropped `Members` model. Will be fixed by sub-step R2. |
+| ✅ View members in group | Member lists are fetched as part of `GET /api/groups/:id` via `User` and `GroupMember` association (R2 refactor). |
 
 ### Expense Management
 | Feature | Current behaviour |
@@ -124,7 +124,7 @@
 
 | Bug | Status | Description |
 |---|---|---|
-| groupService.js references dropped Members model | 🐛 | The `members` table was retired during the auth schema migration. `groupService.js` read paths still query the old `Members` model. **Fix in progress:** sub-step R1 (create group) is done. Next up: R2 (read paths), R3 (balances + suggestions), R4 (activity), R5 (join via invite link), R6 (route authorization). See `ARCHITECTURE.md §5 Known Gaps` for more detail. |
+| groupService.js references dropped Members model | 🐛 | The `members` table was retired during the auth schema migration. `groupService.js` read paths still query the old `Members` model. **Fix in progress:** sub-steps R1 (create group) and R2 (read paths) are done. Next up: R3 (balances + suggestions), R4 (activity), R5 (join via invite link), R6 (route authorization). See `ARCHITECTURE.md §5 Known Gaps` for more detail. |
 | API error key mismatch | ✅ | **Resolved**: Updated axios interceptor to read `data?.message`. Backend validation/error messages are now correctly shown in the UI. |
 | Equal split preview wrong | 🐛 | AddExpense.jsx previews `amount / members.length` (floating-point) but the server uses integer-cent math with penny-remainder distribution — the preview can show different values than what gets stored |
 | Nav links cause full-page reload | ✅ | **Resolved**: Swapped `<a href="...">` nav tags for React Router's `<Link>` components in Layout.jsx. Navigation now works client-side without full-page reloads. |
@@ -195,10 +195,10 @@
 
 | Layer | ✅ Done | 🐛 Broken | 🚧 Partial | ⏳ Not started |
 |---|---|---|---|---|
-| Backend (API endpoints) | 5 expense/delete + 5 auth = 10 | 4 group endpoints (R1–R6 refactor in progress) | 2 | 10+ |
+| Backend (API endpoints) | 5 expense/delete + 5 auth + 2 group = 12 | 2 group endpoints (R3–R6 refactor in progress) | 2 | 10+ |
 | Frontend (pages / UI flows) | 5 pages shipped | Group-dependent UI (balance cards, member dropdowns) | 4 gaps within shipped pages | Auth UI (login/register pages, token refresh interceptor) |
 | Infrastructure | Winston logging | — | 0 | 6 |
 
 _§4 ⏳ total: 6 (auth) + 3 (groups) + 8 (expenses) + 3 (settlements) + 6 (data) + 6 (infra) = 32 planned items_
 
-> **Note on group endpoint counts:** The 4 group-management API endpoints (POST `/api/groups`, GET `/api/groups`, GET `/api/groups/:id`, and the expense/balance/settlement endpoints that depend on member data) are listed under 🐛 Broken while the R1–R6 `groupService.js` refactor is in progress. They will move back to ✅ Done as each sub-step ships.
+> **Note on group endpoint counts:** The 2 remaining group-management API endpoints (the balance and settlement endpoints that depend on member data) are listed under 🐛 Broken while the R3–R6 `groupService.js` refactor is in progress. They will move back to ✅ Done as each sub-step ships.

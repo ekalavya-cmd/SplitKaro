@@ -103,8 +103,8 @@ Fetch a single group with its members.
   "name": "Trip to Bali Expenses",
   "description": "Group for managing expenses during our trip to Bali",
   "members": [
-    { "id": 1, "name": "Alice", "email": "alice@example.com", "phone": "111-111-1111" },
-    { "id": 2, "name": "Bob",   "email": "bob@example.com",   "phone": "222-222-2222" }
+    { "id": 1, "name": "Alice", "email": "alice@example.com" },
+    { "id": 2, "name": "Bob",   "email": "bob@example.com" }
   ]
 }
 ```

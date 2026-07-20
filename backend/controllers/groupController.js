@@ -25,14 +25,12 @@ async function fetchGroups(req, res) {
 async function fetchGroup(req, res) {
   try {
     const group = await getGroup(req.params.id);
-
-    if (!group) {
-      return res.status(404).json({ message: "Group not found" });
-    }
-
     res.status(200).json(group);
   } catch (err) {
-    console.error("Error fetching group:", err);
+    if (err && err.status && err.message) {
+      return res.status(err.status).json({ message: err.message });
+    }
+    logger.error("Error fetching group:", err);
     res.status(500).json({ message: "Internal Server Error" });
   }
 }

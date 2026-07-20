@@ -5,6 +5,7 @@ const {
   Groups,
   Members,
   GroupMember,
+  User,
   ExpenseSplits,
   Settlements,
   sequelize,
@@ -19,16 +20,35 @@ async function getGroups() {
 }
 
 async function getGroup(groupId) {
-  return await Groups.findByPk(groupId, {
+  const group = await Groups.findByPk(groupId, {
     attributes: ["id", "name", "description"],
     include: {
-      model: Members,
-      as: "members",
-      attributes: ["id", "name", "email", "phone"],
-      separate: true,
-      order: [["id", "ASC"]],
+      model: User,
+      as: "users",
+      attributes: ["id", "name", "email"],
+      through: { attributes: [] },
     },
+    order: [[{ model: User, as: "users" }, "id", "ASC"]],
   });
+
+  if (!group) {
+    throw { status: 404, message: "Group not found" };
+  }
+
+  const result = {
+    id: group.id,
+    name: group.name,
+    description: group.description,
+    members: group.users.map((u) => ({
+      id: u.id,
+      name: u.name,
+      email: u.email,
+    })),
+  };
+
+  logger.debug(`Fetched group id ${groupId} with ${result.members.length} members`);
+
+  return result;
 }
 
 async function createGroup(userId, { name, description }) {
