@@ -14,6 +14,7 @@
 | ✅ | Fully implemented — backend API + working frontend UI |
 | 🚧 | Partially implemented — one side exists or the feature is incomplete |
 | ⏳ | Not started — no code exists in either layer |
+| 🐛 | Shipped but broken — code exists, but it crashes or produces wrong output |
 
 ---
 
@@ -22,16 +23,16 @@
 ### Group Management
 | Feature | Current behaviour |
 |---|---|
-| ✅ Create group | POST `/api/groups` — creates group + all initial members in a single transaction |
-| ✅ List all groups | GET `/api/groups` — flat list of all groups (id, name, description) |
-| ✅ View group detail | GET `/api/groups/:id` — returns group with full member list, ordered by id |
-| ✅ Group selector (UI) | Every page renders a `<select>` dropdown populated from the groups list; defaults to the first group on load |
+| 🐛 Create group | POST `/api/groups` calls `createGroupWithMembers`, which still queries the dropped `Members` model — crashes at runtime. Fix in progress: sub-step R1 of the groupService refactor. |
+| 🐛 List all groups | GET `/api/groups` — the read path in `groupController` also references `Members`; likely fails transitively. Fix in progress: sub-step R2. |
+| 🐛 View group detail | GET `/api/groups/:id` — same `Members`-model reference; returns errors until R2 is complete. |
+| ✅ Group selector (UI) | The `<select>` dropdown UI itself is fine; it will resume populating correctly once the underlying GET `/api/groups` read path is unbroken by R2. |
 
 ### Member Management
 | Feature | Current behaviour |
 |---|---|
-| ✅ Create members at group creation | Members (name, email, phone) are submitted alongside the group and persisted atomically |
-| ✅ View members in group | Members shown on Dashboard balance cards and in all dropdown menus |
+| 🚧 Create members at group creation | **No longer exists under new schema.** Group creation is now creator-only (planned sub-step R1). Joining a group happens via invite link (planned sub-step R5 — not yet built). |
+| 🐛 View members in group | Member lists are fetched as part of `GET /api/groups/:id` — broken because that path still references the dropped `Members` model. Will be fixed by sub-step R2. |
 
 ### Expense Management
 | Feature | Current behaviour |
@@ -123,6 +124,7 @@
 
 | Bug | Status | Description |
 |---|---|---|
+| groupService.js references dropped Members model | 🐛 | The `members` table was retired and physically dropped during the auth schema migration (sub-step 4c). However, `groupService.js` and `groupController.js` still query the old `Members` Sequelize model, which no longer maps to any table. This breaks `POST /api/groups` (create group) and, transitively, all group reads, balance calculations, and settlement suggestions that depend on member data. **Fix in progress:** sub-steps R1–R6 of the groupService refactor (R1: creator-only group creation + auto invite-token; R2: read paths; R3: balances + suggestions; R4: activity; R5: join via invite link; R6: route authorization). See `ARCHITECTURE.md §5 Known Gaps` for more detail. |
 | API error key mismatch | ✅ | **Resolved**: Updated axios interceptor to read `data?.message`. Backend validation/error messages are now correctly shown in the UI. |
 | Equal split preview wrong | 🐛 | AddExpense.jsx previews `amount / members.length` (floating-point) but the server uses integer-cent math with penny-remainder distribution — the preview can show different values than what gets stored |
 | Nav links cause full-page reload | ✅ | **Resolved**: Swapped `<a href="...">` nav tags for React Router's `<Link>` components in Layout.jsx. Navigation now works client-side without full-page reloads. |
@@ -191,10 +193,12 @@
 
 ## Quick Counts
 
-| Layer | ✅ Done | 🚧 Partial | ⏳ Not started |
-|---|---|---|---|
-| Backend (API endpoints) | 9 group/expense + 5 auth = 14 | 2 | 10+ |
-| Frontend (pages / UI flows) | 5 pages shipped | 4 gaps within shipped pages | Auth UI (login/register pages, token refresh interceptor) |
-| Infrastructure | Winston logging | 0 | 6 |
+| Layer | ✅ Done | 🐛 Broken | 🚧 Partial | ⏳ Not started |
+|---|---|---|---|---|
+| Backend (API endpoints) | 5 expense/delete + 5 auth = 10 | 4 group endpoints (R1–R6 refactor in progress) | 2 | 10+ |
+| Frontend (pages / UI flows) | 5 pages shipped | Group-dependent UI (balance cards, member dropdowns) | 4 gaps within shipped pages | Auth UI (login/register pages, token refresh interceptor) |
+| Infrastructure | Winston logging | — | 0 | 6 |
 
 _§4 ⏳ total: 6 (auth) + 3 (groups) + 8 (expenses) + 3 (settlements) + 6 (data) + 6 (infra) = 32 planned items_
+
+> **Note on group endpoint counts:** The 4 group-management API endpoints (POST `/api/groups`, GET `/api/groups`, GET `/api/groups/:id`, and the expense/balance/settlement endpoints that depend on member data) are listed under 🐛 Broken while the R1–R6 `groupService.js` refactor is in progress. They will move back to ✅ Done as each sub-step ships.

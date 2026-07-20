@@ -261,55 +261,76 @@ splitKaro/
 
 ## Database Schema 🗄️
 
-```
-┌──────────────┐        ┌──────────────┐
-│    groups    │        │   members    │
-├──────────────┤        ├──────────────┤
-│ id (PK)      │◄───────│ group_id (FK)│
-│ name         │        │ id (PK)      │
-│ description  │        │ name         │
-│ created_at   │        │ email (UNIQ) │
-│ updated_at   │        │ phone        │
-└──────┬───────┘        │ created_at   │
-       │                │ updated_at   │
-       │                └──────┬───────┘
-       │                       │
-       │     ┌─────────────────┘
-       │     │
-       ▼     ▼
-┌──────────────────┐       ┌───────────────────┐
-│    expenses      │       │  expense_splits   │
-├──────────────────┤       ├───────────────────┤
-│ id (PK)          │◄──────│ expense_id (FK)   │
-│ group_id (FK)    │       │ id (PK)           │
-│ paid_by (FK)     │       │ member_id (FK)    │
-│ amount           │       │ amount_owed       │
-│ description      │       │ created_at        │
-│ split_type       │       │ updated_at        │
-│ date             │       └───────────────────┘
-│ created_at       │
-│ updated_at       │
-└──────────────────┘
+> **Note:** The diagram below reflects the **current** `users` / `group_members` schema.
+> The `groupService.js` backend service layer has not been fully refactored onto it yet —
+> see [FEATURES.md §3 Known Bugs](FEATURES.md) for live status of the R1–R6 refactor in progress.
 
-┌───────────────────┐
-│   settlements     │
-├───────────────────┤
-│ id (PK)           │
-│ group_id (FK)     │
-│ paid_by (FK)      │ → member (payer)
-│ paid_to (FK)      │ → member (payee)
-│ amount            │
-│ date              │
-│ created_at        │
-│ updated_at        │
-└───────────────────┘
+```
+┌─────────────────────────────┐         ┌────────────────────────────┐
+│           users             │         │          groups            │
+├─────────────────────────────┤         ├────────────────────────────┤
+│ id (PK)                     │         │ id (PK)                    │
+│ name                        │◄────────│ created_by (FK → users.id) │
+│ email (UNIQUE)              │         │ name                       │
+│ password_hash               │         │ description                │
+│ google_id (UNIQUE)          │         │ invite_token (UNIQUE)      │
+│ avatar_url                  │         │ created_at                 │
+│ is_email_verified           │         │ updated_at                 │
+│ created_at                  │         └──────────────┬─────────────┘
+│ updated_at                  │                        │
+└──────────────┬──────────────┘                        │
+               │                                       │
+               │     ┌─────────────────────────────────┘
+               │     │
+               ▼     ▼
+    ┌──────────────────────────┐
+    │       group_members      │  (join table — many-to-many)
+    ├──────────────────────────┤
+    │ id (PK)                  │
+    │ user_id  (FK → users.id) │
+    │ group_id (FK → groups.id)│
+    │ joined_at                │
+    │ created_at               │
+    │ updated_at               │
+    └──────────────────────────┘
+
+┌─────────────────────┐         ┌──────────────────────────┐
+│      expenses       │         │      expense_splits      │
+├─────────────────────┤         ├──────────────────────────┤
+│ id (PK)             │◄────────│ expense_id (FK)          │
+│ group_id (FK)       │         │ id (PK)                  │
+│ paid_by (FK→users)  │         │ user_id  (FK → users.id) │
+│ amount              │         │ amount_owed              │
+│ description         │         │ created_at               │
+│ split_type          │         │ updated_at               │
+│ date                │         └──────────────────────────┘
+│ created_at          │
+│ updated_at          │
+└─────────────────────┘
+
+┌───────────────────────────┐
+│        settlements        │
+├───────────────────────────┤
+│ id (PK)                   │
+│ group_id (FK)             │
+│ paid_by (FK → users.id)   │  → user (payer)
+│ paid_to (FK → users.id)   │  → user (payee)
+│ amount                    │
+│ date                      │
+│ created_at                │
+│ updated_at                │
+└───────────────────────────┘
 ```
 
 **Key Relationships:**
-- A `Group` has many `Members`, `Expenses`, and `Settlements`
-- An `Expense` belongs to a `Group` and a `Member` (payer), and has many `ExpenseSplits`
-- Each `ExpenseSplit` belongs to an `Expense` and a `Member`
-- A `Settlement` belongs to a `Group` and two `Members` (`payer` and `payee`)
+- A `User` belongs to many `Groups` (and vice versa) through the `group_members` join table
+- `groups.created_by` is a separate FK pointing to the `User` who created the group
+- An `Expense` belongs to a `Group` and a `User` (payer), and has many `ExpenseSplits`
+- Each `ExpenseSplit` belongs to an `Expense` and a `User` (the member who owes a share)
+- A `Settlement` belongs to a `Group` and two `Users` — `paid_by` (payer) and `paid_to` (payee)
+
+> For full field types, nullability, indexes, constraints, and migration notes, see
+> [DATABASE_SCHEMA.md](DATABASE_SCHEMA.md).
 
 ---
 
