@@ -64,9 +64,9 @@ in a Sequelize database transaction with rollback on failure.
 
 ### `GET /groups`
 
-List all groups.
+List groups the authenticated user is a member of.
 
-**Auth:** None  
+**Auth:** Required (`Authorization: Bearer <accessToken>`)  
 **Query params:** None  
 **Request body:** None
 
@@ -91,7 +91,7 @@ unhandled rejection (Express 5 converts it to a `500` with no JSON body).
 
 Fetch a single group with its members.
 
-**Auth:** None  
+**Auth:** Required (`Authorization: Bearer <accessToken>`)  
 **Path param:** `id` — integer group ID  
 **Query params:** None  
 **Request body:** None
@@ -114,6 +114,7 @@ Members are ordered by `id ASC`.
 
 | Status | Body | Condition |
 |---|---|---|
+| `403` | `{ "message": "You are not a member of this group." }` | Authenticated user is not a member of this group |
 | `404` | `{ "message": "Group not found" }` | No group with given `:id` |
 | `500` | `{ "message": "Internal Server Error" }` | Unexpected DB error |
 
@@ -234,7 +235,7 @@ Join a group using its invite token.
 
 List all expenses for a group, including payer info and per-member split details.
 
-**Auth:** None  
+**Auth:** Required (`Authorization: Bearer <accessToken>`)  
 **Path param:** `id` — integer group ID  
 **Query params:** None  
 **Request body:** None
@@ -273,6 +274,7 @@ Expenses are ordered by `id ASC`. Splits within each expense are ordered by
 
 | Status | Body | Condition |
 |---|---|---|
+| `403` | `{ "message": "You are not a member of this group." }` | Authenticated user is not a member of this group |
 | `404` | `{ "message": "Group not found" }` | No group with given `:id` |
 | `500` | `{ "message": "Internal Server Error" }` | Unexpected DB error |
 
@@ -283,7 +285,7 @@ Expenses are ordered by `id ASC`. Splits within each expense are ordered by
 Add a new expense to a group. Creates one `expenses` row and one `expense_splits`
 row per group member, all in a single transaction.
 
-**Auth:** None  
+**Auth:** Required (`Authorization: Bearer <accessToken>`)  
 **Path param:** `id` — integer group ID  
 **Request body**
 ```json
@@ -358,6 +360,7 @@ Values are the amount (for `exact`) or the percentage (for `percentage`).
 | `400` | `{ "message": "Missing splits for member IDs: ..." }` | A group member is absent from `splits` |
 | `400` | `{ "message": "Split amounts sum to X, but total amount is Y" }` | `exact` splits don't sum to `amount` |
 | `400` | `{ "message": "Percentages sum to X, but must sum to exactly 100" }` | `percentage` splits don't sum to 100 |
+| `403` | `{ "message": "You are not a member of this group." }` | Authenticated user is not a member of this group |
 | `404` | `{ "message": "Group not found" }` | No group with given `:id` |
 | `400` | `{ "message": "Group must have members before adding expenses" }` | Group exists but has no members |
 | `500` | `{ "message": "Internal Server Error" }` | Unexpected DB error; transaction rolled back |
@@ -401,7 +404,7 @@ balance = total_paid - total_owed - settlements_received + settlements_paid
 ```
 A positive balance means the member is owed money; negative means they owe money.
 
-**Auth:** None  
+**Auth:** Required (`Authorization: Bearer <accessToken>`)  
 **Path param:** `id` — integer group ID  
 **Query params:** None  
 **Request body:** None
@@ -424,6 +427,7 @@ bug.
 
 | Status | Body | Condition |
 |---|---|---|
+| `403` | `{ "message": "You are not a member of this group." }` | Authenticated user is not a member of this group |
 | `404` | `{ "message": "Group not found" }` | No group with given `:id` |
 | `400` | `{ "message": "Group must have members" }` | Group has no members |
 | `500` | `{ "message": "Balance calculation error: sum of balances (X) does not equal zero. This indicates a bug in the calculation logic." }` | Rounding error or data corruption |
@@ -439,7 +443,7 @@ Return a minimal list of suggested payments that would clear all outstanding
 balances. Uses a greedy two-pointer algorithm: largest creditor paired with
 largest debtor repeatedly until all balances are zero.
 
-**Auth:** None  
+**Auth:** Required (`Authorization: Bearer <accessToken>`)  
 **Path param:** `id` — integer group ID  
 **Query params:** None  
 **Request body:** None
@@ -463,6 +467,7 @@ Returns an empty array `suggestions: []` when all balances are zero (everyone is
 
 | Status | Body | Condition |
 |---|---|---|
+| `403` | `{ "message": "You are not a member of this group." }` | Authenticated user is not a member of this group |
 | `404` | `{ "message": "Group not found" }` | Propagated from `calculateGroupBalances` |
 | `400` | `{ "message": "Group must have members" }` | Propagated from `calculateGroupBalances` |
 | `500` | `{ "message": "Internal Server Error" }` | Unexpected DB error |
@@ -475,7 +480,7 @@ Record an actual payment from one member to another. Validates that the payer
 genuinely owes money and the payee is genuinely owed money, and that the
 amount does not exceed what the payer owes the payee.
 
-**Auth:** None  
+**Auth:** Required (`Authorization: Bearer <accessToken>`)  
 **Path param:** `id` — integer group ID  
 **Request body**
 ```json
@@ -517,6 +522,7 @@ amount does not exceed what the payer owes the payee.
 |---|---|---|
 | `400` | `{ "message": "paid_by, paid_to, and amount are required" }` | Any of those three fields is missing |
 | `400` | `{ "message": "Cannot record settlement to yourself" }` | `paid_by === paid_to` |
+| `403` | `{ "message": "You are not a member of this group." }` | Authenticated user is not a member of this group |
 | `404` | `{ "message": "Group not found" }` | No group with given `:id` |
 | `400` | `{ "message": "Group must have members before recording settlements" }` | Group has no members |
 | `400` | `{ "message": "paid_by must be a valid member of the group" }` | Payer not in group |
@@ -536,7 +542,7 @@ amount does not exceed what the payer owes the payee.
 List all recorded settlements for a group, with payer and payee name/email
 included.
 
-**Auth:** None  
+**Auth:** Required (`Authorization: Bearer <accessToken>`)  
 **Path param:** `id` — integer group ID  
 **Query params:** None  
 **Request body:** None
@@ -565,6 +571,7 @@ Settlements are ordered by `id ASC`.
 
 | Status | Body | Condition |
 |---|---|---|
+| `403` | `{ "message": "You are not a member of this group." }` | Authenticated user is not a member of this group |
 | `404` | `{ "message": "Group not found" }` | No group with given `:id` |
 | `500` | `{ "message": "Internal Server Error" }` | Unexpected DB error |
 

@@ -16,10 +16,10 @@ const {
 
 async function fetchGroups(req, res) {
   try {
-    const groups = await getGroups();
+    const groups = await getGroups(req.userId);
     res.status(200).json({ message: "Groups fetched successfully", groups });
   } catch (err) {
-    console.error("Error fetching groups:", err);
+    logger.error("Error fetching groups:", err);
     res.status(500).json({ message: "Internal Server Error" });
   }
 }

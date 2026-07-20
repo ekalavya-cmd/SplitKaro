@@ -24,7 +24,7 @@
 | Feature | Current behaviour |
 |---|---|
 | ✅ Create group | POST `/api/groups` — creator-only flow; creates group, adds creator as first member via `group_members`, and returns an `inviteToken`. Protected by auth middleware. |
-| ✅ List all groups | GET `/api/groups` — returns all groups (no members included). Live tested and verified. |
+| ✅ List my groups | GET `/api/groups` — returns only groups the authenticated user is a member of (no members included). Protected by auth middleware. |
 | ✅ View group detail | GET `/api/groups/:id` — queries group and members via `User` and `GroupMember` association (R2 refactor). |
 | ✅ Group selector (UI) | The `<select>` dropdown UI itself is fine; it will resume populating correctly once the underlying GET `/api/groups` read path is unbroken by R2. |
 | ✅ Join group via invite link | GET `/api/groups/invite/:token` previews the group (no member list), and POST `/api/groups/invite/:token/join` adds the authenticated user to the group via the `group_members` join table. |

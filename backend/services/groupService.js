@@ -13,9 +13,16 @@ const {
 
 const { splitAmount } = require("../utils/equalSplitAmount");
 
-async function getGroups() {
+async function getGroups(userId) {
   return await Groups.findAll({
     attributes: ["id", "name", "description"],
+    include: {
+      model: User,
+      as: "users",
+      attributes: [],
+      where: { id: userId },
+      through: { attributes: [] },
+    },
   });
 }
 
