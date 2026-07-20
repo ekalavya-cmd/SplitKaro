@@ -159,7 +159,7 @@ erDiagram
     expense_splits {
         int id PK
         int expense_id FK
-        int member_id FK
+        int user_id FK
         decimal amount_owed
         datetime created_at
         datetime updated_at

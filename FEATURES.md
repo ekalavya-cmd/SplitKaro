@@ -135,9 +135,11 @@
 ### Authentication & Identity
 | Feature | Status | Notes |
 |---|---|---|
-| User registration / login | ⏳ | No `users` table, no session/token system, no auth middleware |
-| Per-user view of splits across groups | ⏳ | Members are group-scoped constructs; there is no cross-group identity |
-| Protected routes (frontend) | ⏳ | All pages are publicly accessible |
+| User registration / login | 🚧 | Backend complete: `POST /api/auth/register`, `POST /api/auth/login` with bcrypt + JWT access tokens + Redis-backed rotating refresh tokens. Frontend UI not yet built. |
+| Token refresh / session management | 🚧 | Backend complete: `POST /api/auth/refresh`, `POST /api/auth/logout`, `POST /api/auth/logout-all`. Frontend interceptor not yet wired. |
+| Per-user view of splits across groups | ⏳ | Group membership now uses platform `users` via `group_members` join table; cross-group identity exists at DB level but no UI yet |
+| Protected routes (frontend) | ⏳ | Auth middleware (`authenticate`) exists on backend; frontend pages are still publicly accessible |
+| Google OAuth | ⏳ | Schema ready (`google_id` column on users); implementation deferred to step 5f |
 
 ### Group Management
 | Feature | Status | Notes |
@@ -191,8 +193,8 @@
 
 | Layer | ✅ Done | 🚧 Partial | ⏳ Not started |
 |---|---|---|---|
-| Backend (API endpoints) | 9 | 2 | 10+ |
-| Frontend (pages / UI flows) | 5 pages shipped | 4 gaps within shipped pages | 0 pages for missing features |
-| Infrastructure | 0 | 0 | 7 |
+| Backend (API endpoints) | 9 group/expense + 5 auth = 14 | 2 | 10+ |
+| Frontend (pages / UI flows) | 5 pages shipped | 4 gaps within shipped pages | Auth UI (login/register pages, token refresh interceptor) |
+| Infrastructure | Winston logging | 0 | 6 |
 
 _§4 ⏳ total: 6 (auth) + 3 (groups) + 8 (expenses) + 3 (settlements) + 6 (data) + 6 (infra) = 32 planned items_

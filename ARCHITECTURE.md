@@ -26,27 +26,37 @@ SplitKaro is a bill-splitting web application that lets users create groups, add
 ┌───────────────────────▼────────────────────────────────────────┐
 │                   Express Server  (Node.js)                    │
 │                                                                │
-│  server.js — cors, express.json(), route mounting             │
+│  server.js — cors, cookie-parser, express.json(), route mounting        │
 │                                                                │
 │  Routes                                                        │
+│   /api/auth/*        → auth.routes.js → auth.controller.js    │
 │   /api/groups/*      → groupRoutes.js → groupController.js    │
 │   /api/expenses/:id  → expenseRoutes.js → expenseController.js│
+│                                                                │
+│  Middleware                                                    │
+│   auth.middleware.js — verifies JWT, attaches req.userId       │
 │                                                                │
 │  Controllers — validate HTTP input, call service, respond      │
 │                                                                │
 │  Services — all business logic                                 │
+│   auth.service.js   (register, login — bcrypt + token issue)  │
+│   token.service.js  (JWT sign/verify, Redis refresh tokens)    │
 │   groupService.js  (groups, expenses, balances, settlements)   │
 │   expenseService.js  (delete expense)                          │
+│                                                                │
+│  Config                                                        │
+│   logger.config.js  (Winston — console + daily rotating files) │
+│   redis.config.js   (node-redis v6 client — refresh tokens)   │
 │                                                                │
 │  Utils                                                         │
 │   equalSplitAmount.js  (integer-safe equal-split with pennies) │
 └───────────────────────┬────────────────────────────────────────┘
-      Sequelize ORM      │
+      Sequelize ORM      │                  Redis
 ┌───────────────────────▼────────────────────────────────────────┐
 │               MySQL  (splitKaro_db)                            │
 │                                                                │
 │  Tables: groups · users · group_members · expenses             │
-│          settlements                                            │
+│          expense_splits · settlements                          │
 └────────────────────────────────────────────────────────────────┘
 ```
 
@@ -68,27 +78,39 @@ SplitKaro is a bill-splitting web application that lets users create groups, add
 splitKaro/
 ├── backend/                    # Express REST API
 │   ├── config/
-│   │   └── config.js           # Sequelize DB config; reads from .env
+│   │   ├── config.js           # Sequelize DB config; reads from .env
+│   │   ├── logger.config.js    # Winston logger (console + daily rotating files)
+│   │   └── redis.config.js     # node-redis v6 client (refresh token storage)
 │   ├── controllers/
+│   │   ├── auth.controller.js  # register, login, refresh, logout, logoutAllDevices
 │   │   ├── groupController.js  # HTTP handlers for all group-scoped routes
 │   │   └── expenseController.js# HTTP handler for DELETE /expenses/:id
-│   ├── migrations/             # Sequelize migration files (5 tables)
+│   ├── logs/                   # Winston daily log files (gitignored)
+│   ├── middleware/
+│   │   └── auth.middleware.js  # Verifies JWT Bearer token, sets req.userId
+│   ├── migrations/             # Sequelize migration files
 │   ├── models/
 │   │   ├── index.js            # Auto-loads all models, runs associations
+│   │   ├── User.js
+│   │   ├── GroupMember.js
 │   │   ├── Groups.js
 │   │   ├── Expenses.js
 │   │   ├── ExpenseSplits.js
 │   │   └── Settlements.js
 │   ├── routes/
+│   │   ├── auth.routes.js      # 5 routes under /api/auth
 │   │   ├── groupRoutes.js      # 9 routes under /api/groups
 │   │   └── expenseRoutes.js    # 1 route: DELETE /api/expenses/:id
 │   ├── seeders/                # Sequelize seed files
 │   ├── services/
+│   │   ├── auth.service.js     # registerUser, loginUser (bcrypt + token issuance)
+│   │   ├── token.service.js    # JWT access tokens + Redis rotating refresh tokens
 │   │   ├── groupService.js     # Core business logic (balance calc, settlement algorithm, transactions)
 │   │   └── expenseService.js   # Thin service: delete expense in a transaction
 │   ├── utils/
 │   │   └── equalSplitAmount.js # Integer-safe equal-split helper (distributes penny remainders)
-│   ├── .env                    # DB credentials and PORT (not committed in production)
+│   ├── .env                    # DB credentials, PORT, Redis URL, JWT secrets (not committed)
+│   ├── .env.example            # Template env file with all keys, values blanked
 │   ├── package.json
 │   └── server.js               # Entry point: Express app bootstrap + DB connect
 │
@@ -165,14 +187,15 @@ Backend uses `dotenv`; frontend uses Vite's `import.meta.env`. Both `.env` files
 
 | Area | Issue |
 |---|---|
-| **.env files in version control** | Both `backend/.env` and `frontend/.env` appear to be committed, exposing DB credentials. They should be added to `.gitignore` and replaced with `.env.example` files. |
 | **CORS origin hard-coded** | `origin: "http://localhost:5173"` in `server.js` will break any non-local deployment without a code change. Should be driven from an environment variable. |
-| **No input validation middleware** | Validation logic is spread across controller (`createGroup`) and service (`createExpenseForGroup`). There is no schema-validation library (e.g., Zod, Joi, express-validator) applied consistently. |
-| **No request logging / APM** | No HTTP request logger (e.g., Morgan) or error-tracking service is wired up. |
+| **No input validation middleware** | Validation logic is spread across auth controller (HTTP boundary) and service layer (business rules). There is no schema-validation library (e.g., Zod, Joi, express-validator) applied consistently across group/expense controllers. |
+| **groupService.js still references Members** | The `groupService.js` and `groupController.js` still contain references to the retired `Members` model (e.g., `createGroupWithMembers`). These need to be refactored to use `User` + `GroupMember` before group endpoints can function correctly with the new schema. |
+| **authenticate middleware not wired onto group/expense routes** | The `authenticate` middleware exists but is not yet applied to `/api/groups/*` or `/api/expenses/*` — this will happen after `groupService.js` is refactored. |
 | **No frontend error boundaries** | React error boundaries are not implemented. An uncaught render error will crash the entire SPA. |
-| **Frontend state not shared across pages** | Each page independently fetches the full groups list and group details. Switching between Dashboard and Expenses triggers duplicate network requests because there is no shared cache or global store. |
+| **Frontend state not shared across pages** | Each page independently fetches the full groups list and group details. No shared cache or global store exists. |
 | **Config only has development environment** | `config/config.js` defines only a `development` block. There is no `production` or `test` configuration. |
+| **Redis console calls** | `backend/config/redis.config.js` still uses `console.log`/`console.warn`/`console.error` for Redis events. Should be converted to the Winston logger. |
 
-> For missing product features (auth, tests, rate limiting, pagination, Docker/CI), see `FEATURES.md §3`.
-> For model-level defects (broken `ExpenseSplits` association), see `DATABASE_SCHEMA.md §3`.
-> For API-level bugs (DELETE null-crash, `data.error` key mismatch, `<a href>` nav links), see `API_REFERENCE.md §Flagged Inconsistencies` and `FEATURES.md §2 Known Bugs`.
+> For missing product features (auth frontend, tests, rate limiting, pagination, Docker/CI), see `FEATURES.md`.
+> For model-level gaps, see `DATABASE_SCHEMA.md §6 Not Yet Modeled`.
+> For API-level bugs, see `API_REFERENCE.md §Flagged Inconsistencies`.

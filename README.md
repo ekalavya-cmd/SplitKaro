@@ -45,7 +45,7 @@ The name "SplitKaro" is a mix of English and Hindi, where _"Karo"_ means _"to do
 The following features are **fully implemented** in the current version:
 
 ### 👥 Group Management
-- **Create Groups** with a name, optional description, and one or more members (each with name, email, and phone)
+- **Create Groups** with a name, optional description, and members
 - **View All Groups** — list all existing groups
 - **View Group Details** — see a group's info along with all its members
 
@@ -95,6 +95,12 @@ The following features are **fully implemented** in the current version:
 | **Express.js** | v5.x | Web framework (REST API) |
 | **Sequelize** | v6.x | ORM for database interaction |
 | **MySQL2** | v3.x | MySQL database driver |
+| **Redis (node-redis)** | v6.x | Refresh token storage (rotating tokens) |
+| **jsonwebtoken** | v9.x | JWT access token signing and verification |
+| **bcrypt** | v5.x | Password hashing (cost factor 12) |
+| **cookie-parser** | v1.x | httpOnly cookie parsing for refresh tokens |
+| **Winston** | v3.x | Centralized structured logging |
+| **winston-daily-rotate-file** | v5.x | Rolling log file transport |
 | **dotenv** | v17.x | Environment variable management |
 | **cors** | v2.x | Cross-origin request handling |
 | **nodemon** | v3.x | Development auto-reload |
@@ -114,6 +120,7 @@ The following features are **fully implemented** in the current version:
 | Technology | Purpose |
 |------------|---------|
 | **MySQL** | Relational database |
+| **Redis** | Refresh token store |
 | **Sequelize Migrations** | Schema versioning and management |
 
 ---
@@ -132,26 +139,30 @@ SplitKaro follows a classic **Client–Server** architecture with a clear separa
 │  │  (/)     │  │(/expens.)│  │(/add-e.) │  │Up      │  │
 │  └──────────┘  └──────────┘  └──────────┘  └────────┘  │
 │         │           │              │             │       │
-│         └───────────┴──────────────┴─────────────┘      │
-│                         │                               │
-│              splitKaroService.js (service layer)        │
-│                         │                               │
-│              splitKaroAPI.js (Axios instance)           │
-└──────────────────────────┬──────────────────────────────┘
+│         └────────────────────────────────────────┘       │
+│                         │                                │
+│              splitKaroService.js (service layer)         │
+│                         │                                │
+│              splitKaroAPI.js (Axios instance)            │
+└──────────────────────────┬───────────────────────────────┘
                            │  HTTP/REST (port 5173 → 3000)
 ┌──────────────────────────▼──────────────────────────────┐
 │                        SERVER                           │
 │              Node.js + Express.js (port 3000)           │
 │                                                         │
-│  Routes: /api/groups/*   /api/expenses/*                │
+│  Routes: /api/auth/*   /api/groups/*   /api/expenses/*  │
 │       ↓                                                 │
-│  Controllers: groupController.js  expenseController.js  │
+│  Middleware: auth.middleware.js (JWT verification)       │
 │       ↓                                                 │
-│  Services:   groupService.js      expenseService.js     │
+│  Controllers: authController  groupController           │
+│               expenseController                         │
+│       ↓                                                 │
+│  Services: auth.service  token.service                  │
+│            groupService  expenseService                 │
 │       ↓                                                 │
 │  Sequelize ORM (Models)                                 │
-│  Groups | Members | Expenses | ExpenseSplits            │
-│  Settlements                                            │
+│  User | GroupMember | Groups | Expenses                 │
+│  ExpenseSplits | Settlements                            │
 └──────────────────────────┬──────────────────────────────┘
                            │
 ┌──────────────────────────▼──────────────────────────────┐
@@ -180,33 +191,39 @@ SplitKaro follows a classic **Client–Server** architecture with a clear separa
 splitKaro/
 ├── backend/
 │   ├── config/
-│   │   └── config.js              # Sequelize DB config (reads from .env)
+│   │   ├── config.js              # Sequelize DB config (reads from .env)
+│   │   ├── logger.config.js       # Winston logger (console + daily rotating files)
+│   │   └── redis.config.js        # node-redis v6 client (refresh token storage)
 │   ├── controllers/
+│   │   ├── auth.controller.js     # register, login, refresh, logout, logoutAllDevices
 │   │   ├── groupController.js     # HTTP handlers for group-related routes
 │   │   └── expenseController.js   # HTTP handlers for expense-related routes
-│   ├── migrations/
-│   │   ├── 20260408063521-create-groups.js
-│   │   ├── 20260408063936-create-members.js
-│   │   ├── 20260408064422-create-expenses.js
-│   │   ├── 20260408065535-create-expense_splits.js
-│   │   └── 20260409121454-create-settlements.js
+│   ├── logs/                      # Winston daily log files (gitignored)
+│   ├── middleware/
+│   │   └── auth.middleware.js     # Verifies JWT Bearer token, sets req.userId
+│   ├── migrations/                # Sequelize migration files
 │   ├── models/
 │   │   ├── index.js               # Auto-loads all models, sets up associations
+│   │   ├── User.js
+│   │   ├── GroupMember.js
 │   │   ├── Groups.js
-│   │   ├── Members.js
 │   │   ├── Expenses.js
 │   │   ├── ExpenseSplits.js
 │   │   └── Settlements.js
 │   ├── routes/
+│   │   ├── auth.routes.js         # 5 routes under /api/auth
 │   │   ├── groupRoutes.js         # All /api/groups/* route definitions
 │   │   └── expenseRoutes.js       # All /api/expenses/* route definitions
 │   ├── seeders/                   # (Reserved for seed data)
 │   ├── services/
+│   │   ├── auth.service.js        # registerUser, loginUser (bcrypt + token issuance)
+│   │   ├── token.service.js       # JWT access tokens + Redis rotating refresh tokens
 │   │   ├── groupService.js        # Core business logic (balances, splits, settlements)
 │   │   └── expenseService.js      # Expense deletion logic
 │   ├── utils/
 │   │   └── equalSplitAmount.js    # Precise integer-based equal-split algorithm
 │   ├── .env                       # Environment variables (not committed)
+│   ├── .env.example               # Template with all keys, values blanked
 │   ├── .gitignore
 │   ├── package.json
 │   └── server.js                  # Express app entry point
@@ -321,6 +338,16 @@ Base URL: `http://localhost:3000/api`
 |--------|----------|-------------|
 | `DELETE` | `/expenses/:id` | Delete an expense |
 
+### Authentication
+
+| Method | Endpoint | Auth required | Description |
+|--------|----------|---------------|-------------|
+| `POST` | `/auth/register` | — | Create account; returns access token + sets refresh cookie |
+| `POST` | `/auth/login` | — | Login; returns access token + sets refresh cookie |
+| `POST` | `/auth/refresh` | Cookie | Exchange refresh cookie for a new access token (token rotation) |
+| `POST` | `/auth/logout` | Bearer token | Revoke current session refresh token and clear cookie |
+| `POST` | `/auth/logout-all` | Bearer token | Revoke all sessions for this user across all devices |
+
 ### Example: Create Group
 
 ```json
@@ -402,13 +429,16 @@ POST /api/groups/1/settlements
 
 3. **Configure environment variables:**
 
-   Create a `.env` file inside `backend/` (see [Environment Variables](#environment-variables)):
+   Copy `backend/.env.example` to `backend/.env` and fill in your values:
    ```env
    DB_HOST=localhost
    DB_USER=root
    DB_PASSWORD=your_mysql_password
    DB_NAME=splitKaro_db
    PORT=3000
+   REDIS_URL=redis://127.0.0.1:6379
+   JWT_ACCESS_SECRET=your_64_char_hex_secret
+   LOG_LEVEL=debug
    ```
 
 4. **Create the MySQL database:**
@@ -469,6 +499,11 @@ POST /api/groups/1/settlements
 | `DB_PASSWORD` | MySQL password | _(your password)_ |
 | `DB_NAME` | MySQL database name | `splitKaro_db` |
 | `PORT` | Port the Express server listens on | `3000` |
+| `REDIS_URL` | Redis connection URL | `redis://127.0.0.1:6379` |
+| `JWT_ACCESS_SECRET` | Secret key for signing JWT access tokens | _(generate a 64-char random hex string)_ |
+| `LOG_LEVEL` | Winston log level (`debug`/`info`/`warn`/`error`) | `debug` |
+
+Copy `backend/.env.example` to `backend/.env` and fill in the values.
 
 ### Frontend (`frontend/.env`)
 
