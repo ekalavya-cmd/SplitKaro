@@ -46,18 +46,25 @@ async function requireGroupMembership(req, res, next) {
 }
 
 async function requireExpenseGroupMembership(req, res, next) {
-  const expenseId = req.params.id;
+  const expenseId = req.params.expenseId;
+  const groupId = req.params.id;
   const userId = req.userId;
 
   try {
+    await checkMembership(userId, groupId);
+
     const expense = await Expenses.findByPk(expenseId);
     if (!expense) {
       logger.debug(`requireExpenseGroupMembership: Expense ${expenseId} not found`);
       return res.status(404).json({ message: "Expense not found" });
     }
 
-    await checkMembership(userId, expense.groupId);
-    logger.debug(`requireExpenseGroupMembership: User ${userId} is a member of group ${expense.groupId} for expense ${expenseId}`);
+    if (expense.groupId !== Number(groupId)) {
+      logger.debug(`requireExpenseGroupMembership: Expense ${expenseId} not in group ${groupId}`);
+      return res.status(404).json({ message: "Expense not found in this group." });
+    }
+
+    logger.debug(`requireExpenseGroupMembership: User ${userId} is a member of group ${groupId} for expense ${expenseId}`);
     next();
   } catch (err) {
     if (err.status && err.message) {

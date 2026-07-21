@@ -45,7 +45,7 @@
 | ✅ List expenses for a group | GET `/api/groups/:id/expenses` — expenses with payer info and full split detail per member (R6b discovery: fixed to use User schema and verified working) |
 | ✅ View expenses on Dashboard | Expense table on Dashboard page with date, description, payer, amount, split type badge, split breakdown |
 | ✅ View expenses on Expenses page | Dedicated Expenses page with same columns plus a Delete button per row |
-| ✅ Delete expense | DELETE `/api/expenses/:id` — cascades to all associated `expense_splits` rows via DB CASCADE. Gated by group membership authorization. |
+| ✅ Delete expense | DELETE `/api/groups/:id/expenses/:expenseId` — cascades to all associated `expense_splits` rows via DB CASCADE. Gated by group membership authorization, and validates that the expense belongs to the URL's group (returns 404 otherwise). |
 | ✅ Confirm-before-delete | Expenses page uses `window.confirm()` dialog before calling delete |
 | ✅ Split type colour badges | Equal = blue, exact = green, percentage = yellow; consistent across Dashboard and Expenses pages |
 

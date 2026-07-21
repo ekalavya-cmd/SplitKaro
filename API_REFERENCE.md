@@ -55,7 +55,7 @@ any endpoint. All operations are synchronous request/response.
 
 ### Transactions
 Write endpoints that touch multiple tables (`POST /groups`, `POST /groups/:id/expenses`,
-`DELETE /expenses/:id`, `DELETE /groups/settlements/:id`) wrap their operations
+`DELETE /groups/:id/expenses/:expenseId`, `DELETE /groups/settlements/:id`) wrap their operations
 in a Sequelize database transaction with rollback on failure.
 
 ---
@@ -163,6 +163,9 @@ added as its first member, and a unique `inviteToken` is generated.
 | `401` | `{ "message": "Access token required" }` | No/malformed Authorization header |
 | `401` | `{ "message": "Access token expired" }` | Token expired |
 | `401` | `{ "message": "Invalid access token" }` | Token invalid |
+| `403` | `{ "message": "You are not a member of this group." }` | Requesting user is not part of the URL's group |
+| `404` | `{ "message": "Expense not found" }` | ID does not exist |
+| `404` | `{ "message": "Expense not found in this group." }` | Expense exists but belongs to a different group |
 | `500` | `{ "message": "Something went wrong. Please try again." }` | Unexpected server/DB error |
 
 > **Note:** Members are no longer added inline during group creation. Other users
@@ -367,13 +370,14 @@ Values are the amount (for `exact`) or the percentage (for `percentage`).
 
 ---
 
-### `DELETE /expenses/:id`
+### `DELETE /groups/:id/expenses/:expenseId`
 
 Delete a single expense and all its associated `expense_splits` rows (via
 database CASCADE). Wrapped in a transaction.
 
 **Auth:** Required (`Authorization: Bearer <accessToken>`)  
-**Path param:** `id` — integer expense ID  
+**Path param:** `id` — integer (the group ID)
+**Path param:** `expenseId` — integer (the expense ID)
 **Request body:** None
 
 **Response `200`**
@@ -622,9 +626,9 @@ Delete a recorded settlement. Wrapped in a transaction.
 | `GET` | `/api/groups/:id/settlements` | List recorded settlements for a group |
 | `POST` | `/api/groups/:id/settlements` | Record a settlement payment |
 | `DELETE` | `/api/groups/settlements/:id` | Delete a settlement record |
-| `DELETE` | `/api/expenses/:id` | Delete an expense and its splits |
+| `DELETE` | `/api/groups/:id/expenses/:expenseId` | Delete an expense and its splits |
 
-**Total: 13 endpoints across 2 routers.**
+**Total: 13 endpoints across 1 router (excluding Auth).**
 
 ---
 

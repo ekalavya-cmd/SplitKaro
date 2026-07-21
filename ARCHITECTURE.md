@@ -30,8 +30,7 @@ SplitKaro is a bill-splitting web application that lets users create groups, add
 │                                                                │
 │  Routes                                                        │
 │   /api/auth/*        → auth.routes.js → auth.controller.js    │
-│   /api/groups/*      → groupRoutes.js → groupController.js    │
-│   /api/expenses/:id  → expenseRoutes.js → expenseController.js│
+│   /api/groups/*      → groupRoutes.js → groupController.js & expenseController.js
 │                                                                │
 │  Middleware                                                    │
 │   auth.middleware.js — verifies JWT, attaches req.userId       │
@@ -41,8 +40,8 @@ SplitKaro is a bill-splitting web application that lets users create groups, add
 │  Services — all business logic                                 │
 │   auth.service.js   (register, login — bcrypt + token issue)  │
 │   token.service.js  (JWT sign/verify, Redis refresh tokens)    │
-│   groupService.js  (groups, expenses, balances, settlements)   │
-│   expenseService.js  (delete expense)                          │
+│   groupService.js  (groups, balances, settlements)             │
+│   expenseService.js  (create, list, delete expenses)           │
 │                                                                │
 │  Config                                                        │
 │   logger.config.js  (Winston — console + daily rotating files) │
@@ -83,8 +82,8 @@ splitKaro/
 │   │   └── redis.config.js     # node-redis v6 client (refresh token storage)
 │   ├── controllers/
 │   │   ├── auth.controller.js  # register, login, refresh, logout, logoutAllDevices
-│   │   ├── groupController.js  # HTTP handlers for all group-scoped routes
-│   │   └── expenseController.js# HTTP handler for DELETE /expenses/:id
+│   │   ├── groupController.js  # HTTP handlers for group/balance/settlement routes
+│   │   └── expenseController.js# HTTP handlers for all expense routes (create/list/delete)
 │   ├── logs/                   # Winston daily log files (gitignored)
 │   ├── middleware/
 │   │   └── auth.middleware.js  # Verifies JWT Bearer token, sets req.userId
@@ -99,14 +98,13 @@ splitKaro/
 │   │   └── Settlements.js
 │   ├── routes/
 │   │   ├── auth.routes.js      # 5 routes under /api/auth
-│   │   ├── groupRoutes.js      # 9 routes under /api/groups
-│   │   └── expenseRoutes.js    # 1 route: DELETE /api/expenses/:id
+│   │   └── groupRoutes.js      # All group and expense routes under /api/groups
 │   ├── seeders/                # Sequelize seed files
 │   ├── services/
 │   │   ├── auth.service.js     # registerUser, loginUser (bcrypt + token issuance)
 │   │   ├── token.service.js    # JWT access tokens + Redis rotating refresh tokens
-│   │   ├── groupService.js     # Core business logic (balance calc, settlement algorithm, transactions)
-│   │   └── expenseService.js   # Thin service: delete expense in a transaction
+│   │   ├── groupService.js     # Core business logic (groups, balances, settlements)
+│   │   └── expenseService.js   # Expense business logic (create, list, delete)
 │   ├── utils/
 │   │   └── equalSplitAmount.js # Integer-safe equal-split helper (distributes penny remainders)
 │   ├── .env                    # DB credentials, PORT, Redis URL, JWT secrets (not committed)
