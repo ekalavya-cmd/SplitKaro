@@ -3,7 +3,6 @@ const logger = require("../config/logger.config");
 const {
   Expenses,
   Groups,
-  Members,
   GroupMember,
   User,
   ExpenseSplits,
@@ -331,25 +330,27 @@ async function getExpensesForGroup(groupId) {
     ],
     include: [
       {
-        model: Members,
+        model: User,
         as: "payer",
         attributes: ["name", "email"],
       },
       {
         model: ExpenseSplits,
         as: "splits",
-        attributes: ["id", "memberId", "amountOwed"],
+        attributes: ["id", "userId", "amountOwed"],
         include: {
-          model: Members,
-          as: "member",
+          model: User,
+          as: "user",
           attributes: ["name", "email"],
         },
         separate: true,
-        order: [["memberId", "ASC"]],
+        order: [["userId", "ASC"]],
       },
     ],
     order: [["id", "ASC"]],
   });
+
+  logger.debug(`Fetched ${expenses.length} expenses for group id ${groupId}`);
 
   return expenses.map((expense) => ({
     id: expense.id,
@@ -362,8 +363,8 @@ async function getExpensesForGroup(groupId) {
     date: expense.date,
     splits: expense.splits.map((split) => ({
       id: split.id,
-      memberId: split.memberId,
-      member: split.member,
+      userId: split.userId,
+      user: split.user,
       amountOwed: split.amountOwed,
     })),
   }));
@@ -567,19 +568,19 @@ async function recordSettlementForGroup(groupId, settlementData) {
 
   const group = await Groups.findByPk(groupId, {
     include: {
-      model: Members,
-      as: "members",
+      model: User,
+      as: "users",
       attributes: ["id", "name"],
-      separate: true,
-      order: [["id", "ASC"]],
+      through: { attributes: [] },
     },
+    order: [[{ model: User, as: "users" }, "id", "ASC"]],
   });
 
   if (!group) {
     throw { status: 404, message: "Group not found" };
   }
 
-  const members = group.members;
+  const members = group.users;
   if (!members || members.length === 0) {
     throw {
       status: 400,
@@ -616,10 +617,10 @@ async function recordSettlementForGroup(groupId, settlementData) {
 
   const balances = await calculateGroupBalances(groupId);
   const payerBalance = balances.find(
-    (balance) => balance.member_id === payerId,
+    (balance) => balance.user_id === payerId,
   );
   const payeeBalance = balances.find(
-    (balance) => balance.member_id === payeeId,
+    (balance) => balance.user_id === payeeId,
   );
 
   if (!payerBalance || !payeeBalance) {
@@ -674,18 +675,20 @@ async function getSettlementsForGroup(groupId) {
     attributes: ["id", "groupId", "paidBy", "paidTo", "amount", "date"],
     include: [
       {
-        model: Members,
+        model: User,
         as: "payer",
         attributes: ["name", "email"],
       },
       {
-        model: Members,
+        model: User,
         as: "payee",
         attributes: ["name", "email"],
       },
     ],
     order: [["id", "ASC"]],
   });
+
+  logger.debug(`Fetched ${settlements.length} settlements for group id ${groupId}`);
 
   return settlements.map((settlement) => ({
     id: settlement.id,

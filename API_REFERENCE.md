@@ -257,8 +257,8 @@ List all expenses for a group, including payer info and per-member split details
       "splits": [
         {
           "id": 1,
-          "memberId": 1,
-          "member": { "name": "Alice", "email": "alice@example.com" },
+          "userId": 1,
+          "user": { "name": "Alice", "email": "alice@example.com" },
           "amountOwed": "400.00"
         }
       ]
@@ -267,7 +267,7 @@ List all expenses for a group, including payer info and per-member split details
 }
 ```
 Expenses are ordered by `id ASC`. Splits within each expense are ordered by
-`memberId ASC`. `amount` and `amountOwed` are returned as **strings** (MySQL
+`userId ASC`. `amount` and `amountOwed` are returned as **strings** (MySQL
 `DECIMAL` serialised by Sequelize).
 
 **Error responses**
@@ -372,7 +372,7 @@ Values are the amount (for `exact`) or the percentage (for `percentage`).
 Delete a single expense and all its associated `expense_splits` rows (via
 database CASCADE). Wrapped in a transaction.
 
-**Auth:** None  
+**Auth:** Required (`Authorization: Bearer <accessToken>`)  
 **Path param:** `id` — integer expense ID  
 **Request body:** None
 
@@ -385,6 +385,7 @@ database CASCADE). Wrapped in a transaction.
 
 | Status | Body | Condition |
 |---|---|---|
+| `403` | `{ "message": "You are not a member of this group." }` | Authenticated user is not a member of the group this expense belongs to |
 | `404` | `{ "message": "Expense not found" }` | No expense with given `:id` exists |
 | `500` | `{ "message": "Internal Server Error" }` | Unexpected DB error |
 
@@ -581,7 +582,7 @@ Settlements are ordered by `id ASC`.
 
 Delete a recorded settlement. Wrapped in a transaction.
 
-**Auth:** None  
+**Auth:** Required (`Authorization: Bearer <accessToken>`)  
 **Path param:** `id` — integer settlement ID  
 **Request body:** None
 
@@ -594,6 +595,7 @@ Delete a recorded settlement. Wrapped in a transaction.
 
 | Status | Body | Condition |
 |---|---|---|
+| `403` | `{ "message": "You are not a member of this group." }` | Authenticated user is not a member of the group this settlement belongs to |
 | `404` | `{ "message": "Settlement not found" }` | No settlement with given `:id` exists |
 | `500` | `{ "message": "Internal Server Error" }` | Unexpected DB error |
 

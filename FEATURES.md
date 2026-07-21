@@ -42,10 +42,10 @@
 | ✅ Add expense — exact split | User enters per-member amounts; server validates they sum to total (±0.01) |
 | ✅ Add expense — percentage split | User enters per-member %; server validates they sum to 100 (±0.01) and computes currency amounts with penny-safe rounding |
 | ✅ Expense form with live split preview | `AddExpense.jsx` shows a read-only per-member preview panel for equal splits, and editable inputs for exact/percentage; running total shown |
-| ✅ List expenses for a group | GET `/api/groups/:id/expenses` — expenses with payer info and full split detail per member |
+| ✅ List expenses for a group | GET `/api/groups/:id/expenses` — expenses with payer info and full split detail per member (R6b discovery: fixed to use User schema and verified working) |
 | ✅ View expenses on Dashboard | Expense table on Dashboard page with date, description, payer, amount, split type badge, split breakdown |
 | ✅ View expenses on Expenses page | Dedicated Expenses page with same columns plus a Delete button per row |
-| ✅ Delete expense | DELETE `/api/expenses/:id` — cascades to all associated `expense_splits` rows via DB CASCADE |
+| ✅ Delete expense | DELETE `/api/expenses/:id` — cascades to all associated `expense_splits` rows via DB CASCADE. Gated by group membership authorization. |
 | ✅ Confirm-before-delete | Expenses page uses `window.confirm()` dialog before calling delete |
 | ✅ Split type colour badges | Equal = blue, exact = green, percentage = yellow; consistent across Dashboard and Expenses pages |
 
@@ -71,9 +71,9 @@
 | ✅ Settlement suggestions | GET `/api/groups/:id/settlements/suggest` — greedy two-pointer algorithm that minimises transaction count (R3: fixed to use User schema). |
 | ✅ Suggestions shown on Dashboard | Dashboard shows suggested payments with a "Settle" button that navigates to `/settle-up` |
 | ✅ Suggestions shown on SettleUp page | SettleUp left panel shows the current suggestions list alongside the form |
-| ✅ Record settlement | SettleUp form: select payer, payee, enter amount and date; server validates payer owes money and payee is owed money |
-| ✅ Partial settlement | The backend accepts any amount up to but not exceeding `min(|payer balance|, payee balance)` |
-| ✅ Settlement history table | SettleUp page shows all recorded settlements for the selected group (date, payer, payee, amount) |
+| ✅ Record settlement | SettleUp form: select payer, payee, enter amount and date; server validates payer owes money and payee is owed money (R6b discovery: fixed to use User schema and verified working) |
+| ✅ Partial settlement | The backend accepts any amount up to but not exceeding `min(|payer balance|, payee balance)` (R6b discovery: fixed to use User schema and verified working) |
+| ✅ Settlement history table | SettleUp page shows all recorded settlements for the selected group (date, payer, payee, amount) (R6b discovery: fixed to use User schema and verified working) |
 | ✅ Suggestions refresh after recording | SettleUp re-fetches suggestions and settlements list immediately after a successful `createSettlement` call |
 | ✅ Form feedback via `alert()` | SettleUp shows `alert("Settlement recorded successfully!")` on success and `alert("Failed to record settlement...")` on error |
 | ✅ Pre-fill settlement form from suggestion | Dashboard "Settle" button passes payer, payee, and amount via `location.state` to pre-fill the form on SettleUp page |
@@ -110,7 +110,7 @@
 | Feature | Status | What exists | What is missing |
 |---|---|---|---|
 | Edit expense | 🚧 | Nothing | No backend endpoint; no frontend UI |
-| Delete settlement (UI) | 🚧 | Backend `DELETE /api/groups/settlements/:id` exists and is wired in `splitKaroService.deleteSettlement()` | The SettleUp page has no delete button in the settlement history table; the service function is never called from any page |
+| Delete settlement (UI) | 🚧 | Backend `DELETE /api/groups/settlements/:id` exists (gated by group membership authorization) and is wired in `splitKaroService.deleteSettlement()` | The SettleUp page has no delete button in the settlement history table; the service function is never called from any page |
 
 ### Feedback & UX
 | Feature | Status | What exists | What is missing |
@@ -128,9 +128,10 @@
 | groupService.js references dropped Members model | 🐛 | The `members` table was retired during the auth schema migration. `groupService.js` read paths still query the old `Members` model. **Fix in progress:** sub-steps R1, R2, and R3 are done. Next up: R4 (activity). R5 (join via invite link) and R6 (route authorization) are separate new-functionality items. See `ARCHITECTURE.md §5 Known Gaps` for more detail. |
 | createExpenseForGroup schema reference bug | ✅ | **Resolved**: Discovered out-of-sequence during R3 testing. Expense creation was still referencing the deleted `Members` model when validating users and creating splits. Refactored to use the new `User` + `GroupMember` schema. |
 | API error key mismatch | ✅ | **Resolved**: Updated axios interceptor to read `data?.message`. Backend validation/error messages are now correctly shown in the UI. |
-| Equal split preview wrong | 🐛 | AddExpense.jsx previews `amount / members.length` (floating-point) but the server uses integer-cent math with penny-remainder distribution — the preview can show different values than what gets stored |
+| equal split preview wrong | 🐛 | AddExpense.jsx previews `amount / members.length` (floating-point) but the server uses integer-cent math with penny-remainder distribution — the preview can show different values than what gets stored |
 | Nav links cause full-page reload | ✅ | **Resolved**: Swapped `<a href="...">` nav tags for React Router's `<Link>` components in Layout.jsx. Navigation now works client-side without full-page reloads. |
 | DELETE endpoints return 500 for missing IDs | ✅ | **Resolved**: Added null guards in `deleteExpense` and `deleteSettlement` to correctly return a `404` error instead of crashing. |
+| schema reference bugs in remaining functions | ✅ | **Resolved**: Discovered out-of-sequence during R6b testing. `createSettlement`, `getExpensesForGroup`, and `getSettlementsForGroup` were still referencing the deleted `Members` model. Refactored to use the new `User` + `GroupMember` schema. A full grep of `groupService.js` confirms zero remaining `Members` references. |
 
 ---
 

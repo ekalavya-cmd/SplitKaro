@@ -2,11 +2,11 @@ const express = require("express");
 const router = express.Router();
 const groupcontroller = require("../controllers/groupController");
 const { authenticate } = require("../middleware/auth.middleware");
-const { requireGroupMembership } = require("../middleware/groupMembership.middleware");
+const { requireGroupMembership, requireSettlementGroupMembership } = require("../middleware/groupMembership.middleware");
 
 router.get("/", authenticate, groupcontroller.fetchGroups);
 router.post("/", authenticate, groupcontroller.createGroup);
-router.delete("/settlements/:id", groupcontroller.removeSettlement);
+router.delete("/settlements/:id", authenticate, requireSettlementGroupMembership, groupcontroller.removeSettlement);
 router.get("/invite/:token", groupcontroller.getGroupByInviteToken);
 router.post("/invite/:token/join", authenticate, groupcontroller.joinGroupViaInvite);
 router.get("/:id", authenticate, requireGroupMembership, groupcontroller.fetchGroup);
