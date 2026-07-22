@@ -196,11 +196,14 @@ splitKaro/
 │   │   └── redis.config.js        # node-redis v6 client (refresh token storage)
 │   ├── controllers/
 │   │   ├── auth.controller.js     # register, login, refresh, logout, logoutAllDevices
-│   │   ├── groupController.js     # HTTP handlers for group-related routes
-│   │   └── expenseController.js   # HTTP handlers for expense-related routes
+│   │   ├── expense.controller.js  # HTTP handlers for expense-related routes
+│   │   ├── group.controller.js    # HTTP handlers for group-related routes
+│   │   ├── invite.controller.js   # HTTP handlers for joining via invite link
+│   │   └── settlement.controller.js # HTTP handlers for balances and settlements
 │   ├── logs/                      # Winston daily log files (gitignored)
 │   ├── middleware/
-│   │   └── auth.middleware.js     # Verifies JWT Bearer token, sets req.userId
+│   │   ├── auth.middleware.js     # Verifies JWT Bearer token, sets req.userId
+│   │   └── groupMembership.middleware.js # Authorizes group-scoped operations
 │   ├── migrations/                # Sequelize migration files
 │   ├── models/
 │   │   ├── index.js               # Auto-loads all models, sets up associations
@@ -212,16 +215,21 @@ splitKaro/
 │   │   └── Settlements.js
 │   ├── routes/
 │   │   ├── auth.routes.js         # 5 routes under /api/auth
-│   │   ├── groupRoutes.js         # All /api/groups/* route definitions
-│   │   └── expenseRoutes.js       # All /api/expenses/* route definitions
+│   │   ├── expense.routes.js      # Expense routes mounted under /api/groups/:id/expenses
+│   │   ├── group.routes.js        # Core group routes under /api/groups
+│   │   ├── invite.routes.js       # Invite routes mounted under /api/groups/invite
+│   │   └── settlement.routes.js   # Settlement routes mounted at root and /api/groups/:id
 │   ├── seeders/                   # (Reserved for seed data)
 │   ├── services/
 │   │   ├── auth.service.js        # registerUser, loginUser (bcrypt + token issuance)
-│   │   ├── token.service.js       # JWT access tokens + Redis rotating refresh tokens
-│   │   ├── groupService.js        # Core business logic (balances, splits, settlements)
-│   │   └── expenseService.js      # Expense deletion logic
+│   │   ├── expense.service.js     # Expense business logic
+│   │   ├── group.service.js       # Core group management logic
+│   │   ├── invite.service.js      # Invite token and group join logic
+│   │   ├── settlement.service.js  # Balances and settlements logic
+│   │   └── token.service.js       # JWT access tokens + Redis rotating refresh tokens
 │   ├── utils/
-│   │   └── equalSplitAmount.js    # Precise integer-based equal-split algorithm
+│   │   ├── dateValidator.js       # Shared date parsing and validation logic
+│   │   └── splitMath.js           # Shared penny-math and remainder distribution logic
 │   ├── .env                       # Environment variables (not committed)
 │   ├── .env.example               # Template with all keys, values blanked
 │   ├── .gitignore
@@ -261,9 +269,7 @@ splitKaro/
 
 ## Database Schema 🗄️
 
-> **Note:** The diagram below reflects the **current** `users` / `group_members` schema.
-> The `groupService.js` backend service layer has not been fully refactored onto it yet —
-> see [FEATURES.md §3 Known Bugs](FEATURES.md) for live status of the R1–R6 refactor in progress.
+> **Note on implementation:** The backend service layer has been fully refactored to use the `users` and `group_members` tables. All endpoints are now functionally bound to the new auth-enabled schema.
 
 ```
 ┌─────────────────────────────┐         ┌────────────────────────────┐

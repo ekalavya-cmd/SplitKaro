@@ -50,7 +50,7 @@ SplitKaro is a bill-splitting web application that lets users create groups, add
 │   redis.config.js   (node-redis v6 client — refresh tokens)   │
 │                                                                │
 │  Utils                                                         │
-│   equalSplitAmount.js  (integer-safe equal-split with pennies) │
+│   splitMath.js  (penny-math & remainder distribution)          │
 └───────────────────────┬────────────────────────────────────────┘
       Sequelize ORM      │                  Redis
 ┌───────────────────────▼────────────────────────────────────────┐
@@ -197,7 +197,7 @@ Backend uses `dotenv`; frontend uses Vite's `import.meta.env`. Both `.env` files
 |---|---|
 | **CORS origin hard-coded** | `origin: "http://localhost:5173"` in `server.js` will break any non-local deployment without a code change. Should be driven from an environment variable. |
 | **No input validation middleware** | Validation logic is spread across auth controller (HTTP boundary) and service layer (business rules). There is no schema-validation library (e.g., Zod, Joi, express-validator) applied consistently across group/expense controllers. |
-| **groupService.js still references Members** | The `groupService.js` and `groupController.js` still contain references to the retired `Members` model (e.g., `createGroupWithMembers`). These need to be refactored to use `User` + `GroupMember` before group endpoints can function correctly with the new schema. |
+
 
 | **No frontend error boundaries** | React error boundaries are not implemented. An uncaught render error will crash the entire SPA. |
 | **Frontend state not shared across pages** | Each page independently fetches the full groups list and group details. No shared cache or global store exists. |
