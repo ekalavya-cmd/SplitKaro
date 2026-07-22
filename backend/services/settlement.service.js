@@ -1,4 +1,5 @@
 const logger = require("../config/logger.config");
+const { validateAndParseDate } = require("../utils/dateValidator");
 const {
   Expenses,
   Groups,
@@ -248,10 +249,7 @@ async function recordSettlementForGroup(groupId, settlementData) {
     throw { status: 400, message: "Amount must be greater than 0" };
   }
 
-  const parsedDate = date ? new Date(date) : new Date();
-  if (Number.isNaN(parsedDate.getTime())) {
-    throw { status: 400, message: "Invalid date format" };
-  }
+  const parsedDate = validateAndParseDate(date);
 
   const balances = await calculateGroupBalances(groupId);
   const payerBalance = balances.find(

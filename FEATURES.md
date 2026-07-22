@@ -40,7 +40,7 @@
 |---|---|
 | ✅ Add expense — equal split | Divides total amount evenly; penny remainder distributed one cent at a time to the first N members |
 | ✅ Add expense — exact split | User enters per-member amounts; server validates they sum to total (±0.01) |
-| ✅ Add expense — percentage split | User enters per-member %; server validates they sum to 100 (±0.01) and computes currency amounts with penny-safe rounding |
+| ✅ Add expense — percentage split | User enters per-member %; server validates they sum to 100 (±0.01) and computes currency amounts with penny-safe rounding (now sharing the remainder-distribution primitive with equal splits) |
 | ✅ Expense form with live split preview | `AddExpense.jsx` shows a read-only per-member preview panel for equal splits, and editable inputs for exact/percentage; running total shown |
 | ✅ List expenses for a group | GET `/api/groups/:id/expenses` — expenses with payer info and full split detail per member (R6b discovery: fixed to use User schema and verified working) |
 | ✅ View expenses on Dashboard | Expense table on Dashboard page with date, description, payer, amount, split type badge, split breakdown |

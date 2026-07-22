@@ -115,7 +115,8 @@ splitKaro/
 │   │   ├── settlement.service.js # Balances and settlements logic
 │   │   └── invite.service.js   # Invite token generation and joining groups
 │   ├── utils/
-│   │   └── equalSplitAmount.js # Integer-safe equal-split helper (distributes penny remainders)
+│   │   ├── splitMath.js        # Shared penny-math and remainder distribution logic
+│   │   └── dateValidator.js    # Shared date parsing and validation logic
 │   ├── .env                    # DB credentials, PORT, Redis URL, JWT secrets (not committed)
 │   ├── .env.example            # Template env file with all keys, values blanked
 │   ├── package.json
@@ -168,7 +169,7 @@ All database interaction goes through Sequelize models. The `models/index.js` au
 `createGroupWithMembers`, `createExpenseForGroup`, `deleteExpense`, and `deleteSettlement` all use explicit Sequelize transactions with commit/rollback, preventing partial writes.
 
 ### Integer-safe monetary arithmetic
-`equalSplitAmount.js` operates in integer cents (`totalAmount * 100`) and distributes penny remainders one-by-one to avoid floating-point drift. The same pattern is used in the percentage-split path in `groupService.js`.
+`splitMath.js` provides shared primitives to operate in integer cents (`totalAmount * 100`) and distribute penny remainders one-by-one to avoid floating-point drift. This single utility is now used by both the equal-split and percentage-split paths to guarantee identical rounding behavior.
 
 ### Server-side balance calculation
 User balances and settlement suggestions are computed on the server in `calculateGroupBalances` and `suggestSettlementForGroup`. The suggestion algorithm is a greedy two-pointer approach (largest creditor vs. largest debtor) that minimises the number of transactions.

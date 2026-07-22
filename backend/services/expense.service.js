@@ -1,5 +1,6 @@
 const logger = require("../config/logger.config");
-const { splitAmount } = require("../utils/equalSplitAmount");
+const { splitAmount, distributeRemainder } = require("../utils/splitMath");
+const { validateAndParseDate } = require("../utils/dateValidator");
 const {
   Expenses,
   Groups,
@@ -63,10 +64,7 @@ async function createExpenseForGroup(groupId, expenseData) {
     };
   }
 
-  const parsedDate = new Date(date);
-  if (Number.isNaN(parsedDate.getTime())) {
-    throw { status: 400, message: "Invalid date format" };
-  }
+  const parsedDate = validateAndParseDate(date);
 
   const totalAmount = Math.round(Number(amount) * 100);
   if (totalAmount <= 0) {
@@ -173,24 +171,20 @@ async function createExpenseForGroup(groupId, expenseData) {
       };
     }
 
-    const percentageAmounts = userIds.map((userId) => {
+    const initialAmounts = userIds.map((userId) => {
       const percentage = Number(splits[userId]);
       return Math.round((totalAmount * percentage) / 100);
     });
 
-    const calculatedTotal = percentageAmounts.reduce(
+    const calculatedTotal = initialAmounts.reduce(
       (sum, amount) => sum + amount,
       0,
     );
     const remainder = totalAmount - calculatedTotal;
 
-    for (let i = 0; i < Math.abs(remainder); i++) {
-      if (remainder > 0) {
-        percentageAmounts[i]++;
-      } else {
-        percentageAmounts[i]--;
-      }
-    }
+    // Array order is strictly determined by userIds (matching the DB insertion order of group.users),
+    // bypassing JS object key sorting so remainder distribution perfectly matches the equal-split path.
+    const percentageAmounts = distributeRemainder(initialAmounts, remainder);
 
     splitsData = userIds.map((userId, index) => ({
       expenseId: null,
