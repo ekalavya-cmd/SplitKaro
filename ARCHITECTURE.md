@@ -30,7 +30,7 @@ SplitKaro is a bill-splitting web application that lets users create groups, add
 │                                                                │
 │  Routes                                                        │
 │   /api/auth/*        → auth.routes.js → auth.controller.js    │
-│   /api/groups/*      → groupRoutes.js → groupController.js & expenseController.js
+│   /api/groups/*      → group.routes.js (composition root)     │
 │                                                                │
 │  Middleware                                                    │
 │   auth.middleware.js — verifies JWT, attaches req.userId       │
@@ -40,8 +40,10 @@ SplitKaro is a bill-splitting web application that lets users create groups, add
 │  Services — all business logic                                 │
 │   auth.service.js   (register, login — bcrypt + token issue)  │
 │   token.service.js  (JWT sign/verify, Redis refresh tokens)    │
-│   groupService.js  (groups, balances, settlements)             │
-│   expenseService.js  (create, list, delete expenses)           │
+│   group.service.js  (core groups)                              │
+│   expense.service.js  (create, list, delete expenses)          │
+│   settlement.service.js  (balances, settlements)               │
+│   invite.service.js  (invite tokens, joining groups)           │
 │                                                                │
 │  Config                                                        │
 │   logger.config.js  (Winston — console + daily rotating files) │
@@ -63,8 +65,8 @@ SplitKaro is a bill-splitting web application that lets users create groups, add
 
 1. User fills the `AddExpense` page and submits.
 2. `splitKaroService.createExpense()` calls `POST /api/groups/:id/expenses` via the axios instance.
-3. Express routes the request to `groupController.createExpense`.
-4. Controller calls `groupService.createExpenseForGroup()`.
+3. Express routes the request to `expense.controller.createExpense`.
+4. Controller calls `expense.service.createExpenseForGroup()`.
 5. Service validates all inputs (payer is part of the group, split type, amounts), computes split rows, then creates `Expenses` + `ExpenseSplits` records inside a single Sequelize transaction.
 6. Controller responds `201` with the new expense and splits.
 7. The page navigates back to the Dashboard, which re-fetches expenses and balances.
@@ -81,9 +83,11 @@ splitKaro/
 │   │   ├── logger.config.js    # Winston logger (console + daily rotating files)
 │   │   └── redis.config.js     # node-redis v6 client (refresh token storage)
 │   ├── controllers/
-│   │   ├── auth.controller.js  # register, login, refresh, logout, logoutAllDevices
-│   │   ├── groupController.js  # HTTP handlers for group/balance/settlement routes
-│   │   └── expenseController.js# HTTP handlers for all expense routes (create/list/delete)
+│   │   ├── auth.controller.js       # register, login, refresh, logout, logoutAllDevices
+│   │   ├── group.controller.js      # core group routes
+│   │   ├── expense.controller.js    # expense routes
+│   │   ├── settlement.controller.js # balance and settlement routes
+│   │   └── invite.controller.js     # invite link and join routes
 │   ├── logs/                   # Winston daily log files (gitignored)
 │   ├── middleware/
 │   │   └── auth.middleware.js  # Verifies JWT Bearer token, sets req.userId
@@ -98,13 +102,18 @@ splitKaro/
 │   │   └── Settlements.js
 │   ├── routes/
 │   │   ├── auth.routes.js      # 5 routes under /api/auth
-│   │   └── groupRoutes.js      # All group and expense routes under /api/groups
+│   │   ├── group.routes.js     # Composition root for all /api/groups routes
+│   │   ├── expense.routes.js   # Mounted at /:id/expenses
+│   │   ├── settlement.routes.js# Mounted at /
+│   │   └── invite.routes.js    # Mounted at /invite
 │   ├── seeders/                # Sequelize seed files
 │   ├── services/
 │   │   ├── auth.service.js     # registerUser, loginUser (bcrypt + token issuance)
 │   │   ├── token.service.js    # JWT access tokens + Redis rotating refresh tokens
-│   │   ├── groupService.js     # Core business logic (groups, balances, settlements)
-│   │   └── expenseService.js   # Expense business logic (create, list, delete)
+│   │   ├── group.service.js    # Core group business logic
+│   │   ├── expense.service.js  # Expense business logic
+│   │   ├── settlement.service.js # Balances and settlements logic
+│   │   └── invite.service.js   # Invite token generation and joining groups
 │   ├── utils/
 │   │   └── equalSplitAmount.js # Integer-safe equal-split helper (distributes penny remainders)
 │   ├── .env                    # DB credentials, PORT, Redis URL, JWT secrets (not committed)
@@ -192,7 +201,7 @@ Backend uses `dotenv`; frontend uses Vite's `import.meta.env`. Both `.env` files
 | **No frontend error boundaries** | React error boundaries are not implemented. An uncaught render error will crash the entire SPA. |
 | **Frontend state not shared across pages** | Each page independently fetches the full groups list and group details. No shared cache or global store exists. |
 | **Config only has development environment** | `config/config.js` defines only a `development` block. There is no `production` or `test` configuration. |
-| **Redis console calls** | `backend/config/redis.config.js` still uses `console.log`/`console.warn`/`console.error` for Redis events. Should be converted to the Winston logger. |
+
 
 > For missing product features (auth frontend, tests, rate limiting, pagination, Docker/CI), see `FEATURES.md`.
 > For model-level gaps, see `DATABASE_SCHEMA.md §6 Not Yet Modeled`.

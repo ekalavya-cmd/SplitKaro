@@ -2,7 +2,7 @@ const {
   createExpenseForGroup,
   getExpensesForGroup,
   deleteExpense,
-} = require("../services/expenseService");
+} = require("../services/expense.service");
 
 async function createExpense(req, res) {
   try {

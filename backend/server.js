@@ -7,10 +7,9 @@ const logger = require("./config/logger.config");
 const cookieParser = require("cookie-parser");
 
 const { sequelize } = require("./models");
-const groupRoutes = require("./routes/groupRoutes");
 
 const authRoutes = require("./routes/auth.routes");
-
+const groupRoutes = require("./routes/group.routes");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -20,8 +19,6 @@ app.use(cookieParser());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/groups", groupRoutes);
-
-
 app.get("/", (req, res) => {
   res.json({ message: "Welcome to the SplitKaro application!" });
 });

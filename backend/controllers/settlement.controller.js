@@ -1,62 +1,10 @@
-const logger = require("../config/logger.config");
 const {
-  getGroups,
-  getGroup,
-  createGroup: createGroupService,
-  getGroupByInviteToken: getGroupByInviteTokenService,
-  joinGroupViaInvite: joinGroupViaInviteService,
-
   calculateGroupBalances,
   suggestSettlementForGroup,
   recordSettlementForGroup,
   getSettlementsForGroup,
   deleteSettlement,
-} = require("../services/groupService");
-
-async function fetchGroups(req, res) {
-  try {
-    const groups = await getGroups(req.userId);
-    res.status(200).json({ message: "Groups fetched successfully", groups });
-  } catch (err) {
-    logger.error("Error fetching groups:", err);
-    res.status(500).json({ message: "Internal Server Error" });
-  }
-}
-
-async function fetchGroup(req, res) {
-  try {
-    const group = await getGroup(req.params.id);
-    res.status(200).json(group);
-  } catch (err) {
-    if (err && err.status && err.message) {
-      return res.status(err.status).json({ message: err.message });
-    }
-    logger.error("Error fetching group:", err);
-    res.status(500).json({ message: "Internal Server Error" });
-  }
-}
-
-async function createGroup(req, res) {
-  try {
-    const { name, description } = req.body;
-    const userId = req.userId;
-
-    const group = await createGroupService(userId, { name, description });
-
-    res.status(201).json({
-      message: "Group created successfully",
-      group,
-    });
-  } catch (err) {
-    if (err && err.status && err.message) {
-      return res.status(err.status).json({ message: err.message });
-    }
-
-    logger.error("Error creating group:", err);
-    res.status(500).json({ message: "Something went wrong. Please try again." });
-  }
-}
-
+} = require("../services/settlement.service");
 
 async function fetchBalances(req, res) {
   try {
@@ -151,41 +99,7 @@ async function removeSettlement(req, res) {
   }
 }
 
-async function getGroupByInviteToken(req, res) {
-  try {
-    const group = await getGroupByInviteTokenService(req.params.token);
-    res.status(200).json(group);
-  } catch (err) {
-    if (err && err.status && err.message) {
-      return res.status(err.status).json({ message: err.message });
-    }
-    logger.error("Error fetching group by invite token:", err);
-    res.status(500).json({ message: "Something went wrong. Please try again." });
-  }
-}
-
-async function joinGroupViaInvite(req, res) {
-  try {
-    const result = await joinGroupViaInviteService(req.userId, req.params.token);
-    res.status(200).json({
-      message: "Successfully joined the group",
-      group: result
-    });
-  } catch (err) {
-    if (err && err.status && err.message) {
-      return res.status(err.status).json({ message: err.message });
-    }
-    logger.error("Error joining group via invite token:", err);
-    res.status(500).json({ message: "Something went wrong. Please try again." });
-  }
-}
-
 module.exports = {
-  fetchGroup,
-  fetchGroups,
-  createGroup,
-  getGroupByInviteToken,
-  joinGroupViaInvite,
   fetchBalances,
   fetchSettlementSuggestions,
   recordSettlement,

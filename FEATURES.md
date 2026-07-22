@@ -181,6 +181,7 @@
 | Export to CSV / PDF | ⏳ | No export functionality |
 | Group archiving | ⏳ | Archive fully-settled groups to keep the UI clean without permanently deleting data; no archived/status column exists in the `groups` schema |
 | Spending analytics dashboard | ⏳ | Visual charts (pie, bar, timeline) showing each member's total spend, share of group expenses, and balance trend over time; no analytics endpoints or charting library exists |
+| Total balance across all groups (dashboard aggregate) | ⏳ | Additional aggregate view summing a user's position across all their groups. Unlike `GET /:id/balances` which correctly isolates a single group's finances, this represents the overall friend/dashboard balance. Likely implemented as a new endpoint (e.g. `GET /api/users/me/balances`) querying `group_members` to sum each group's `calculateGroupBalances` result for the user, rather than reimplementing balance math globally. |
 
 ### Infrastructure & Quality
 | Feature | Status | Notes |
