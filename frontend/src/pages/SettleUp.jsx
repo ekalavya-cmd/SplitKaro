@@ -196,7 +196,7 @@ const SettleUp = () => {
                         amount: suggestion.amount.toFixed(2),
                       }))
                     }
-                    className="rounded-DEFAULT border border-primary bg-transparent px-3 py-1.5 font-label-sm text-label-sm tracking-wide text-primary transition-all hover:bg-primary/5 hover:shadow-md"
+                    className="rounded-DEFAULT border border-primary bg-transparent px-3 py-1.5 font-label-sm text-label-sm font-semibold tracking-wide text-primary transition-all hover:bg-primary/5 hover:shadow-md"
                   >
                     Settle
                   </button>
@@ -407,7 +407,7 @@ const SettleUp = () => {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="mt-2 flex h-10 w-full items-center justify-center gap-2 rounded-DEFAULT bg-primary px-4 font-label-sm text-label-sm tracking-wide text-on-primary transition-all hover:bg-primary/90 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50"
+              className="mt-2 flex h-10 w-full items-center justify-center gap-2 rounded-DEFAULT bg-primary px-4 font-label-sm text-label-sm font-semibold tracking-wide text-on-primary transition-all hover:bg-primary/90 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50"
             >
               Record Payment
             </button>

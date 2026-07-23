@@ -106,7 +106,7 @@ const Layout = () => {
             <select
               value={selectedGroupId}
               onChange={handleGroupChange}
-              className="h-9 min-w-[160px] cursor-pointer rounded-DEFAULT border border-outline-variant bg-surface-container-low px-3 py-1 font-label-sm text-label-sm text-on-surface focus:ring-2 focus:ring-primary/20 focus:outline-none"
+              className="h-9 min-w-40 cursor-pointer rounded-DEFAULT border border-outline-variant bg-surface-container-low px-3 py-1 font-label-sm text-label-sm text-on-surface focus:ring-2 focus:ring-primary/20 focus:outline-none"
             >
               <option value="" disabled>
                 Select a group
@@ -135,12 +135,12 @@ const Layout = () => {
           </div>
 
           <div className="flex items-center gap-4">
-            <button className="flex h-8 w-8 items-center justify-center rounded-full text-outline transition-colors hover:bg-surface-container-low hover:text-on-surface">
+            <button className="flex h-8 w-8 items-center justify-center rounded-full font-semibold text-outline transition-colors hover:bg-surface-container-low hover:text-on-surface">
               <span className="material-symbols-outlined text-[20px]">
                 notifications
               </span>
             </button>
-            <button className="flex h-8 w-8 items-center justify-center rounded-full text-outline transition-colors hover:bg-surface-container-low hover:text-on-surface">
+            <button className="flex h-8 w-8 items-center justify-center rounded-full font-semibold text-outline transition-colors hover:bg-surface-container-low hover:text-on-surface">
               <span className="material-symbols-outlined text-[20px]">
                 help
               </span>
@@ -148,14 +148,14 @@ const Layout = () => {
 
             <div className="mx-1 h-6 w-px bg-outline-variant"></div>
 
-            <button className="h-9 rounded-DEFAULT border border-primary bg-transparent px-4 font-label-sm text-label-sm tracking-wide text-primary transition-all hover:bg-primary/5 hover:shadow-md">
+            <button className="h-9 rounded-DEFAULT border border-primary bg-transparent px-4 font-label-sm text-label-sm font-semibold tracking-wide text-primary transition-all hover:bg-primary/5 hover:shadow-md">
               Groups
             </button>
 
             <button
               onClick={() => navigate(`/add-expense/${selectedGroupId}`)}
               disabled={!selectedGroupId}
-              className="flex h-9 items-center justify-center gap-2 rounded-DEFAULT bg-primary px-4 font-label-sm text-label-sm tracking-wide text-on-primary transition-all hover:bg-primary/90 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex h-9 items-center justify-center gap-2 rounded-DEFAULT bg-primary px-4 font-label-sm text-label-sm font-semibold tracking-wide text-on-primary transition-all hover:bg-primary/90 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50"
             >
               <span className="material-symbols-outlined text-[18px]">add</span>{" "}
               Add Expense
@@ -172,7 +172,7 @@ const Layout = () => {
 
         {/* Page Content */}
         <main className="flex-1 overflow-auto bg-background p-6">
-          <div className="mx-auto w-full max-w-[1200px]">
+          <div className="mx-auto w-full max-w-300">
             <Outlet
               context={{
                 selectedGroupId,

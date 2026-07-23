@@ -192,7 +192,7 @@ const Expenses = () => {
                           onClick={(e) => e.stopPropagation()}
                         >
                           <button
-                            className="ml-auto flex cursor-pointer items-center justify-center rounded-DEFAULT p-1 text-error transition-colors hover:bg-error/10"
+                            className="ml-auto flex cursor-pointer items-center justify-center rounded-DEFAULT p-1 font-semibold text-error transition-colors hover:bg-error/10"
                             title="Delete Expense"
                             onClick={() => {
                               if (

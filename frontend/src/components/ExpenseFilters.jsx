@@ -60,7 +60,7 @@ export const ExpenseFilters = ({ filterProps, members }) => {
                 id="splitType"
                 value={filterSplitType}
                 onChange={(e) => setFilterSplitType(e.target.value)}
-                className="cursor-pointer rounded-DEFAULT border border-outline-variant bg-surface-container-low px-2 py-1 font-body-md text-body-md font-bold text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"
+                className="cursor-pointer rounded-DEFAULT border border-outline-variant bg-surface-container-low px-2 py-1 font-body-md text-body-md font-bold text-on-surface focus:ring-2 focus:ring-primary/20 focus:outline-none"
               >
                 <option value="all">All</option>
                 <option value="equal">Equal</option>
@@ -81,7 +81,7 @@ export const ExpenseFilters = ({ filterProps, members }) => {
                 id="paidBy"
                 value={filterPaidBy}
                 onChange={(e) => setFilterPaidBy(e.target.value)}
-                className="max-w-[120px] cursor-pointer truncate rounded-DEFAULT border border-outline-variant bg-surface-container-low px-2 py-1 font-body-md text-body-md font-bold text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"
+                className="max-w-30 cursor-pointer truncate rounded-DEFAULT border border-outline-variant bg-surface-container-low px-2 py-1 font-body-md text-body-md font-bold text-on-surface focus:ring-2 focus:ring-primary/20 focus:outline-none"
               >
                 <option value="all">All</option>
                 {members && members.length > 0 ? (
@@ -103,9 +103,9 @@ export const ExpenseFilters = ({ filterProps, members }) => {
               onClick={() =>
                 setIsAdvancedFiltersExpanded(!isAdvancedFiltersExpanded)
               }
-              className="group flex cursor-pointer items-center gap-1 font-label-sm text-label-sm tracking-wider text-on-surface-variant transition-colors hover:text-primary focus:outline-none"
+              className="group flex cursor-pointer items-center gap-1 font-label-sm text-label-sm font-semibold tracking-wider text-on-surface-variant transition-colors hover:text-primary focus:outline-none"
             >
-              <span className="font-bold">Advanced Filters</span>
+              <span>Advanced Filters</span>
               {!isAdvancedFiltersExpanded && activeAdvancedFiltersCount > 0 && (
                 <span className="rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold tracking-normal text-on-primary lowercase">
                   {activeAdvancedFiltersCount} active
@@ -124,14 +124,14 @@ export const ExpenseFilters = ({ filterProps, members }) => {
         <div
           className={`overflow-hidden transition-all duration-300 ${
             isAdvancedFiltersExpanded
-              ? "mt-4 max-h-[500px] opacity-100"
+              ? "mt-4 max-h-125 opacity-100"
               : "pointer-events-none max-h-0 opacity-0"
           }`}
         >
           <div className="rounded-lg border border-outline-variant bg-surface-container-lowest p-6 shadow-sm">
             <div className="flex w-full flex-wrap items-end gap-4">
               {/* Date range filters */}
-              <div className="flex min-w-[140px] flex-1 flex-col">
+              <div className="flex min-w-35 flex-1 flex-col">
                 <label
                   htmlFor="datePreset"
                   className="mb-2 font-label-sm text-label-sm text-on-surface-variant"
@@ -154,7 +154,7 @@ export const ExpenseFilters = ({ filterProps, members }) => {
                 </select>
               </div>
 
-              <div className="flex min-w-[160px] flex-1 flex-col">
+              <div className="flex min-w-40 flex-1 flex-col">
                 <label
                   htmlFor="fromDate"
                   className="mb-2 font-label-sm text-label-sm text-on-surface-variant"
@@ -173,7 +173,7 @@ export const ExpenseFilters = ({ filterProps, members }) => {
                 />
               </div>
 
-              <div className="flex min-w-[160px] flex-1 flex-col">
+              <div className="flex min-w-40 flex-1 flex-col">
                 <label
                   htmlFor="toDate"
                   className="mb-2 font-label-sm text-label-sm text-on-surface-variant"
@@ -193,7 +193,7 @@ export const ExpenseFilters = ({ filterProps, members }) => {
               </div>
 
               {/* Amount range filters */}
-              <div className="flex min-w-[140px] flex-1 flex-col">
+              <div className="flex min-w-35 flex-1 flex-col">
                 <label
                   htmlFor="minAmount"
                   className="mb-2 font-label-sm text-label-sm text-on-surface-variant"
@@ -214,7 +214,7 @@ export const ExpenseFilters = ({ filterProps, members }) => {
                 />
               </div>
 
-              <div className="flex min-w-[140px] flex-1 flex-col">
+              <div className="flex min-w-35 flex-1 flex-col">
                 <label
                   htmlFor="maxAmount"
                   className="mb-2 font-label-sm text-label-sm text-on-surface-variant"
@@ -235,11 +235,11 @@ export const ExpenseFilters = ({ filterProps, members }) => {
                 />
               </div>
 
-              <div className="min-w-[140px] flex-1 md:flex-initial">
+              <div className="min-w-35 flex-1 md:flex-initial">
                 <button
                   type="button"
                   onClick={handleResetFilters}
-                  className="flex h-10 w-full cursor-pointer items-center justify-center gap-2 rounded-DEFAULT border border-primary bg-transparent px-6 font-body-md text-body-md font-medium text-primary transition-all hover:bg-primary/5 hover:shadow-md"
+                  className="flex h-10 w-full cursor-pointer items-center justify-center gap-2 rounded-DEFAULT border border-primary bg-transparent px-6 font-body-md text-body-md font-semibold text-primary transition-all hover:bg-primary/5 hover:shadow-md"
                 >
                   Reset Filters
                 </button>
