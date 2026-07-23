@@ -202,10 +202,17 @@ const Dashboard = () => {
               })}
             </div>
           ) : (
-            <div className="rounded-lg border border-outline-variant bg-surface-container-lowest p-6 text-center shadow-sm">
-              <p className="font-label-sm text-label-sm text-on-surface-variant">
-                No members in this group.
-              </p>
+            <div className="grid grid-cols-1 gap-gutter sm:grid-cols-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="flex h-28 flex-col items-center justify-center gap-2 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface-variant">
+                  <span className="material-symbols-outlined text-[32px] opacity-20">
+                    account_balance_wallet
+                  </span>
+                  <span className="font-label-sm text-label-sm tracking-wider uppercase opacity-50">
+                    Placeholder
+                  </span>
+                </div>
+              ))}
             </div>
           )}
         </div>
