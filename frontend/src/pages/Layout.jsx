@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { getGroups } from "../services/group.service";
+import { useAuth } from "../context/AuthContext";
 
 const Layout = () => {
   const [selectedGroupId, setSelectedGroupId] = useState("");
@@ -8,21 +9,36 @@ const Layout = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
+  const { isAuthenticated, isInitializing } = useAuth();
+
   useEffect(() => {
+    if (isInitializing) return;
+    
+    if (!isAuthenticated) {
+      setGroups([]);
+      setSelectedGroupId("");
+      return;
+    }
+
     const fetchGroups = async () => {
       try {
         const data = await getGroups();
         if (data && data.length > 0) {
           setGroups(data);
           setSelectedGroupId(data[0].id);
+        } else {
+          setGroups([]);
+          setSelectedGroupId("");
         }
       } catch (error) {
         console.error("Error fetching groups:", error);
         setGroups([]);
+        setSelectedGroupId("");
       }
     };
+    
     fetchGroups();
-  }, []);
+  }, [isAuthenticated, isInitializing]);
 
   const handleGroupChange = (e) => {
     setSelectedGroupId(e.target.value);

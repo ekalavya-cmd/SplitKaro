@@ -128,6 +128,8 @@ splitKaro/
 │   │   ├── api/
 │   │   │   ├── http.client.js          # Axios instance with interceptors and credentials
 │   │   │   └── token.store.js          # Minimal in-memory JWT storage
+│   │   ├── context/
+│   │   │   └── AuthContext.jsx         # Global auth state and silent session restore
 │   │   ├── components/
 │   │   │   ├── ExpenseFilters.jsx    # Reusable expense filtering UI component
 │   │   │   └── SettlementFilters.jsx # Reusable settlement filtering UI component
