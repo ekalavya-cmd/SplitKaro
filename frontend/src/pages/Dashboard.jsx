@@ -253,7 +253,7 @@ const Dashboard = () => {
                         },
                       })
                     }
-                    className="rounded-DEFAULT border border-primary px-3 py-1.5 font-label-sm text-label-sm tracking-wide text-primary uppercase transition-colors hover:bg-primary-container/10"
+                    className="rounded-DEFAULT border border-primary bg-transparent px-3 py-1.5 font-label-sm text-label-sm tracking-wide text-primary transition-all hover:bg-primary/5 hover:shadow-md"
                   >
                     Settle
                   </button>

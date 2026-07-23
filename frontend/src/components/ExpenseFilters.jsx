@@ -103,7 +103,7 @@ export const ExpenseFilters = ({ filterProps, members }) => {
               onClick={() =>
                 setIsAdvancedFiltersExpanded(!isAdvancedFiltersExpanded)
               }
-              className="group flex cursor-pointer items-center gap-1 font-label-sm text-label-sm tracking-wider text-on-surface-variant uppercase transition-colors hover:text-primary focus:outline-none"
+              className="group flex cursor-pointer items-center gap-1 font-label-sm text-label-sm tracking-wider text-on-surface-variant transition-colors hover:text-primary focus:outline-none"
             >
               <span className="font-bold">Advanced Filters</span>
               {!isAdvancedFiltersExpanded && activeAdvancedFiltersCount > 0 && (
@@ -239,7 +239,7 @@ export const ExpenseFilters = ({ filterProps, members }) => {
                 <button
                   type="button"
                   onClick={handleResetFilters}
-                  className="hover:bg-surface-variant flex h-10 w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-outline-variant bg-surface px-6 font-body-md text-body-md font-medium text-on-surface transition-colors"
+                  className="flex h-10 w-full cursor-pointer items-center justify-center gap-2 rounded-DEFAULT border border-primary bg-transparent px-6 font-body-md text-body-md font-medium text-primary transition-all hover:bg-primary/5 hover:shadow-md"
                 >
                   Reset Filters
                 </button>

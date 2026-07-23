@@ -54,9 +54,9 @@ const Layout = () => {
         </div>
 
         <div className="mb-6 px-4">
-          <button className="flex h-10 w-full items-center justify-center gap-2 rounded-DEFAULT border border-outline-variant font-label-sm text-label-sm font-semibold tracking-wider text-on-surface uppercase transition-colors hover:bg-surface-container-low">
+          <button className="flex h-10 w-full items-center justify-center gap-2 rounded-DEFAULT border border-primary bg-transparent font-label-sm text-label-sm font-semibold tracking-wider text-primary transition-all hover:bg-primary/5 hover:shadow-md">
             <span className="material-symbols-outlined text-[18px]">add</span>{" "}
-            NEW GROUP
+            New Group
           </button>
         </div>
 
@@ -148,17 +148,17 @@ const Layout = () => {
 
             <div className="mx-1 h-6 w-px bg-outline-variant"></div>
 
-            <button className="hover:bg-surface-variant h-9 rounded-DEFAULT border border-outline-variant bg-surface-container-low px-4 font-label-sm text-label-sm tracking-wide text-on-surface uppercase transition-colors">
-              GROUPS
+            <button className="h-9 rounded-DEFAULT border border-primary bg-transparent px-4 font-label-sm text-label-sm tracking-wide text-primary transition-all hover:bg-primary/5 hover:shadow-md">
+              Groups
             </button>
 
             <button
               onClick={() => navigate(`/add-expense/${selectedGroupId}`)}
               disabled={!selectedGroupId}
-              className="flex h-9 items-center justify-center gap-2 rounded-DEFAULT bg-primary px-4 font-label-sm text-label-sm tracking-wide text-on-primary uppercase shadow-sm transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex h-9 items-center justify-center gap-2 rounded-DEFAULT bg-primary px-4 font-label-sm text-label-sm tracking-wide text-on-primary transition-all hover:bg-primary/90 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50"
             >
               <span className="material-symbols-outlined text-[18px]">add</span>{" "}
-              ADD EXPENSE
+              Add Expense
             </button>
 
             <div className="ml-2 flex h-8 w-8 cursor-pointer items-center justify-center overflow-hidden rounded-full border border-outline-variant bg-secondary-container font-label-sm text-on-secondary-container">

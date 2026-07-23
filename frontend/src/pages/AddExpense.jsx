@@ -196,7 +196,7 @@ const AddExpense = () => {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="mt-6 flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 font-label-sm text-label-sm tracking-wide text-on-primary uppercase shadow-sm transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+            className="mt-6 flex h-10 w-full items-center justify-center gap-2 rounded-DEFAULT bg-primary px-4 font-label-sm text-label-sm tracking-wide text-on-primary transition-all hover:bg-primary/90 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50"
           >
             Add Expense
           </button>
