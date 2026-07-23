@@ -175,7 +175,7 @@ const Dashboard = () => {
 
                 return (
                   <div
-                    key={bal.member_id}
+                    key={bal.user_id}
                     className={`border bg-surface-container-lowest ${borderColor} group relative overflow-hidden rounded-lg p-4 shadow-sm transition-shadow hover:shadow-md`}
                   >
                     <div
@@ -437,7 +437,7 @@ const Dashboard = () => {
                                     <div className="divide-y divide-outline-variant">
                                       {expense.splits.map((split) => {
                                         const isPayer =
-                                          split.memberId === expense.paidBy;
+                                          split.userId === expense.paidBy;
                                         return (
                                           <div
                                             key={split.id}
@@ -445,12 +445,12 @@ const Dashboard = () => {
                                           >
                                             <div className="flex items-center gap-2">
                                               <div className="bg-surface-variant flex h-5 w-5 items-center justify-center rounded-full font-label-sm text-[9px] text-on-surface-variant">
-                                                {split.member.name
+                                                {split.user.name
                                                   .substring(0, 2)
                                                   .toUpperCase()}
                                               </div>
                                               <span className="font-body-md text-body-md text-on-surface">
-                                                {split.member.name}
+                                                {split.user.name}
                                               </span>
                                             </div>
                                             <div className="flex items-center gap-2">

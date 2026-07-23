@@ -13,14 +13,14 @@ const Layout = () => {
 
   useEffect(() => {
     if (isInitializing) return;
-    
-    if (!isAuthenticated) {
-      setGroups([]);
-      setSelectedGroupId("");
-      return;
-    }
 
-    const fetchGroups = async () => {
+    const syncState = async () => {
+      if (!isAuthenticated) {
+        setGroups([]);
+        setSelectedGroupId("");
+        return;
+      }
+
       try {
         const data = await getGroups();
         if (data && data.length > 0) {
@@ -37,7 +37,7 @@ const Layout = () => {
       }
     };
     
-    fetchGroups();
+    syncState();
   }, [isAuthenticated, isInitializing]);
 
   const handleGroupChange = (e) => {

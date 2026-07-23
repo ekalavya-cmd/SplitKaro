@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useState, useEffect } from "react";
 import * as authService from "../services/auth.service";
 
@@ -14,7 +15,7 @@ export const AuthProvider = ({ children }) => {
         const data = await authService.refresh();
         setIsAuthenticated(true);
         setUser(data.user || null); // Known gap: refresh only returns accessToken currently
-      } catch (error) {
+      } catch {
         setIsAuthenticated(false);
         setUser(null);
       } finally {
@@ -45,7 +46,7 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
     return data;
   };
-  
+
   const logoutAll = async () => {
     const data = await authService.logoutAll();
     setIsAuthenticated(false);
@@ -81,7 +82,7 @@ export const useAuth = () => {
 // TEMPORARY DEV-ONLY BRIDGE — remove once real login/register UI exists
 export const DevAuthBridge = () => {
   const auth = useAuth();
-  
+
   useEffect(() => {
     if (import.meta.env.DEV) {
       window.authContext = auth;
