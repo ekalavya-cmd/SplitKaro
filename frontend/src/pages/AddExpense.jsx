@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { getGroup, createExpense } from "../services/splitKaroService";
+import { getGroup } from "../services/group.service";
+import { createExpense } from "../services/expense.service";
 
 const clearInputs = {
   paid_by: "",

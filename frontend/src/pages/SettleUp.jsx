@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useOutletContext } from "react-router-dom";
+import { getGroup } from "../services/group.service";
 import {
-  getGroup,
   getSettlementSuggestions,
   getSettlements,
   createSettlement,
-} from "../services/splitKaroService";
+} from "../services/settlement.service";
 import { useSettlementFilters } from "../hooks/useSettlementFilters";
 import { SettlementFilters } from "../components/SettlementFilters";
 

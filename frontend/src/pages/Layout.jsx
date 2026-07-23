@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { getGroups } from "../services/splitKaroService";
+import { getGroups } from "../services/group.service";
 
 const Layout = () => {
   const [selectedGroupId, setSelectedGroupId] = useState("");

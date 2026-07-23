@@ -1,11 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
-import {
-  getExpenses,
-  getGroup,
-  getBalances,
-  getSettlementSuggestions,
-} from "../services/splitKaroService";
+import { getGroup } from "../services/group.service";
+import { getExpenses } from "../services/expense.service";
+import { getBalances, getSettlementSuggestions } from "../services/settlement.service";
 import { useExpenseFilters } from "../hooks/useExpenseFilters";
 import { ExpenseFilters } from "../components/ExpenseFilters";
 

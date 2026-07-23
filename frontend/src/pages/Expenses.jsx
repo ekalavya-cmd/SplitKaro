@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useOutletContext } from "react-router-dom";
-import {
-  getExpenses,
-  getGroup,
-  deleteExpense,
-} from "../services/splitKaroService";
+import { getGroup } from "../services/group.service";
+import { getExpenses, deleteExpense } from "../services/expense.service";
 import { useExpenseFilters } from "../hooks/useExpenseFilters";
 import { ExpenseFilters } from "../components/ExpenseFilters";
 
@@ -87,7 +84,7 @@ const Expenses = () => {
 
   const handleDeleteExpense = async (expenseId) => {
     try {
-      await deleteExpense(expenseId);
+      await deleteExpense(selectedGroupId, expenseId);
       const updatedExpenses = await getExpenses(selectedGroupId);
       if (
         updatedExpenses &&

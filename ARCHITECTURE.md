@@ -126,7 +126,8 @@ splitKaro/
 │   ├── public/                 # Static assets served as-is
 │   ├── src/
 │   │   ├── api/
-│   │   │   └── splitKaroAPI.js # Axios instance with base URL + error interceptor
+│   │   │   ├── http.client.js          # Axios instance with interceptors and credentials
+│   │   │   └── token.store.js          # Minimal in-memory JWT storage
 │   │   ├── components/
 │   │   │   ├── ExpenseFilters.jsx    # Reusable expense filtering UI component
 │   │   │   └── SettlementFilters.jsx # Reusable settlement filtering UI component
@@ -144,7 +145,11 @@ splitKaro/
 │   │   │   ├── SettleUp.jsx    # Record / view / delete settlements
 │   │   │   └── Error404.jsx    # Catch-all 404 page
 │   │   ├── services/
-│   │   │   └── splitKaroService.js # One function per API endpoint (10 functions)
+│   │   │   ├── auth.service.js         # Auth endpoints (register, login, etc)
+│   │   │   ├── group.service.js        # Core group endpoints
+│   │   │   ├── expense.service.js      # Expense endpoints
+│   │   │   ├── settlement.service.js   # Balance and settlement endpoints
+│   │   │   └── invite.service.js       # Invite link endpoints
 │   │   ├── App.jsx             # Route tree (React Router v7)
 │   │   ├── main.jsx            # React root mount + BrowserRouter
 │   │   └── index.css           # Minimal global CSS (Tailwind handled by plugin)
@@ -174,8 +179,8 @@ All database interaction goes through Sequelize models. The `models/index.js` au
 ### Server-side balance calculation
 User balances and settlement suggestions are computed on the server in `calculateGroupBalances` and `suggestSettlementForGroup`. The suggestion algorithm is a greedy two-pointer approach (largest creditor vs. largest debtor) that minimises the number of transactions.
 
-### Axios instance with centralised error interceptor
-`splitKaroAPI.js` creates a single axios instance pointed at `VITE_API_URL`. A response interceptor normalises all error shapes to `{ status, message }` before they reach service or component code.
+### Axios instance with centralised error interceptor and token handling
+`http.client.js` creates a single axios instance pointed at `VITE_API_URL` with `withCredentials: true`. A request interceptor automatically attaches the JWT `Authorization` header from `token.store.js` if available. A response interceptor normalises all error shapes to `{ status, message }` before they reach service or component code.
 
 ### Frontend state: local useState / useEffect per page
 All data fetching and state lives inside individual page components via `useState`/`useEffect`. There is no global state management library (no Redux, Zustand, Context, React Query, etc.).
