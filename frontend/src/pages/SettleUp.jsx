@@ -24,6 +24,7 @@ const SettleUp = () => {
   );
   const { selectedGroupId } = useOutletContext();
   const [group, setGroup] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const location = useLocation();
 
@@ -61,6 +62,7 @@ const SettleUp = () => {
       alert("Please select a group first.");
       return;
     }
+    setIsSubmitting(true);
     try {
       await createSettlement(selectedGroupId, inputs);
       alert("Settlement recorded successfully!");
@@ -80,6 +82,8 @@ const SettleUp = () => {
     } catch (error) {
       console.error("Error recording settlement:", error);
       alert("Failed to record settlement. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -402,7 +406,8 @@ const SettleUp = () => {
 
             <button
               type="submit"
-              className="mt-2 flex h-10 w-full items-center justify-center rounded-lg bg-primary px-4 font-label-sm text-label-sm tracking-wide text-on-primary uppercase shadow-sm transition-colors hover:bg-primary/90"
+              disabled={isSubmitting}
+              className="mt-2 flex h-10 w-full items-center justify-center rounded-lg bg-primary px-4 font-label-sm text-label-sm tracking-wide text-on-primary uppercase shadow-sm transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Record Payment
             </button>

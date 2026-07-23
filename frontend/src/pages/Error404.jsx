@@ -12,7 +12,7 @@ const Error404 = () => {
       </p>
       <Link
         to="/"
-        className="cursor-pointer bg-primary text-on-primary hover:bg-primary-active rounded-xl py-md px-xl text-button-md font-semibold transition-colors shadow-sm"
+        className="flex h-10 items-center justify-center rounded-DEFAULT bg-primary px-4 font-label-sm text-label-sm tracking-wide text-on-primary transition-colors hover:bg-primary/90"
       >
         Back to Dashboard
       </Link>

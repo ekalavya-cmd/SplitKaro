@@ -16,6 +16,7 @@ const AddExpense = () => {
 
   const [group, setGroup] = useState(null);
   const [inputs, setInputs] = useState(clearInputs);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -33,12 +34,15 @@ const AddExpense = () => {
   };
 
   const addExpense = async () => {
+    setIsSubmitting(true);
     try {
       await createExpense(groupId, inputs);
       alert("Expense added successfully!");
     } catch (error) {
       console.error("Error creating expense:", error);
       alert("Failed to add expense. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -191,7 +195,8 @@ const AddExpense = () => {
 
           <button
             type="submit"
-            className="mt-6 flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 font-label-sm text-label-sm tracking-wide text-on-primary uppercase shadow-sm transition-colors hover:bg-primary/90"
+            disabled={isSubmitting}
+            className="mt-6 flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 font-label-sm text-label-sm tracking-wide text-on-primary uppercase shadow-sm transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Add Expense
           </button>
