@@ -43,21 +43,23 @@ export const refresh = async () => {
 export const logout = async () => {
   try {
     const response = await api.post("/auth/logout");
-    clearAccessToken();
     return response.data;
   } catch (error) {
     console.error("Error logging out:", error);
     throw error;
+  } finally {
+    clearAccessToken();
   }
 };
 
 export const logoutAll = async () => {
   try {
     const response = await api.post("/auth/logout-all");
-    clearAccessToken();
     return response.data;
   } catch (error) {
     console.error("Error logging out from all devices:", error);
     throw error;
+  } finally {
+    clearAccessToken();
   }
 };

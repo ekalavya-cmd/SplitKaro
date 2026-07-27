@@ -115,8 +115,8 @@
 ### Feedback & UX
 | Feature | Status | What exists | What is missing |
 |---|---|---|---|
-| Loading states | 🚧 | No loading indicators anywhere | Spinners or skeleton screens while fetching data |
-| Error display in UI | 🚧 | AddExpense.jsx and SettleUp.jsx show `alert()` on failure; all other pages only log to `console.error` | Dashboard and Expenses pages show no user-visible feedback when data fetching fails |
+| Loading states | ✅ | `useQuery` provides boolean `isLoading` states globally, and visual spinners render safely on all components without flashing during cache-hit navigations. | None |
+| Error display in UI | ✅ | AddExpense.jsx and SettleUp.jsx show `alert()` on mutation failure; all queries use a reusable `ErrorBlock` component with a Retry button that renders using `DESIGN.md` error tokens. App boot includes a top-level connection error state distinct from per-query errors. | None |
 
 
 ---

@@ -1,30 +1,43 @@
-/* eslint-disable react-refresh/only-export-components */
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import * as authService from "../services/auth.service";
-
-const AuthContext = createContext(null);
+import { AuthContext } from "./AuthContextObj";
+import { useAuth } from "./useAuth";
 
 export const AuthProvider = ({ children }) => {
+  const queryClient = useQueryClient();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState(null);
   const [isInitializing, setIsInitializing] = useState(true);
+  const [hasConnectionError, setHasConnectionError] = useState(false);
 
-  useEffect(() => {
-    const silentRestore = async () => {
-      try {
-        const data = await authService.refresh();
-        setIsAuthenticated(true);
-        setUser(data.user || null); // Known gap: refresh only returns accessToken currently
-      } catch {
+  const silentRestore = async () => {
+    try {
+      const data = await authService.refresh();
+      setIsAuthenticated(true);
+      setUser(data.user || null); // Known gap: refresh only returns accessToken currently
+    } catch (error) {
+      if (error && error.status === 0) {
+        setHasConnectionError(true);
+        // Do not touch isAuthenticated — leave it in its current state
+      } else {
         setIsAuthenticated(false);
         setUser(null);
-      } finally {
-        setIsInitializing(false);
       }
-    };
+    } finally {
+      setIsInitializing(false);
+    }
+  };
 
+  useEffect(() => {
     silentRestore();
   }, []);
+
+  const retryConnection = () => {
+    setIsInitializing(true);
+    setHasConnectionError(false);
+    silentRestore();
+  };
 
   const login = async (credentials) => {
     const data = await authService.login(credentials);
@@ -41,17 +54,31 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = async () => {
-    const data = await authService.logout();
-    setIsAuthenticated(false);
-    setUser(null);
-    return data;
+    try {
+      const data = await authService.logout();
+      return data;
+    } catch (error) {
+      console.error("Logout failed:", error);
+      throw error;
+    } finally {
+      setIsAuthenticated(false);
+      queryClient.clear();
+      setUser(null);
+    }
   };
 
   const logoutAll = async () => {
-    const data = await authService.logoutAll();
-    setIsAuthenticated(false);
-    setUser(null);
-    return data;
+    try {
+      const data = await authService.logoutAll();
+      return data;
+    } catch (error) {
+      console.error("Logout all devices failed:", error);
+      throw error;
+    } finally {
+      setIsAuthenticated(false);
+      queryClient.clear();
+      setUser(null);
+    }
   };
 
   return (
@@ -60,6 +87,8 @@ export const AuthProvider = ({ children }) => {
         isAuthenticated,
         user,
         isInitializing,
+        hasConnectionError,
+        retryConnection,
         login,
         register,
         logout,
@@ -69,14 +98,6 @@ export const AuthProvider = ({ children }) => {
       {children}
     </AuthContext.Provider>
   );
-};
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
 };
 
 // TEMPORARY DEV-ONLY BRIDGE — remove once real login/register UI exists

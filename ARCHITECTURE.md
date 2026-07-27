@@ -184,8 +184,11 @@ User balances and settlement suggestions are computed on the server in `calculat
 ### Axios instance with centralised error interceptor and token handling
 `http.client.js` creates a single axios instance pointed at `VITE_API_URL` with `withCredentials: true`. A request interceptor automatically attaches the JWT `Authorization` header from `token.store.js` if available. A response interceptor normalises all error shapes to `{ status, message }` before they reach service or component code.
 
-### Frontend state: local useState / useEffect per page
-All data fetching and state lives inside individual page components via `useState`/`useEffect`. There is no global state management library (no Redux, Zustand, Context, React Query, etc.).
+### Frontend state: React Query + AuthContext
+Historically, all data fetching and state lived inside individual page components via `useState`/`useEffect`.
+Now, page-local UI-only state (e.g., form inputs, modal visibility) still stays as local `useState`, but there are two strict exceptions for global data:
+1. **Global Auth/Client State:** Managed by `AuthContext` (React Context), tracking login status and the current user.
+2. **Server State:** Managed by TanStack Query (React Query v5), which caches and synchronises API data. This is fully implemented across all pages, meaning components instantly reuse cached data (e.g. `["groups"]`) rather than duplicating network requests on navigation. Mutations also automatically invalidate related queries, replacing manual data-refresh calls.
 
 ### Split types: equal, exact, percentage
 The `splitType` field is a MySQL `ENUM('equal','exact','percentage')` enforced at both the DB and service layers. The service validates that exact-split amounts sum to the total, and that percentage-split values sum to 100.
@@ -207,10 +210,7 @@ Backend uses `dotenv`; frontend uses Vite's `import.meta.env`. Both `.env` files
 
 
 | **No frontend error boundaries** | React error boundaries are not implemented. An uncaught render error will crash the entire SPA. |
-| **Frontend state not shared across pages** | Each page independently fetches the full groups list and group details. No shared cache or global store exists. |
 | **Config only has development environment** | `config/config.js` defines only a `development` block. There is no `production` or `test` configuration. |
-
-
 > For missing product features (auth frontend, tests, rate limiting, pagination, Docker/CI), see `FEATURES.md`.
 > For model-level gaps, see `DATABASE_SCHEMA.md §6 Not Yet Modeled`.
 > For API-level bugs, see `API_REFERENCE.md §Flagged Inconsistencies`.

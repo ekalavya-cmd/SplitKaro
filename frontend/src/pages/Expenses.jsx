@@ -1,15 +1,61 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useOutletContext } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getGroup } from "../services/group.service";
 import { getExpenses, deleteExpense } from "../services/expense.service";
 import { useExpenseFilters } from "../hooks/useExpenseFilters";
 import { ExpenseFilters } from "../components/ExpenseFilters";
+import { LoadingSpinner } from "../components/LoadingSpinner";
+import { ErrorBlock } from "../components/ErrorBlock";
+import { Skeleton } from "../components/Skeleton";
+import { usePageQueryState } from "../hooks/usePageQueryState";
 
 const Expenses = () => {
   const { selectedGroupId } = useOutletContext();
-  const [group, setGroup] = useState(null);
-  const [expenses, setExpenses] = useState([]);
+  const queryClient = useQueryClient();
   const [expandedExpenseIds, setExpandedExpenseIds] = useState({});
+
+  const groupQuery = useQuery({
+    queryKey: ["groups", selectedGroupId],
+    queryFn: () => getGroup(selectedGroupId),
+    enabled: !!selectedGroupId,
+  });
+  const group = groupQuery.data;
+
+  const expensesQuery = useQuery({
+    queryKey: ["groups", selectedGroupId, "expenses"],
+    queryFn: async () => {
+      const data = await getExpenses(selectedGroupId);
+      return data.expenses || [];
+    },
+    enabled: !!selectedGroupId,
+  });
+  const expenses = expensesQuery.data || [];
+
+  const { isError, errors, refetchAll } = usePageQueryState([
+    groupQuery,
+    expensesQuery,
+  ]);
+
+  const deleteExpenseMutation = useMutation({
+    mutationFn: ({ groupId, expenseId }) => deleteExpense(groupId, expenseId),
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["groups", variables.groupId, "expenses"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["groups", variables.groupId, "balances"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["groups", variables.groupId, "settlements", "suggest"],
+      });
+    },
+    onError: (error) => {
+      console.error("Error deleting expense:", error);
+      alert("Failed to delete expense. Please try again.");
+    },
+  });
+
   const { filteredExpenses, filterProps } = useExpenseFilters(expenses);
 
   const toggleExpenseExpand = (id) => {
@@ -40,72 +86,32 @@ const Expenses = () => {
     }
   };
 
-  useEffect(() => {
-    const fetchExpenses = async () => {
-      if (!selectedGroupId) {
-        setExpenses([]);
-        return;
-      }
-
-      try {
-        const data = await getExpenses(selectedGroupId);
-        if (data && data.expenses) {
-          setExpenses(data.expenses);
-        }
-      } catch (error) {
-        console.error("Error fetching expenses:", error);
-        setExpenses([]);
-      }
-    };
-
-    fetchExpenses();
-  }, [selectedGroupId]);
-
-  useEffect(() => {
-    const fetchGroup = async () => {
-      if (!selectedGroupId) {
-        setGroup(null);
-        return;
-      }
-
-      try {
-        const data = await getGroup(selectedGroupId);
-        if (data) {
-          setGroup(data);
-        }
-      } catch (error) {
-        console.error("Error fetching group details:", error);
-        setGroup(null);
-      }
-    };
-
-    fetchGroup();
-  }, [selectedGroupId]);
-
-  const handleDeleteExpense = async (expenseId) => {
-    try {
-      await deleteExpense(selectedGroupId, expenseId);
-      const updatedExpenses = await getExpenses(selectedGroupId);
-      if (
-        updatedExpenses &&
-        updatedExpenses.expenses &&
-        updatedExpenses.expenses.length > 0
-      ) {
-        setExpenses(updatedExpenses.expenses);
-      } else {
-        setExpenses([]);
-      }
-    } catch (error) {
-      console.error("Error deleting expense:", error);
-      alert("Failed to delete expense. Please try again.");
-    }
+  const handleDeleteExpense = (expenseId) => {
+    deleteExpenseMutation.mutate({ groupId: selectedGroupId, expenseId });
   };
+
+  if (isError) {
+    return (
+      <div className="flex min-h-[50vh] w-full flex-col items-center justify-center p-6">
+        <ErrorBlock
+          error={{
+            message:
+              errors[0]?.message +
+              (errors.length > 1
+                ? ` (and ${errors.length - 1} other error${errors.length > 2 ? "s" : ""})`
+                : ""),
+          }}
+          refetch={refetchAll}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-4">
         <h2 className="font-headline-md text-headline-md text-on-surface">
-          {group ? group.name : "Select a group to view expenses"}
+          {group ? group.name : "Select a group"}
         </h2>
 
         <ExpenseFilters
@@ -139,7 +145,30 @@ const Expenses = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-outline-variant">
-                {filteredExpenses && filteredExpenses.length > 0 ? (
+                {expensesQuery.isLoading ? (
+                  Array.from({ length: 1 }).map((_, i) => (
+                    <tr key={i} className="h-row-height-compact">
+                      <td className="px-4 py-8">
+                        <Skeleton className="h-4 w-12" />
+                      </td>
+                      <td className="px-4 py-8">
+                        <Skeleton className="h-4 w-32" />
+                      </td>
+                      <td className="px-4 py-8">
+                        <Skeleton className="h-4 w-24" />
+                      </td>
+                      <td className="px-4 py-8 text-right">
+                        <Skeleton className="ml-auto h-4 w-16" />
+                      </td>
+                      <td className="px-4 py-8">
+                        <Skeleton className="h-4 w-20" />
+                      </td>
+                      <td className="px-4 py-8">
+                        <Skeleton className="ml-auto h-4 w-8" />
+                      </td>
+                    </tr>
+                  ))
+                ) : filteredExpenses && filteredExpenses.length > 0 ? (
                   filteredExpenses.map((expense) => (
                     <React.Fragment key={expense.id}>
                       <tr
@@ -184,14 +213,10 @@ const Expenses = () => {
                             </span>
                           </div>
                         </td>
-                        <td
-                          className="px-4 py-2 text-right"
-                          onClick={(e) => e.stopPropagation()}
-                        >
+                        <td className="px-4 py-2 text-right">
                           <button
-                            className="ml-auto flex cursor-pointer items-center justify-center rounded-DEFAULT p-1 font-semibold text-error transition-colors hover:bg-error/10"
-                            title="Delete Expense"
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.stopPropagation();
                               if (
                                 window.confirm(
                                   "Are you sure you want to delete this expense?",
@@ -200,6 +225,13 @@ const Expenses = () => {
                                 handleDeleteExpense(expense.id);
                               }
                             }}
+                            disabled={
+                              deleteExpenseMutation.isPending &&
+                              deleteExpenseMutation.variables?.expenseId ===
+                                expense.id
+                            }
+                            className="rounded-DEFAULT p-2 text-error transition-colors hover:bg-error/10 disabled:cursor-not-allowed disabled:opacity-50"
+                            title="Delete Expense"
                           >
                             <span className="material-symbols-outlined text-[20px]">
                               delete
@@ -303,7 +335,7 @@ const Expenses = () => {
                   <tr>
                     <td
                       colSpan="6"
-                      className="px-4 py-8 text-center text-body-md text-on-surface-variant"
+                      className="h-20 px-4 text-center text-body-md text-on-surface-variant"
                     >
                       {selectedGroupId
                         ? expenses.length > 0

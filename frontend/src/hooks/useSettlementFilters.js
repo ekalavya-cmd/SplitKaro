@@ -7,7 +7,8 @@ export const useSettlementFilters = (settlements) => {
   const [filterFromDate, setFilterFromDate] = useState("");
   const [filterToDate, setFilterToDate] = useState("");
   const [filterDatePreset, setFilterDatePreset] = useState("all");
-  const [isAdvancedFiltersExpanded, setIsAdvancedFiltersExpanded] = useState(false);
+  const [isAdvancedFiltersExpanded, setIsAdvancedFiltersExpanded] =
+    useState(false);
 
   const handleDatePresetChange = (preset) => {
     setFilterDatePreset(preset);
@@ -57,10 +58,7 @@ export const useSettlementFilters = (settlements) => {
           filterToDate === "" || settlDateString <= filterToDate;
 
         return (
-          matchesPaidBy &&
-          matchesPaidTo &&
-          matchesFromDate &&
-          matchesToDate
+          matchesPaidBy && matchesPaidTo && matchesFromDate && matchesToDate
         );
       })
     : [];

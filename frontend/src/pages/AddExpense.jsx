@@ -1,7 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useParams } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getGroup } from "../services/group.service";
 import { createExpense } from "../services/expense.service";
+import { LoadingSpinner } from "../components/LoadingSpinner";
+import { ErrorBlock } from "../components/ErrorBlock";
+import { Skeleton } from "../components/Skeleton";
+import { usePageQueryState } from "../hooks/usePageQueryState";
 
 const clearInputs = {
   paid_by: "",
@@ -14,10 +19,39 @@ const clearInputs = {
 
 const AddExpense = () => {
   const { id: groupId } = useParams();
+  const queryClient = useQueryClient();
 
-  const [group, setGroup] = useState(null);
   const [inputs, setInputs] = useState(clearInputs);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const groupQuery = useQuery({
+    queryKey: ["groups", groupId],
+    queryFn: () => getGroup(groupId),
+    enabled: !!groupId,
+  });
+  const group = groupQuery.data;
+
+  const { isError, errors, refetchAll } = usePageQueryState([groupQuery]);
+
+  const createExpenseMutation = useMutation({
+    mutationFn: ({ groupId, inputs }) => createExpense(groupId, inputs),
+    onSuccess: (data, variables) => {
+      alert("Expense added successfully!");
+      queryClient.invalidateQueries({
+        queryKey: ["groups", variables.groupId, "expenses"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["groups", variables.groupId, "balances"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["groups", variables.groupId, "settlements", "suggest"],
+      });
+      setInputs(clearInputs);
+    },
+    onError: (error) => {
+      console.error("Error creating expense:", error);
+      alert("Failed to add expense. Please try again.");
+    },
+  });
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -34,45 +68,27 @@ const AddExpense = () => {
     }));
   };
 
-  const addExpense = async () => {
-    setIsSubmitting(true);
-    try {
-      await createExpense(groupId, inputs);
-      alert("Expense added successfully!");
-    } catch (error) {
-      console.error("Error creating expense:", error);
-      alert("Failed to add expense. Please try again.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
   const handleFormSubmit = (e) => {
     e.preventDefault();
-    addExpense();
-    setInputs(clearInputs);
+    createExpenseMutation.mutate({ groupId, inputs });
   };
 
-  useEffect(() => {
-    const fetchGroup = async () => {
-      if (!groupId) {
-        setGroup(null);
-        return;
-      }
-
-      try {
-        const data = await getGroup(groupId);
-        if (data) {
-          setGroup(data);
-        }
-      } catch (error) {
-        console.error("Error fetching group details:", error);
-        setGroup(null);
-      }
-    };
-
-    fetchGroup();
-  }, [groupId]);
+  if (isError) {
+    return (
+      <div className="flex min-h-[50vh] w-full flex-col items-center justify-center p-6">
+        <ErrorBlock
+          error={{
+            message:
+              errors[0]?.message +
+              (errors.length > 1
+                ? ` (and ${errors.length - 1} other error${errors.length > 2 ? "s" : ""})`
+                : ""),
+          }}
+          refetch={refetchAll}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
@@ -138,7 +154,11 @@ const AddExpense = () => {
               <option value="" disabled>
                 Select Payer
               </option>
-              {group && group.members && group.members.length > 0 ? (
+              {groupQuery.isLoading ? (
+                <option value="" disabled>
+                  Loading...
+                </option>
+              ) : group && group.members && group.members.length > 0 ? (
                 group.members.map((member) => (
                   <option key={member.id} value={member.id}>
                     {member.name}
@@ -196,10 +216,10 @@ const AddExpense = () => {
 
           <button
             type="submit"
-            disabled={isSubmitting}
+            disabled={createExpenseMutation.isPending}
             className="mt-6 flex h-10 w-full items-center justify-center gap-2 rounded-DEFAULT bg-primary px-4 font-label-sm text-label-sm font-semibold tracking-wide text-on-primary transition-all hover:bg-primary/90 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50"
           >
-            Add Expense
+            {createExpenseMutation.isPending ? "Adding..." : "Add Expense"}
           </button>
         </form>
       </div>
@@ -216,7 +236,13 @@ const AddExpense = () => {
               <p className="font-label-sm text-label-sm text-on-surface-variant">
                 Enter the exact amount each person owes:
               </p>
-              {group && group.members && group.members.length > 0 ? (
+              {groupQuery.isLoading ? (
+                <div className="flex min-h-[7.5rem] flex-col gap-3">
+                  <Skeleton className="h-10 w-full rounded-lg" />
+                  <Skeleton className="h-10 w-full rounded-lg" />
+                  <Skeleton className="h-10 w-full rounded-lg" />
+                </div>
+              ) : group && group.members && group.members.length > 0 ? (
                 <div className="flex flex-col gap-3">
                   {group.members.map((member) => (
                     <div
@@ -276,7 +302,13 @@ const AddExpense = () => {
               <p className="font-label-sm text-label-sm text-on-surface-variant">
                 Enter the percentage each person owes (must sum to 100%):
               </p>
-              {group && group.members && group.members.length > 0 ? (
+              {groupQuery.isLoading ? (
+                <div className="flex min-h-[7.5rem] flex-col gap-3">
+                  <Skeleton className="h-10 w-full rounded-lg" />
+                  <Skeleton className="h-10 w-full rounded-lg" />
+                  <Skeleton className="h-10 w-full rounded-lg" />
+                </div>
+              ) : group && group.members && group.members.length > 0 ? (
                 <div className="flex flex-col gap-3">
                   {group.members.map((member) => (
                     <div
@@ -338,7 +370,13 @@ const AddExpense = () => {
               <p className="font-label-sm text-label-sm text-on-surface-variant">
                 Equal split amounts (auto-calculated):
               </p>
-              {group && group.members && group.members.length > 0 ? (
+              {groupQuery.isLoading ? (
+                <div className="flex min-h-[7.5rem] flex-col gap-3">
+                  <Skeleton className="h-10 w-full rounded-lg" />
+                  <Skeleton className="h-10 w-full rounded-lg" />
+                  <Skeleton className="h-10 w-full rounded-lg" />
+                </div>
+              ) : group && group.members && group.members.length > 0 ? (
                 <div className="flex flex-col gap-3">
                   {group.members.map((member) => {
                     const equalAmount = inputs.amount

@@ -11,14 +11,19 @@ const httpClient = axios.create({
 });
 
 httpClient.interceptors.request.use(
-  (config) => {
+  async (config) => {
+    // TEMPORARY DEV-ONLY ARTIFICIAL DELAY — for visually testing loading-state UI. REMOVE before considering this done — do not let this ship.
+    if (import.meta.env.DEV) {
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+    }
+
     const token = getAccessToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 httpClient.interceptors.response.use(

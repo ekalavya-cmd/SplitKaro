@@ -1,18 +1,63 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { getGroup } from "../services/group.service";
 import { getExpenses } from "../services/expense.service";
-import { getBalances, getSettlementSuggestions } from "../services/settlement.service";
+import {
+  getBalances,
+  getSettlementSuggestions,
+} from "../services/settlement.service";
 import { useExpenseFilters } from "../hooks/useExpenseFilters";
 import { ExpenseFilters } from "../components/ExpenseFilters";
+import { LoadingSpinner } from "../components/LoadingSpinner";
+import { ErrorBlock } from "../components/ErrorBlock";
+import { Skeleton } from "../components/Skeleton";
+import { usePageQueryState } from "../hooks/usePageQueryState";
 
 const Dashboard = () => {
   const { selectedGroupId } = useOutletContext();
-  const [group, setGroup] = useState(null);
-  const [expenses, setExpenses] = useState([]);
-  const [balances, setBalances] = useState([]);
-  const [suggestions, setSuggestions] = useState([]);
   const [expandedExpenseIds, setExpandedExpenseIds] = useState({});
+
+  const groupQuery = useQuery({
+    queryKey: ["groups", selectedGroupId],
+    queryFn: () => getGroup(selectedGroupId),
+    enabled: !!selectedGroupId,
+  });
+  const group = groupQuery.data;
+
+  const expensesQuery = useQuery({
+    queryKey: ["groups", selectedGroupId, "expenses"],
+    queryFn: async () => {
+      const data = await getExpenses(selectedGroupId);
+      return data.expenses || [];
+    },
+    enabled: !!selectedGroupId,
+  });
+  const expenses = expensesQuery.data || [];
+
+  const balancesQuery = useQuery({
+    queryKey: ["groups", selectedGroupId, "balances"],
+    queryFn: async () => {
+      const data = await getBalances(selectedGroupId);
+      return data.balances || [];
+    },
+    enabled: !!selectedGroupId,
+  });
+  const balances = balancesQuery.data || [];
+
+  const suggestionsQuery = useQuery({
+    queryKey: ["groups", selectedGroupId, "settlements", "suggest"],
+    queryFn: () => getSettlementSuggestions(selectedGroupId),
+    enabled: !!selectedGroupId,
+  });
+  const suggestions = suggestionsQuery.data || [];
+
+  const { isError, errors, refetchAll } = usePageQueryState([
+    groupQuery,
+    expensesQuery,
+    balancesQuery,
+    suggestionsQuery,
+  ]);
 
   const toggleExpenseExpand = (id) => {
     setExpandedExpenseIds((prev) => ({
@@ -29,7 +74,6 @@ const Dashboard = () => {
     const date = new Date(dateStr);
     const day = String(date.getDate()).padStart(2, "0");
     const month = date.toLocaleString("en-US", { month: "short" });
-    // const year = date.getFullYear();
     return `${month} ${day}`;
   };
 
@@ -46,95 +90,22 @@ const Dashboard = () => {
     }
   };
 
-  // const totalExpenses = expenses.reduce(
-  //   (accumulator, expense) => accumulator + Number(expense.amount),
-  //   0,
-  // );
-
-  // const totalMembers = group && group.members ? group.members.length : 0;
-
-  useEffect(() => {
-    const fetchExpenses = async () => {
-      if (!selectedGroupId) {
-        setExpenses([]);
-        return;
-      }
-
-      try {
-        const data = await getExpenses(selectedGroupId);
-        if (data && data.expenses) {
-          setExpenses(data.expenses);
-        }
-      } catch (error) {
-        console.error("Error fetching expenses:", error);
-        setExpenses([]);
-      }
-    };
-
-    fetchExpenses();
-  }, [selectedGroupId]);
-
-  useEffect(() => {
-    const fetchGroup = async () => {
-      if (!selectedGroupId) {
-        setGroup(null);
-        return;
-      }
-
-      try {
-        const data = await getGroup(selectedGroupId);
-        if (data) {
-          setGroup(data);
-        }
-      } catch (error) {
-        console.error("Error fetching group details:", error);
-        setGroup(null);
-      }
-    };
-
-    fetchGroup();
-  }, [selectedGroupId]);
-
-  useEffect(() => {
-    const fetchBalances = async () => {
-      if (!selectedGroupId) {
-        setBalances([]);
-        return;
-      }
-
-      try {
-        const data = await getBalances(selectedGroupId);
-        if (data && data.balances) {
-          setBalances(data.balances);
-        }
-      } catch (error) {
-        console.error("Error fetching balances:", error);
-        setBalances([]);
-      }
-    };
-
-    fetchBalances();
-  }, [selectedGroupId]);
-
-  useEffect(() => {
-    const fetchSettlementSuggestions = async () => {
-      if (!selectedGroupId) {
-        setSuggestions([]);
-        return;
-      }
-      try {
-        const data = await getSettlementSuggestions(selectedGroupId);
-        if (data && data.length > 0) {
-          setSuggestions(data);
-        }
-      } catch (error) {
-        console.error("Error fetching settlement suggestions:", error);
-        setSuggestions([]);
-      }
-    };
-
-    fetchSettlementSuggestions();
-  }, [selectedGroupId]);
+  if (isError) {
+    return (
+      <div className="flex min-h-[50vh] w-full flex-col items-center justify-center p-6">
+        <ErrorBlock
+          error={{
+            message:
+              errors[0]?.message +
+              (errors.length > 1
+                ? ` (and ${errors.length - 1} other error${errors.length > 2 ? "s" : ""})`
+                : ""),
+          }}
+          refetch={refetchAll}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-8">
@@ -144,7 +115,20 @@ const Dashboard = () => {
           <h2 className="font-headline-md text-headline-md text-on-surface">
             Overview
           </h2>
-          {group && group.members && group.members.length > 0 ? (
+          {balancesQuery.isLoading ? (
+            <div className="grid grid-cols-1 gap-gutter sm:grid-cols-3">
+              {[1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className="h-28 overflow-hidden rounded-lg border border-outline-variant bg-surface-container-lowest p-4 shadow-sm"
+                >
+                  <Skeleton className="mb-1 h-3 w-16" />
+                  <Skeleton className="mb-2 h-4 w-20" />
+                  <Skeleton className="h-7 w-28" />
+                </div>
+              ))}
+            </div>
+          ) : group && group.members && group.members.length > 0 ? (
             <div className="grid grid-cols-1 gap-gutter sm:grid-cols-3">
               {balances.map((bal) => {
                 const amount = Number(bal.balance);
@@ -201,7 +185,10 @@ const Dashboard = () => {
           ) : (
             <div className="grid grid-cols-1 gap-gutter sm:grid-cols-3">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="flex h-28 flex-col items-center justify-center gap-2 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface-variant">
+                <div
+                  key={i}
+                  className="flex h-28 flex-col items-center justify-center gap-2 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface-variant"
+                >
                   <span className="material-symbols-outlined text-[32px] opacity-20">
                     account_balance_wallet
                   </span>
@@ -220,7 +207,15 @@ const Dashboard = () => {
             Simplified Settlements
           </h2>
           <div className="flex flex-col overflow-hidden rounded-lg border border-outline-variant bg-surface-container-lowest shadow-sm">
-            {suggestions && suggestions.length > 0 ? (
+            {suggestionsQuery.isLoading ? (
+              <div className="flex min-h-19 items-center justify-between border-b border-outline-variant p-4 last:border-b-0">
+                <div className="flex flex-col gap-2">
+                  <Skeleton className="h-4 w-48" />
+                  <Skeleton className="h-4 w-24" />
+                </div>
+                <Skeleton className="h-8 w-16 rounded-DEFAULT" />
+              </div>
+            ) : suggestions && suggestions.length > 0 ? (
               suggestions.map((suggestion, index) => (
                 <div
                   key={index}
@@ -257,7 +252,7 @@ const Dashboard = () => {
                 </div>
               ))
             ) : (
-              <div className="p-6 text-center">
+              <div className="flex min-h-19 items-center justify-center text-center">
                 <p className="font-body-md text-body-md text-on-surface-variant">
                   All balances are settled!
                 </p>
@@ -345,7 +340,27 @@ const Dashboard = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-outline-variant">
-                {filteredExpenses && filteredExpenses.length > 0 ? (
+                {expensesQuery.isLoading ? (
+                  Array.from({ length: 1 }).map((_, i) => (
+                    <tr key={i} className="h-row-height-compact">
+                      <td className="px-4 py-8">
+                        <Skeleton className="h-4 w-12" />
+                      </td>
+                      <td className="px-4 py-8">
+                        <Skeleton className="h-4 w-32" />
+                      </td>
+                      <td className="px-4 py-8">
+                        <Skeleton className="h-4 w-24" />
+                      </td>
+                      <td className="px-4 py-8 text-right">
+                        <Skeleton className="ml-auto h-4 w-16" />
+                      </td>
+                      <td className="px-4 py-8">
+                        <Skeleton className="h-4 w-20" />
+                      </td>
+                    </tr>
+                  ))
+                ) : filteredExpenses && filteredExpenses.length > 0 ? (
                   filteredExpenses.map((expense) => (
                     <React.Fragment key={expense.id}>
                       <tr
@@ -487,7 +502,7 @@ const Dashboard = () => {
                   <tr>
                     <td
                       colSpan="5"
-                      className="py-8 text-center text-body-md text-on-surface-variant"
+                      className="h-20 px-4 text-center text-body-md text-on-surface-variant"
                     >
                       {selectedGroupId
                         ? expenses.length > 0

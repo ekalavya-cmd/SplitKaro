@@ -1,6 +1,11 @@
 import React from "react";
 
-export const ExpenseFilters = ({ filterProps, members }) => {
+export const ExpenseFilters = ({
+  filterProps,
+  members,
+  isLoading,
+  isError,
+}) => {
   const {
     filterDescription,
     setFilterDescription,
@@ -84,7 +89,11 @@ export const ExpenseFilters = ({ filterProps, members }) => {
                 className="max-w-30 cursor-pointer truncate rounded-DEFAULT border border-outline-variant bg-surface-container-low px-2 py-1 font-body-md text-body-md font-bold text-on-surface focus:ring-2 focus:ring-primary/20 focus:outline-none"
               >
                 <option value="all">All</option>
-                {members && members.length > 0 ? (
+                {isLoading ? (
+                  <option disabled>Loading members...</option>
+                ) : isError ? (
+                  <option disabled>Error loading members</option>
+                ) : members && members.length > 0 ? (
                   members.map((member) => (
                     <option key={member.id} value={member.id}>
                       {member.name}

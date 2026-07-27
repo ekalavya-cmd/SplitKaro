@@ -1,44 +1,33 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { getGroups } from "../services/group.service";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/useAuth";
 
 const Layout = () => {
   const [selectedGroupId, setSelectedGroupId] = useState("");
-  const [groups, setGroups] = useState([]);
   const location = useLocation();
   const navigate = useNavigate();
 
-  const { isAuthenticated, isInitializing } = useAuth();
+  const { isAuthenticated, isInitializing, logout } = useAuth();
 
-  useEffect(() => {
-    if (isInitializing) return;
+  const {
+    data: groups = [],
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["groups"],
+    queryFn: getGroups,
+    enabled: isAuthenticated && !isInitializing,
+  });
 
-    const syncState = async () => {
-      if (!isAuthenticated) {
-        setGroups([]);
-        setSelectedGroupId("");
-        return;
-      }
-
-      try {
-        const data = await getGroups();
-        if (data && data.length > 0) {
-          setGroups(data);
-          setSelectedGroupId(data[0].id);
-        } else {
-          setGroups([]);
-          setSelectedGroupId("");
-        }
-      } catch (error) {
-        console.error("Error fetching groups:", error);
-        setGroups([]);
-        setSelectedGroupId("");
-      }
-    };
-    
-    syncState();
-  }, [isAuthenticated, isInitializing]);
+  // Auto-select the first group when groups data becomes available
+  // Done during render phase to avoid cascading effect renders
+  if (groups && groups.length > 0 && !selectedGroupId) {
+    setSelectedGroupId(groups[0].id);
+  } else if (groups && groups.length === 0 && selectedGroupId !== "") {
+    setSelectedGroupId("");
+  }
 
   const handleGroupChange = (e) => {
     setSelectedGroupId(e.target.value);
@@ -99,18 +88,41 @@ const Layout = () => {
         </nav>
 
         <div className="flex flex-col gap-1 border-t border-outline-variant p-4">
-          {bottomNavLinks.map((link) => (
-            <Link
-              key={link.path}
-              to={link.path}
-              className="flex items-center gap-3 rounded-DEFAULT px-4 py-2 text-on-surface-variant transition-colors hover:bg-surface-container-low hover:text-on-surface"
-            >
-              <span className="material-symbols-outlined text-[20px]">
-                {link.icon}
-              </span>
-              <span className="font-body-md text-body-md">{link.name}</span>
-            </Link>
-          ))}
+          {bottomNavLinks.map((link) => {
+            if (link.name === "Logout") {
+              return (
+                <button
+                  key={link.path}
+                  onClick={async (e) => {
+                    e.preventDefault();
+                    try {
+                      await logout();
+                    } catch (error) {
+                      console.error("Logout failed in UI:", error);
+                    }
+                  }}
+                  className="flex items-center gap-3 rounded-DEFAULT px-4 py-2 text-left text-on-surface-variant transition-colors hover:bg-surface-container-low hover:text-on-surface"
+                >
+                  <span className="material-symbols-outlined text-[20px]">
+                    {link.icon}
+                  </span>
+                  <span className="font-body-md text-body-md">{link.name}</span>
+                </button>
+              );
+            }
+            return (
+              <Link
+                key={link.path}
+                to={link.path}
+                className="flex items-center gap-3 rounded-DEFAULT px-4 py-2 text-on-surface-variant transition-colors hover:bg-surface-container-low hover:text-on-surface"
+              >
+                <span className="material-symbols-outlined text-[20px]">
+                  {link.icon}
+                </span>
+                <span className="font-body-md text-body-md">{link.name}</span>
+              </Link>
+            );
+          })}
         </div>
       </aside>
 
@@ -127,7 +139,11 @@ const Layout = () => {
               <option value="" disabled>
                 Select a group
               </option>
-              {groups && groups.length > 0 ? (
+              {isLoading ? (
+                <option disabled>Loading groups...</option>
+              ) : isError ? (
+                <option disabled>Error loading groups</option>
+              ) : groups && groups.length > 0 ? (
                 groups.map((g) => (
                   <option key={g.id} value={g.id}>
                     {g.name}
@@ -194,7 +210,6 @@ const Layout = () => {
                 selectedGroupId,
                 setSelectedGroupId,
                 groups,
-                setGroups,
               }}
             />
           </div>

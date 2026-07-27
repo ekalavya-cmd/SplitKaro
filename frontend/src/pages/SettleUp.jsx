@@ -1,13 +1,19 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useLocation, useOutletContext } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getGroup } from "../services/group.service";
 import {
   getSettlementSuggestions,
   getSettlements,
   createSettlement,
+  deleteSettlement,
 } from "../services/settlement.service";
 import { useSettlementFilters } from "../hooks/useSettlementFilters";
 import { SettlementFilters } from "../components/SettlementFilters";
+import { LoadingSpinner } from "../components/LoadingSpinner";
+import { ErrorBlock } from "../components/ErrorBlock";
+import { Skeleton } from "../components/Skeleton";
+import { usePageQueryState } from "../hooks/usePageQueryState";
 
 const clearInputs = {
   paid_by: "",
@@ -17,16 +23,40 @@ const clearInputs = {
 };
 
 const SettleUp = () => {
-  const [suggestions, setSuggestions] = useState([]);
-  const [settlementsData, setSettlementsData] = useState({ settlements: [] });
+  const { selectedGroupId } = useOutletContext();
+  const queryClient = useQueryClient();
+  const location = useLocation();
+
+  const groupQuery = useQuery({
+    queryKey: ["groups", selectedGroupId],
+    queryFn: () => getGroup(selectedGroupId),
+    enabled: !!selectedGroupId,
+  });
+  const group = groupQuery.data;
+
+  const suggestionsQuery = useQuery({
+    queryKey: ["groups", selectedGroupId, "settlements", "suggest"],
+    queryFn: () => getSettlementSuggestions(selectedGroupId),
+    enabled: !!selectedGroupId,
+  });
+  const suggestions = suggestionsQuery.data || [];
+
+  const settlementsQuery = useQuery({
+    queryKey: ["groups", selectedGroupId, "settlements"],
+    queryFn: () => getSettlements(selectedGroupId),
+    enabled: !!selectedGroupId,
+  });
+  const settlementsData = settlementsQuery.data || { settlements: [] };
+
+  const { isError, errors, refetchAll } = usePageQueryState([
+    groupQuery,
+    suggestionsQuery,
+    settlementsQuery,
+  ]);
+
   const { filteredSettlements, filterProps } = useSettlementFilters(
     settlementsData.settlements,
   );
-  const { selectedGroupId } = useOutletContext();
-  const [group, setGroup] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const location = useLocation();
 
   const [inputs, setInputs] = useState(() => {
     const state = location.state || {};
@@ -51,102 +81,67 @@ const SettleUp = () => {
     setInputs((prev) => ({ ...prev, [name]: value }));
   };
 
+  const createSettlementMutation = useMutation({
+    mutationFn: ({ groupId, inputs }) => createSettlement(groupId, inputs),
+    onSuccess: (data, variables) => {
+      alert("Settlement recorded successfully!");
+      queryClient.invalidateQueries({
+        queryKey: ["groups", variables.groupId, "balances"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["groups", variables.groupId, "settlements", "suggest"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["groups", variables.groupId, "settlements"],
+      });
+      setInputs(clearInputs);
+    },
+    onError: (error) => {
+      console.error("Error recording settlement:", error);
+      alert("Failed to record settlement. Please try again.");
+    },
+  });
+
+  const deleteSettlementMutation = useMutation({
+    mutationFn: ({ settlementId }) => deleteSettlement(settlementId),
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["groups", variables.groupId, "balances"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["groups", variables.groupId, "settlements", "suggest"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["groups", variables.groupId, "settlements"],
+      });
+    },
+  });
+
   const handleFormSubmit = (e) => {
     e.preventDefault();
-    addRecord();
-    setInputs(clearInputs);
-  };
-
-  const addRecord = async () => {
     if (!selectedGroupId) {
       alert("Please select a group first.");
       return;
     }
-    setIsSubmitting(true);
-    try {
-      await createSettlement(selectedGroupId, inputs);
-      alert("Settlement recorded successfully!");
-      const updatedSuggestions =
-        await getSettlementSuggestions(selectedGroupId);
-      if (updatedSuggestions && updatedSuggestions.length > 0) {
-        setSuggestions(updatedSuggestions);
-      } else {
-        setSuggestions([]);
-      }
-      const updatedSettlements = await getSettlements(selectedGroupId);
-      if (updatedSettlements && updatedSettlements.settlements) {
-        setSettlementsData(updatedSettlements);
-      } else {
-        setSettlementsData({ settlements: [] });
-      }
-    } catch (error) {
-      console.error("Error recording settlement:", error);
-      alert("Failed to record settlement. Please try again.");
-    } finally {
-      setIsSubmitting(false);
-    }
+    createSettlementMutation.mutate({ groupId: selectedGroupId, inputs });
   };
 
-  useEffect(() => {
-    const fetchSettlementSuggestions = async () => {
-      if (!selectedGroupId) {
-        setSuggestions([]);
-        return;
-      }
-      try {
-        const data = await getSettlementSuggestions(selectedGroupId);
-        if (data && data.length > 0) {
-          setSuggestions(data);
-        }
-      } catch (error) {
-        console.error("Error fetching settlement suggestions:", error);
-        setSuggestions([]);
-      }
-    };
-
-    fetchSettlementSuggestions();
-  }, [selectedGroupId]);
-
-  useEffect(() => {
-    const fetchSettlements = async () => {
-      if (!selectedGroupId) {
-        setSettlementsData({ settlements: [] });
-        return;
-      }
-      try {
-        const data = await getSettlements(selectedGroupId);
-        if (data && data.settlements && data.settlements.length > 0) {
-          setSettlementsData(data);
-        }
-      } catch (error) {
-        console.error("Error fetching settlements:", error);
-        setSettlementsData({ settlements: [] });
-      }
-    };
-
-    fetchSettlements();
-  }, [selectedGroupId]);
-
-  useEffect(() => {
-    const fetchGroup = async () => {
-      if (!selectedGroupId) {
-        setGroup(null);
-        return;
-      }
-
-      try {
-        const data = await getGroup(selectedGroupId);
-        if (data) {
-          setGroup(data);
-        }
-      } catch (error) {
-        console.error("Error fetching group details:", error);
-        setGroup(null);
-      }
-    };
-
-    fetchGroup();
-  }, [selectedGroupId]);
+  if (isError) {
+    return (
+      <div className="flex min-h-[50vh] w-full flex-col items-center justify-center p-6">
+        <ErrorBlock
+          error={{
+            message:
+              errors[0]?.message +
+              (errors.length > 1
+                ? ` (and ${errors.length - 1} other error${errors.length > 2 ? "s" : ""})`
+                : ""),
+          }}
+          refetch={refetchAll}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
@@ -166,7 +161,15 @@ const SettleUp = () => {
             Simplified Settlements
           </h2>
           <div className="flex flex-col overflow-hidden rounded-lg border border-outline-variant bg-surface-container-lowest shadow-sm">
-            {suggestions && suggestions.length > 0 ? (
+            {suggestionsQuery.isLoading ? (
+              <div className="flex min-h-19 items-center justify-between border-b border-outline-variant p-4 last:border-b-0">
+                <div className="flex flex-col gap-2">
+                  <Skeleton className="h-4 w-48" />
+                  <Skeleton className="h-4 w-24" />
+                </div>
+                <Skeleton className="h-8 w-16 rounded-DEFAULT" />
+              </div>
+            ) : suggestions && suggestions.length > 0 ? (
               suggestions.map((suggestion, index) => (
                 <div
                   key={index}
@@ -203,7 +206,7 @@ const SettleUp = () => {
                 </div>
               ))
             ) : (
-              <div className="p-6 text-center">
+              <div className="flex min-h-19 items-center justify-center text-center">
                 <p className="font-body-md text-body-md text-on-surface-variant">
                   All balances are settled!
                 </p>
@@ -242,7 +245,24 @@ const SettleUp = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-outline-variant">
-                  {filteredSettlements && filteredSettlements.length > 0 ? (
+                  {settlementsQuery.isLoading ? (
+                    Array.from({ length: 1 }).map((_, i) => (
+                      <tr key={i} className="h-row-height-compact">
+                        <td className="px-4 py-8">
+                          <Skeleton className="h-4 w-12" />
+                        </td>
+                        <td className="px-4 py-8">
+                          <Skeleton className="h-4 w-24" />
+                        </td>
+                        <td className="px-4 py-8">
+                          <Skeleton className="h-4 w-24" />
+                        </td>
+                        <td className="px-4 py-8 text-right">
+                          <Skeleton className="ml-auto h-4 w-16" />
+                        </td>
+                      </tr>
+                    ))
+                  ) : filteredSettlements && filteredSettlements.length > 0 ? (
                     filteredSettlements.map((settlement) => (
                       <tr
                         key={settlement.id}
@@ -254,7 +274,9 @@ const SettleUp = () => {
                         <td className="px-4 py-2">
                           <div className="flex items-center gap-2">
                             <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-secondary-container font-label-sm text-[10px] text-on-secondary-container">
-                              {settlement.payer.name.substring(0, 2).toUpperCase()}
+                              {settlement.payer.name
+                                .substring(0, 2)
+                                .toUpperCase()}
                             </div>
                             <span className="truncate font-body-md font-medium text-on-surface">
                               {settlement.payer.name}
@@ -264,7 +286,9 @@ const SettleUp = () => {
                         <td className="px-4 py-2">
                           <div className="flex items-center gap-2">
                             <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-secondary-container font-label-sm text-[10px] text-on-secondary-container">
-                              {settlement.payee.name.substring(0, 2).toUpperCase()}
+                              {settlement.payee.name
+                                .substring(0, 2)
+                                .toUpperCase()}
                             </div>
                             <span className="truncate font-body-md font-medium text-on-surface">
                               {settlement.payee.name}
@@ -279,7 +303,7 @@ const SettleUp = () => {
                   ) : (
                     <tr>
                       <td
-                        className="px-4 py-8 text-center text-body-md text-on-surface-variant"
+                        className="h-20 px-4 text-center text-body-md text-on-surface-variant"
                         colSpan="4"
                       >
                         {settlementsData.settlements.length > 0
@@ -320,7 +344,11 @@ const SettleUp = () => {
                 <option value="" disabled>
                   Select Payer
                 </option>
-                {group && group.members && group.members.length > 0 ? (
+                {groupQuery.isLoading ? (
+                  <option value="" disabled>
+                    Loading...
+                  </option>
+                ) : group && group.members && group.members.length > 0 ? (
                   group.members.map((member) => (
                     <option key={member.id} value={member.id}>
                       {member.name}
@@ -352,7 +380,11 @@ const SettleUp = () => {
                 <option value="" disabled>
                   Select Payee
                 </option>
-                {group && group.members && group.members.length > 0 ? (
+                {groupQuery.isLoading ? (
+                  <option value="" disabled>
+                    Loading...
+                  </option>
+                ) : group && group.members && group.members.length > 0 ? (
                   group.members.map((member) => (
                     <option key={member.id} value={member.id}>
                       {member.name}
@@ -406,10 +438,12 @@ const SettleUp = () => {
 
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={createSettlementMutation.isPending}
               className="mt-2 flex h-10 w-full items-center justify-center gap-2 rounded-DEFAULT bg-primary px-4 font-label-sm text-label-sm font-semibold tracking-wide text-on-primary transition-all hover:bg-primary/90 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50"
             >
-              Record Payment
+              {createSettlementMutation.isPending
+                ? "Recording..."
+                : "Record Payment"}
             </button>
           </form>
         </div>

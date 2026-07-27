@@ -21,7 +21,7 @@ SplitKaro is a group bill-splitting web app (Splitwise-style): users create grou
 **Frontend**
 - Module system: ES modules (`import` / `export`)
 - All API calls go through `src/api/splitKaroAPI.js` (axios instance) → `src/services/splitKaroService.js` (one function per endpoint) → page component
-- State: local `useState` / `useEffect` per page — no global store
+- State: Page-local UI state uses `useState`. Global auth uses `AuthContext`. API caching/fetching uses `TanStack Query` (currently migrating). No Redux/Zustand.
 - Styling: Tailwind CSS utility classes only; no inline styles, no CSS modules
 
 ---
