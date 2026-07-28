@@ -134,6 +134,11 @@ To maintain a sleek fintech aesthetic, heavy drop shadows are avoided in favor o
 - Bottom borders only (`border-b border-outline-variant`), no vertical lines.
 - Headers: all-caps `label-sm` style.
 
+### Skeleton Loaders
+- **Primitive**: Uses Tailwind's `animate-pulse` utility.
+- **Color**: `bg-surface-container-high` (a neutral surface token, not a dedicated grey).
+- **Shapes**: Composited from basic rectangles (`rounded-lg` or `rounded-md`) to exactly match the dimensions of the real content (e.g., a `h-28` block for a balance card, or a multi-line `min-h-[4.75rem]` block for a suggestion row).
+
 ### Sidebar Navigation
 - Fixed width: 240px. Light background.
 - Active state: Indicated by a 2px vertical Indigo (`primary`) bar on the left edge.

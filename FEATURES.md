@@ -115,8 +115,8 @@
 ### Feedback & UX
 | Feature | Status | What exists | What is missing |
 |---|---|---|---|
-| Loading states | ✅ | `useQuery` provides boolean `isLoading` states globally, and visual spinners render safely on all components without flashing during cache-hit navigations. | None |
-| Error display in UI | ✅ | AddExpense.jsx and SettleUp.jsx show `alert()` on mutation failure; all queries use a reusable `ErrorBlock` component with a Retry button that renders using `DESIGN.md` error tokens. App boot includes a top-level connection error state distinct from per-query errors. | None |
+| Loading states | ✅ | `useQuery` provides boolean `isLoading` states globally. Page-level skeleton loaders are synchronized with auth initialization (`isInitializing`) and network health (`hasConnectionError`), preventing UI flicker and ensuring smooth transitions from boot to data fetch. | None |
+| Error display in UI | ✅ | AddExpense and SettleUp show `alert()` on mutation failure. Queries use a reusable `ErrorBlock`. App boot includes a global, non-blocking `ConnectionToast` with exponential backoff auto-retry for transient network errors. | None |
 
 
 ---

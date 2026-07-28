@@ -18,9 +18,9 @@ SplitKaro is a bill-splitting web application that lets users create groups, add
 │                                                                │
 │  Pages: Dashboard | Expenses | AddExpense | SettleUp | Error404│
 │       ↕  local useState / useEffect  (no global state store)   │
-│  services/splitKaroService.js  (thin wrapper per API call)     │
+│  services/*.service.js (thin wrapper per API call)             │
 │       ↕  axios (10 s timeout, response error interceptor)      │
-│  api/splitKaroAPI.js  (axios instance, baseURL from .env)      │
+│  api/http.client.js  (axios instance, baseURL from .env)       │
 └───────────────────────┬────────────────────────────────────────┘
           HTTP (JSON)   │   VITE_API_URL = http://localhost:3000/api
 ┌───────────────────────▼────────────────────────────────────────┐
@@ -64,7 +64,7 @@ SplitKaro is a bill-splitting web application that lets users create groups, add
 **Typical request flow (e.g., "Add Expense"):**
 
 1. User fills the `AddExpense` page and submits.
-2. `splitKaroService.createExpense()` calls `POST /api/groups/:id/expenses` via the axios instance.
+2. `expense.service.createExpense()` calls `POST /api/groups/:id/expenses` via the axios instance.
 3. Express routes the request to `expense.controller.createExpense`.
 4. Controller calls `expense.service.createExpenseForGroup()`.
 5. Service validates all inputs (payer is part of the group, split type, amounts), computes split rows, then creates `Expenses` + `ExpenseSplits` records inside a single Sequelize transaction.

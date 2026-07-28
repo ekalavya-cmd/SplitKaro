@@ -141,9 +141,9 @@ SplitKaro follows a classic **Client–Server** architecture with a clear separa
 │         │           │              │             │       │
 │         └────────────────────────────────────────┘       │
 │                         │                                │
-│              splitKaroService.js (service layer)         │
+│              services/*.service.js (service layer)       │
 │                         │                                │
-│              splitKaroAPI.js (Axios instance)            │
+│              api/http.client.js (Axios instance)         │
 └──────────────────────────┬───────────────────────────────┘
                            │  HTTP/REST (port 5173 → 3000)
 ┌──────────────────────────▼──────────────────────────────┐
@@ -178,8 +178,8 @@ SplitKaro follows a classic **Client–Server** architecture with a clear separa
 - **Centralized Error Handling**: Controllers catch service-level errors with structured `{ status, message }` objects and forward appropriate HTTP responses
 
 ### Frontend Design Patterns
-- **Service Abstraction**: `splitKaroService.js` provides a clean API facade over the raw Axios instance
-- **Axios Interceptors**: `splitKaroAPI.js` centralizes error normalization at the HTTP layer
+- **Service Abstraction**: Modular services (`auth.service.js`, `group.service.js`, etc.) provide clean API facades over the raw Axios instance
+- **Axios Interceptors**: `http.client.js` centralizes error normalization and token attachment at the HTTP layer
 - **Custom Hooks**: `useDebounce` for debounced input filtering
 - **React Router v7**: SPA routing with a shared `Layout` wrapper
 
@@ -240,7 +240,8 @@ splitKaro/
     ├── public/
     ├── src/
     │   ├── api/
-    │   │   └── splitKaroAPI.js    # Axios instance with interceptors
+    │   │   ├── http.client.js         # Axios instance with interceptors
+    │   │   └── token.store.js         # Minimal JWT storage
     │   ├── assets/
     │   ├── hooks/
     │   │   └── useDebounce.js     # Custom debounce hook
@@ -252,7 +253,11 @@ splitKaro/
     │   │   ├── SettleUp.jsx       # Settlement recording + history
     │   │   └── Error404.jsx       # 404 not found page
     │   ├── services/
-    │   │   └── splitKaroService.js # API call wrappers
+    │   │   ├── auth.service.js        # Auth endpoints
+    │   │   ├── group.service.js       # Group endpoints
+    │   │   ├── expense.service.js     # Expense endpoints
+    │   │   ├── settlement.service.js  # Settlement endpoints
+    │   │   └── invite.service.js      # Invite link endpoints
     │   ├── App.jsx                # Route definitions
     │   ├── main.jsx               # React entry point
     │   ├── index.css
