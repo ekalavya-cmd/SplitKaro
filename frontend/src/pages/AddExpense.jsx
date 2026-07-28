@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useOutletContext } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getGroup } from "../services/group.service";
 import { createExpense } from "../services/expense.service";
@@ -19,6 +19,8 @@ const clearInputs = {
 
 const AddExpense = () => {
   const { id: groupId } = useParams();
+  const { isInitializing, hasConnectionError, groupsIsLoading } =
+    useOutletContext();
   const queryClient = useQueryClient();
 
   const [inputs, setInputs] = useState(clearInputs);
@@ -26,7 +28,7 @@ const AddExpense = () => {
   const groupQuery = useQuery({
     queryKey: ["groups", groupId],
     queryFn: () => getGroup(groupId),
-    enabled: !!groupId,
+    enabled: !!groupId && !isInitializing,
   });
   const group = groupQuery.data;
 
@@ -154,7 +156,10 @@ const AddExpense = () => {
               <option value="" disabled>
                 Select Payer
               </option>
-              {groupQuery.isLoading ? (
+              {isInitializing ||
+              hasConnectionError ||
+              groupsIsLoading ||
+              groupQuery.isLoading ? (
                 <option value="" disabled>
                   Loading...
                 </option>
@@ -216,7 +221,7 @@ const AddExpense = () => {
 
           <button
             type="submit"
-            disabled={createExpenseMutation.isPending}
+            disabled={hasConnectionError || createExpenseMutation.isPending}
             className="mt-6 flex h-10 w-full items-center justify-center gap-2 rounded-DEFAULT bg-primary px-4 font-label-sm text-label-sm font-semibold tracking-wide text-on-primary transition-all hover:bg-primary/90 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50"
           >
             {createExpenseMutation.isPending ? "Adding..." : "Add Expense"}
@@ -236,8 +241,11 @@ const AddExpense = () => {
               <p className="font-label-sm text-label-sm text-on-surface-variant">
                 Enter the exact amount each person owes:
               </p>
-              {groupQuery.isLoading ? (
-                <div className="flex min-h-[7.5rem] flex-col gap-3">
+              {isInitializing ||
+              hasConnectionError ||
+              groupsIsLoading ||
+              groupQuery.isLoading ? (
+                <div className="flex min-h-30 flex-col gap-3">
                   <Skeleton className="h-10 w-full rounded-lg" />
                   <Skeleton className="h-10 w-full rounded-lg" />
                   <Skeleton className="h-10 w-full rounded-lg" />
@@ -302,8 +310,11 @@ const AddExpense = () => {
               <p className="font-label-sm text-label-sm text-on-surface-variant">
                 Enter the percentage each person owes (must sum to 100%):
               </p>
-              {groupQuery.isLoading ? (
-                <div className="flex min-h-[7.5rem] flex-col gap-3">
+              {isInitializing ||
+              hasConnectionError ||
+              groupsIsLoading ||
+              groupQuery.isLoading ? (
+                <div className="flex min-h-30 flex-col gap-3">
                   <Skeleton className="h-10 w-full rounded-lg" />
                   <Skeleton className="h-10 w-full rounded-lg" />
                   <Skeleton className="h-10 w-full rounded-lg" />
@@ -370,8 +381,11 @@ const AddExpense = () => {
               <p className="font-label-sm text-label-sm text-on-surface-variant">
                 Equal split amounts (auto-calculated):
               </p>
-              {groupQuery.isLoading ? (
-                <div className="flex min-h-[7.5rem] flex-col gap-3">
+              {isInitializing ||
+              hasConnectionError ||
+              groupsIsLoading ||
+              groupQuery.isLoading ? (
+                <div className="flex min-h-30 flex-col gap-3">
                   <Skeleton className="h-10 w-full rounded-lg" />
                   <Skeleton className="h-10 w-full rounded-lg" />
                   <Skeleton className="h-10 w-full rounded-lg" />

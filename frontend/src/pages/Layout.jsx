@@ -9,7 +9,8 @@ const Layout = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const { isAuthenticated, isInitializing, logout } = useAuth();
+  const { isAuthenticated, isInitializing, hasConnectionError, logout } =
+    useAuth();
 
   const {
     data: groups = [],
@@ -139,7 +140,7 @@ const Layout = () => {
               <option value="" disabled>
                 Select a group
               </option>
-              {isLoading ? (
+              {isInitializing || hasConnectionError || isLoading ? (
                 <option disabled>Loading groups...</option>
               ) : isError ? (
                 <option disabled>Error loading groups</option>
@@ -210,6 +211,9 @@ const Layout = () => {
                 selectedGroupId,
                 setSelectedGroupId,
                 groups,
+                isInitializing,
+                hasConnectionError,
+                groupsIsLoading: isLoading,
               }}
             />
           </div>

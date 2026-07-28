@@ -15,7 +15,12 @@ import { Skeleton } from "../components/Skeleton";
 import { usePageQueryState } from "../hooks/usePageQueryState";
 
 const Dashboard = () => {
-  const { selectedGroupId } = useOutletContext();
+  const {
+    selectedGroupId,
+    isInitializing,
+    hasConnectionError,
+    groupsIsLoading,
+  } = useOutletContext();
   const [expandedExpenseIds, setExpandedExpenseIds] = useState({});
 
   const groupQuery = useQuery({
@@ -115,7 +120,10 @@ const Dashboard = () => {
           <h2 className="font-headline-md text-headline-md text-on-surface">
             Overview
           </h2>
-          {balancesQuery.isLoading ? (
+          {isInitializing ||
+          hasConnectionError ||
+          groupsIsLoading ||
+          balancesQuery.isLoading ? (
             <div className="grid grid-cols-1 gap-gutter sm:grid-cols-3">
               {[1, 2, 3].map((i) => (
                 <div
@@ -207,7 +215,10 @@ const Dashboard = () => {
             Simplified Settlements
           </h2>
           <div className="flex flex-col overflow-hidden rounded-lg border border-outline-variant bg-surface-container-lowest shadow-sm">
-            {suggestionsQuery.isLoading ? (
+            {isInitializing ||
+            hasConnectionError ||
+            groupsIsLoading ||
+            suggestionsQuery.isLoading ? (
               <div className="flex min-h-19 items-center justify-between border-b border-outline-variant p-4 last:border-b-0">
                 <div className="flex flex-col gap-2">
                   <Skeleton className="h-4 w-48" />
@@ -340,7 +351,10 @@ const Dashboard = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-outline-variant">
-                {expensesQuery.isLoading ? (
+                {isInitializing ||
+                hasConnectionError ||
+                groupsIsLoading ||
+                expensesQuery.isLoading ? (
                   Array.from({ length: 1 }).map((_, i) => (
                     <tr key={i} className="h-row-height-compact">
                       <td className="px-4 py-8">

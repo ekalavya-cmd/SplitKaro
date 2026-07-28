@@ -23,7 +23,12 @@ const clearInputs = {
 };
 
 const SettleUp = () => {
-  const { selectedGroupId } = useOutletContext();
+  const {
+    selectedGroupId,
+    isInitializing,
+    hasConnectionError,
+    groupsIsLoading,
+  } = useOutletContext();
   const queryClient = useQueryClient();
   const location = useLocation();
 
@@ -161,7 +166,10 @@ const SettleUp = () => {
             Simplified Settlements
           </h2>
           <div className="flex flex-col overflow-hidden rounded-lg border border-outline-variant bg-surface-container-lowest shadow-sm">
-            {suggestionsQuery.isLoading ? (
+            {isInitializing ||
+            hasConnectionError ||
+            groupsIsLoading ||
+            suggestionsQuery.isLoading ? (
               <div className="flex min-h-19 items-center justify-between border-b border-outline-variant p-4 last:border-b-0">
                 <div className="flex flex-col gap-2">
                   <Skeleton className="h-4 w-48" />
@@ -245,7 +253,10 @@ const SettleUp = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-outline-variant">
-                  {settlementsQuery.isLoading ? (
+                  {isInitializing ||
+                  hasConnectionError ||
+                  groupsIsLoading ||
+                  settlementsQuery.isLoading ? (
                     Array.from({ length: 1 }).map((_, i) => (
                       <tr key={i} className="h-row-height-compact">
                         <td className="px-4 py-8">
@@ -344,7 +355,10 @@ const SettleUp = () => {
                 <option value="" disabled>
                   Select Payer
                 </option>
-                {groupQuery.isLoading ? (
+                {isInitializing ||
+                hasConnectionError ||
+                groupsIsLoading ||
+                groupQuery.isLoading ? (
                   <option value="" disabled>
                     Loading...
                   </option>
@@ -380,7 +394,10 @@ const SettleUp = () => {
                 <option value="" disabled>
                   Select Payee
                 </option>
-                {groupQuery.isLoading ? (
+                {isInitializing ||
+                hasConnectionError ||
+                groupsIsLoading ||
+                groupQuery.isLoading ? (
                   <option value="" disabled>
                     Loading...
                   </option>
@@ -438,7 +455,9 @@ const SettleUp = () => {
 
             <button
               type="submit"
-              disabled={createSettlementMutation.isPending}
+              disabled={
+                hasConnectionError || createSettlementMutation.isPending
+              }
               className="mt-2 flex h-10 w-full items-center justify-center gap-2 rounded-DEFAULT bg-primary px-4 font-label-sm text-label-sm font-semibold tracking-wide text-on-primary transition-all hover:bg-primary/90 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50"
             >
               {createSettlementMutation.isPending

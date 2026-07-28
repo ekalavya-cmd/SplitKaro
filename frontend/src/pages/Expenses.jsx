@@ -11,7 +11,12 @@ import { Skeleton } from "../components/Skeleton";
 import { usePageQueryState } from "../hooks/usePageQueryState";
 
 const Expenses = () => {
-  const { selectedGroupId } = useOutletContext();
+  const {
+    selectedGroupId,
+    isInitializing,
+    hasConnectionError,
+    groupsIsLoading,
+  } = useOutletContext();
   const queryClient = useQueryClient();
   const [expandedExpenseIds, setExpandedExpenseIds] = useState({});
 
@@ -145,7 +150,10 @@ const Expenses = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-outline-variant">
-                {expensesQuery.isLoading ? (
+                {isInitializing ||
+                hasConnectionError ||
+                groupsIsLoading ||
+                expensesQuery.isLoading ? (
                   Array.from({ length: 1 }).map((_, i) => (
                     <tr key={i} className="h-row-height-compact">
                       <td className="px-4 py-8">
