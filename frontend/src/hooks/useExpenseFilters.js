@@ -5,15 +5,31 @@ import {
   calculatePresetDates,
 } from "../utils/dateFilters";
 
-export const useExpenseFilters = (expenses) => {
-  const [filterDescription, setFilterDescription] = useState("");
-  const [filterSplitType, setFilterSplitType] = useState("all");
-  const [filterPaidBy, setFilterPaidBy] = useState("all");
-  const [filterFromDate, setFilterFromDate] = useState("");
-  const [filterToDate, setFilterToDate] = useState("");
-  const [filterDatePreset, setFilterDatePreset] = useState("all");
-  const [filterMinAmount, setFilterMinAmount] = useState("");
-  const [filterMaxAmount, setFilterMaxAmount] = useState("");
+export const useExpenseFilters = (expenses, initialValues = {}) => {
+  const [filterDescription, setFilterDescription] = useState(
+    initialValues.filterDescription ?? "",
+  );
+  const [filterSplitType, setFilterSplitType] = useState(
+    initialValues.filterSplitType ?? "all",
+  );
+  const [filterPaidBy, setFilterPaidBy] = useState(
+    initialValues.filterPaidBy ?? "all",
+  );
+  const [filterFromDate, setFilterFromDate] = useState(
+    initialValues.filterFromDate ?? "",
+  );
+  const [filterToDate, setFilterToDate] = useState(
+    initialValues.filterToDate ?? "",
+  );
+  const [filterDatePreset, setFilterDatePreset] = useState(
+    initialValues.filterDatePreset ?? "all",
+  );
+  const [filterMinAmount, setFilterMinAmount] = useState(
+    initialValues.filterMinAmount ?? "",
+  );
+  const [filterMaxAmount, setFilterMaxAmount] = useState(
+    initialValues.filterMaxAmount ?? "",
+  );
   const [isAdvancedFiltersExpanded, setIsAdvancedFiltersExpanded] =
     useState(false);
 

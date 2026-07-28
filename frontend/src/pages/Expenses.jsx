@@ -1,14 +1,16 @@
-import React, { useState } from "react";
-import { useOutletContext } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useOutletContext, useSearchParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getGroup } from "../services/group.service";
 import { getExpenses, deleteExpense } from "../services/expense.service";
 import { useExpenseFilters } from "../hooks/useExpenseFilters";
 import { ExpenseFilters } from "../components/ExpenseFilters";
-import { LoadingSpinner } from "../components/LoadingSpinner";
 import { ErrorBlock } from "../components/ErrorBlock";
 import { Skeleton } from "../components/Skeleton";
 import { usePageQueryState } from "../hooks/usePageQueryState";
+import { calculatePresetDates } from "../utils/dateFilters";
+
+const EXPENSES_PER_PAGE = 10;
 
 const Expenses = () => {
   const {
@@ -19,6 +21,36 @@ const Expenses = () => {
   } = useOutletContext();
   const queryClient = useQueryClient();
   const [expandedExpenseIds, setExpandedExpenseIds] = useState({});
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Derive initial filter values from URL params.
+  // useState only reads these on the first render; re-renders ignore them.
+  const urlPreset = searchParams.get("preset") || "all";
+  let initFromDate = searchParams.get("from") || "";
+  let initToDate = searchParams.get("to") || "";
+  // For non-custom presets, recalculate dates so they're always current
+  // (e.g. "this-week" rehydrates to the correct week, not the stale stored dates).
+  // Only "custom" stores explicit from/to in the URL.
+  if (urlPreset !== "all" && urlPreset !== "custom") {
+    const { fromDate, toDate } = calculatePresetDates(urlPreset);
+    initFromDate = fromDate;
+    initToDate = toDate;
+  }
+  const initialFilterValues = {
+    filterDescription: searchParams.get("q") || "",
+    filterSplitType: searchParams.get("split") || "all",
+    filterPaidBy: searchParams.get("payer") || "all",
+    filterDatePreset: urlPreset,
+    filterFromDate: initFromDate,
+    filterToDate: initToDate,
+    filterMinAmount: searchParams.get("min") || "",
+    filterMaxAmount: searchParams.get("max") || "",
+  };
+
+  const [currentPage, setCurrentPage] = useState(() => {
+    const p = parseInt(searchParams.get("page") || "1", 10);
+    return Number.isFinite(p) && p > 0 ? p : 1;
+  });
 
   const groupQuery = useQuery({
     queryKey: ["groups", selectedGroupId],
@@ -61,7 +93,120 @@ const Expenses = () => {
     },
   });
 
-  const { filteredExpenses, filterProps } = useExpenseFilters(expenses);
+  const { filteredExpenses, filterProps } = useExpenseFilters(
+    expenses,
+    initialFilterValues,
+  );
+
+  // Destructure the raw setters and state values for the URL sync effect
+  const {
+    filterDescription,
+    setFilterDescription,
+    filterSplitType,
+    setFilterSplitType,
+    filterPaidBy,
+    setFilterPaidBy,
+    filterFromDate,
+    setFilterFromDate,
+    filterToDate,
+    setFilterToDate,
+    filterDatePreset,
+    handleDatePresetChange,
+    filterMinAmount,
+    setFilterMinAmount,
+    filterMaxAmount,
+    setFilterMaxAmount,
+    handleResetFilters: originalResetFilters,
+  } = filterProps;
+
+  // Wrap every filter setter to atomically reset the page to 1.
+  // React 18 batches both state updates into a single re-render.
+  const wrappedFilterProps = {
+    ...filterProps,
+    setFilterDescription: (v) => {
+      setFilterDescription(v);
+      setCurrentPage(1);
+    },
+    setFilterSplitType: (v) => {
+      setFilterSplitType(v);
+      setCurrentPage(1);
+    },
+    setFilterPaidBy: (v) => {
+      setFilterPaidBy(v);
+      setCurrentPage(1);
+    },
+    setFilterFromDate: (v) => {
+      setFilterFromDate(v);
+      setCurrentPage(1);
+    },
+    setFilterToDate: (v) => {
+      setFilterToDate(v);
+      setCurrentPage(1);
+    },
+    handleDatePresetChange: (preset) => {
+      handleDatePresetChange(preset);
+      setCurrentPage(1);
+    },
+    setFilterMinAmount: (v) => {
+      setFilterMinAmount(v);
+      setCurrentPage(1);
+    },
+    setFilterMaxAmount: (v) => {
+      setFilterMaxAmount(v);
+      setCurrentPage(1);
+    },
+    handleResetFilters: () => {
+      originalResetFilters();
+      setCurrentPage(1);
+    },
+  };
+
+  // Sync all filter state + current page to the URL.
+  // Uses { replace: true } so filter changes/keystrokes don't spam browser history.
+  // Params equal to their default value are omitted so the clean URL stays param-free.
+  useEffect(() => {
+    const params = {};
+    if (filterDescription) params.q = filterDescription;
+    if (filterSplitType !== "all") params.split = filterSplitType;
+    if (filterPaidBy !== "all") params.payer = filterPaidBy;
+    if (filterDatePreset !== "all") params.preset = filterDatePreset;
+    // Only persist from/to for the "custom" preset; all other presets recalculate
+    // their date windows from the current date on load, so storing them would stale.
+    if (filterDatePreset === "custom") {
+      if (filterFromDate) params.from = filterFromDate;
+      if (filterToDate) params.to = filterToDate;
+    }
+    if (filterMinAmount) params.min = filterMinAmount;
+    if (filterMaxAmount) params.max = filterMaxAmount;
+    if (currentPage !== 1) params.page = String(currentPage);
+    setSearchParams(params, { replace: true });
+  }, [
+    filterDescription,
+    filterSplitType,
+    filterPaidBy,
+    filterDatePreset,
+    filterFromDate,
+    filterToDate,
+    filterMinAmount,
+    filterMaxAmount,
+    currentPage,
+    setSearchParams,
+  ]);
+
+  // Pagination calculations
+  const totalExpenses = filteredExpenses.length;
+  const totalPages = Math.max(1, Math.ceil(totalExpenses / EXPENSES_PER_PAGE));
+  // safePage clamps the stored page number in case filteredExpenses shrinks
+  // (e.g. URL param page=5 but filters only yield 1 page of results)
+  const safePage = Math.min(currentPage, totalPages);
+  const startIdx = (safePage - 1) * EXPENSES_PER_PAGE;
+  const endIdx = Math.min(startIdx + EXPENSES_PER_PAGE, totalExpenses);
+  const pagedExpenses = filteredExpenses.slice(startIdx, endIdx);
+  const showingFrom = totalExpenses === 0 ? 0 : startIdx + 1;
+  const showingTo = endIdx;
+
+  const isDataLoading =
+    isInitializing || hasConnectionError || groupsIsLoading || expensesQuery.isLoading;
 
   const toggleExpenseExpand = (id) => {
     setExpandedExpenseIds((prev) => ({
@@ -74,7 +219,6 @@ const Expenses = () => {
     const date = new Date(dateStr);
     const day = String(date.getDate()).padStart(2, "0");
     const month = date.toLocaleString("en-US", { month: "short" });
-    // const year = date.getFullYear();
     return `${month} ${day}`;
   };
 
@@ -115,12 +259,18 @@ const Expenses = () => {
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-4">
-        <h2 className="font-headline-md text-headline-md text-on-surface">
-          {group ? group.name : "Select a group"}
-        </h2>
+        {/* Static page heading */}
+        <div>
+          <h1 className="font-headline-lg text-headline-lg text-on-surface">
+            Expenses
+          </h1>
+          <p className="mt-1 font-body-md text-body-md text-on-surface-variant">
+            Review and manage all your shared expenses
+          </p>
+        </div>
 
         <ExpenseFilters
-          filterProps={filterProps}
+          filterProps={wrappedFilterProps}
           members={group ? group.members : []}
         />
 
@@ -150,10 +300,7 @@ const Expenses = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-outline-variant">
-                {isInitializing ||
-                hasConnectionError ||
-                groupsIsLoading ||
-                expensesQuery.isLoading ? (
+                {isDataLoading ? (
                   Array.from({ length: 1 }).map((_, i) => (
                     <tr key={i} className="h-row-height-compact">
                       <td className="px-4 py-8">
@@ -176,8 +323,8 @@ const Expenses = () => {
                       </td>
                     </tr>
                   ))
-                ) : filteredExpenses && filteredExpenses.length > 0 ? (
-                  filteredExpenses.map((expense) => (
+                ) : pagedExpenses && pagedExpenses.length > 0 ? (
+                  pagedExpenses.map((expense) => (
                     <React.Fragment key={expense.id}>
                       <tr
                         onClick={() => toggleExpenseExpand(expense.id)}
@@ -356,6 +503,42 @@ const Expenses = () => {
               </tbody>
             </table>
           </div>
+
+          {/* Pagination bar — only rendered when there are enough results to paginate */}
+          {!isDataLoading && totalExpenses > EXPENSES_PER_PAGE && (
+            <div className="flex items-center justify-between border-t border-outline-variant px-4 py-3">
+              <p className="font-label-sm text-label-sm text-on-surface-variant">
+                Showing {showingFrom}&ndash;{showingTo} of {totalExpenses}{" "}
+                expenses
+              </p>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() =>
+                    setCurrentPage((p) => Math.max(1, p - 1))
+                  }
+                  disabled={safePage <= 1}
+                  className="flex h-8 cursor-pointer items-center gap-1 rounded-DEFAULT border border-primary bg-transparent px-3 font-label-sm text-label-sm font-semibold text-primary transition-all hover:bg-primary/5 disabled:cursor-not-allowed disabled:border-outline-variant disabled:text-on-surface-variant disabled:opacity-50"
+                >
+                  <span className="material-symbols-outlined text-[16px]">
+                    chevron_left
+                  </span>
+                  Prev
+                </button>
+                <button
+                  onClick={() =>
+                    setCurrentPage((p) => Math.min(totalPages, p + 1))
+                  }
+                  disabled={safePage >= totalPages}
+                  className="flex h-8 cursor-pointer items-center gap-1 rounded-DEFAULT border border-primary bg-transparent px-3 font-label-sm text-label-sm font-semibold text-primary transition-all hover:bg-primary/5 disabled:cursor-not-allowed disabled:border-outline-variant disabled:text-on-surface-variant disabled:opacity-50"
+                >
+                  Next
+                  <span className="material-symbols-outlined text-[16px]">
+                    chevron_right
+                  </span>
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

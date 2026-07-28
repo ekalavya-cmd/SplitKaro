@@ -57,6 +57,7 @@
 | ✅ Filter by payer | Shared dropdown filter populated from current group's members on Dashboard and Expenses pages |
 | ✅ Filter by Date (Preset / Custom) | Shared preset selectors (Today, This Week, This Month, Last 30 Days, This Year) or custom calendar selectors (From/To dates) using local timezone-safe dates on Dashboard and Expenses pages |
 | ✅ Filter by Amount | Shared Min and Max amount boundaries to filter the expense table on Dashboard and Expenses pages |
+| ✅ URL-persisted filter state (Expenses) | All Expenses page filter state (search, split type, payer, date preset/range, amount range) and current page are synced to the URL via `useSearchParams` with `{ replace: true }`. Params at their default value are omitted (clean base URL). Non-custom date presets recalculate from the current date on load. Dashboard filters remain component-local state only. |
 
 ### Balance Tracking
 | Feature | Current behaviour |
@@ -177,7 +178,7 @@
 |---|---|---|
 | Group activity log / feed | ⏳ | No audit table; deleting an expense leaves no trace |
 | Expense search (server-side) | ⏳ | All filtering is client-side; unbounded data set returned |
-| Pagination | ⏳ | All list endpoints return full unbound result sets |
+| Pagination | ✅ | Client-side pagination on the Expenses page (`EXPENSES_PER_PAGE = 10`). Shows "Showing X–Y of Z expenses" with Prev/Next controls (secondary ghost button style per DESIGN.md). Page resets to 1 on any filter change. Page number URL-persisted via `?page=` (omitted when 1). Backend still returns full unbounded result sets; pagination happens over the already-fetched array. |
 | Export to CSV / PDF | ⏳ | No export functionality |
 | Group archiving | ⏳ | Archive fully-settled groups to keep the UI clean without permanently deleting data; no archived/status column exists in the `groups` schema |
 | Spending analytics dashboard | ⏳ | Visual charts (pie, bar, timeline) showing each member's total spend, share of group expenses, and balance trend over time; no analytics endpoints or charting library exists |
