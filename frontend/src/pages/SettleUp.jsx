@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useLocation, useOutletContext } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useLocation, useOutletContext, useSearchParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getGroup } from "../services/group.service";
 import {
@@ -10,10 +10,15 @@ import {
 } from "../services/settlement.service";
 import { useSettlementFilters } from "../hooks/useSettlementFilters";
 import { SettlementFilters } from "../components/SettlementFilters";
-import { LoadingSpinner } from "../components/LoadingSpinner";
 import { ErrorBlock } from "../components/ErrorBlock";
 import { Skeleton } from "../components/Skeleton";
 import { usePageQueryState } from "../hooks/usePageQueryState";
+import {
+  formatDateForDisplay,
+  calculatePresetDates,
+} from "../utils/dateFilters";
+
+const SETTLEMENTS_PER_PAGE = 10;
 
 const clearInputs = {
   paid_by: "",
@@ -31,6 +36,33 @@ const SettleUp = () => {
   } = useOutletContext();
   const queryClient = useQueryClient();
   const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Derive initial filter values from URL params.
+  // useState only reads these on the first render; re-renders ignore them.
+  const urlPreset = searchParams.get("preset") || "all";
+  let initFromDate = searchParams.get("from") || "";
+  let initToDate = searchParams.get("to") || "";
+  // For non-custom presets, recalculate dates from the current date so
+  // they are always fresh (e.g. "this-week" gives the correct week, not
+  // stale stored dates). Only "custom" persists explicit from/to in URL.
+  if (urlPreset !== "all" && urlPreset !== "custom") {
+    const { fromDate, toDate } = calculatePresetDates(urlPreset);
+    initFromDate = fromDate;
+    initToDate = toDate;
+  }
+  const initialFilterValues = {
+    filterPaidBy: searchParams.get("paidBy") || "all",
+    filterPaidTo: searchParams.get("paidTo") || "all",
+    filterDatePreset: urlPreset,
+    filterFromDate: initFromDate,
+    filterToDate: initToDate,
+  };
+
+  const [currentPage, setCurrentPage] = useState(() => {
+    const p = parseInt(searchParams.get("page") || "1", 10);
+    return Number.isFinite(p) && p > 0 ? p : 1;
+  });
 
   const groupQuery = useQuery({
     queryKey: ["groups", selectedGroupId],
@@ -61,7 +93,93 @@ const SettleUp = () => {
 
   const { filteredSettlements, filterProps } = useSettlementFilters(
     settlementsData.settlements,
+    initialFilterValues,
   );
+
+  // Destructure filter state for URL sync effect and setter wrapping
+  const {
+    filterPaidBy,
+    setFilterPaidBy,
+    filterPaidTo,
+    setFilterPaidTo,
+    filterFromDate,
+    setFilterFromDate,
+    filterToDate,
+    setFilterToDate,
+    filterDatePreset,
+    handleDatePresetChange,
+    handleResetFilters: originalResetFilters,
+  } = filterProps;
+
+  // Wrap every filter setter to atomically reset page to 1.
+  // React 18 batches both state updates into a single re-render.
+  const wrappedFilterProps = {
+    ...filterProps,
+    setFilterPaidBy: (v) => {
+      setFilterPaidBy(v);
+      setCurrentPage(1);
+    },
+    setFilterPaidTo: (v) => {
+      setFilterPaidTo(v);
+      setCurrentPage(1);
+    },
+    setFilterFromDate: (v) => {
+      setFilterFromDate(v);
+      setCurrentPage(1);
+    },
+    setFilterToDate: (v) => {
+      setFilterToDate(v);
+      setCurrentPage(1);
+    },
+    handleDatePresetChange: (preset) => {
+      handleDatePresetChange(preset);
+      setCurrentPage(1);
+    },
+    handleResetFilters: () => {
+      originalResetFilters();
+      setCurrentPage(1);
+    },
+  };
+
+  // Sync all filter state + current page to the URL.
+  // Uses { replace: true } so changes don't spam browser history.
+  // Params equal to their default are omitted so the base URL stays clean.
+  useEffect(() => {
+    const params = {};
+    if (filterPaidBy !== "all") params.paidBy = filterPaidBy;
+    if (filterPaidTo !== "all") params.paidTo = filterPaidTo;
+    if (filterDatePreset !== "all") params.preset = filterDatePreset;
+    // Only persist from/to for the "custom" preset; all other presets
+    // recalculate their window from the current date on load.
+    if (filterDatePreset === "custom") {
+      if (filterFromDate) params.from = filterFromDate;
+      if (filterToDate) params.to = filterToDate;
+    }
+    if (currentPage !== 1) params.page = String(currentPage);
+    setSearchParams(params, { replace: true });
+  }, [
+    filterPaidBy,
+    filterPaidTo,
+    filterDatePreset,
+    filterFromDate,
+    filterToDate,
+    currentPage,
+    setSearchParams,
+  ]);
+
+  // Pagination calculations
+  const totalSettlements = filteredSettlements.length;
+  const totalPages = Math.max(1, Math.ceil(totalSettlements / SETTLEMENTS_PER_PAGE));
+  // safePage clamps the stored page in case filteredSettlements shrinks
+  const safePage = Math.min(currentPage, totalPages);
+  const startIdx = (safePage - 1) * SETTLEMENTS_PER_PAGE;
+  const endIdx = Math.min(startIdx + SETTLEMENTS_PER_PAGE, totalSettlements);
+  const pagedSettlements = filteredSettlements.slice(startIdx, endIdx);
+  const showingFrom = totalSettlements === 0 ? 0 : startIdx + 1;
+  const showingTo = endIdx;
+
+  const isDataLoading =
+    isInitializing || hasConnectionError || groupsIsLoading;
 
   const [inputs, setInputs] = useState(() => {
     const state = location.state || {};
@@ -72,14 +190,6 @@ const SettleUp = () => {
       amount: state.amount || "",
     };
   });
-
-  const formatDateToDisplay = (dateStr) => {
-    const date = new Date(dateStr);
-    const day = String(date.getDate()).padStart(2, "0");
-    const month = date.toLocaleString("en-US", { month: "short" });
-    // const year = date.getFullYear();
-    return `${month} ${day}`;
-  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -149,10 +259,12 @@ const SettleUp = () => {
   }
 
   return (
-    <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
-      {/* Left Column */}
-      <div className="flex flex-col gap-8 lg:col-span-7">
-        <div className="border-b border-outline-variant pb-6">
+    <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+      {/* Left column: heading + Simplified Settlements + Settlements History */}
+      <div className="flex flex-col gap-8 lg:col-span-2">
+
+        {/* Page heading — no border/divider below */}
+        <div>
           <h1 className="mb-2 font-headline-lg text-headline-lg font-bold text-on-surface">
             Settle Up
           </h1>
@@ -161,75 +273,93 @@ const SettleUp = () => {
           </p>
         </div>
 
+        {/* Simplified Settlements */}
         <div className="flex flex-col gap-4">
-          <h2 className="font-headline-md text-headline-md text-on-surface">
-            Simplified Settlements
-          </h2>
-          <div className="flex flex-col overflow-hidden rounded-lg border border-outline-variant bg-surface-container-lowest shadow-sm">
-            {isInitializing ||
-            hasConnectionError ||
-            groupsIsLoading ||
-            suggestionsQuery.isLoading ? (
-              <div className="flex min-h-19 items-center justify-between border-b border-outline-variant p-4 last:border-b-0">
+          <div className="flex items-center justify-between">
+            <h2 className="font-headline-md text-headline-md text-on-surface">
+              Simplified Settlements
+            </h2>
+            <button
+              type="button"
+              onClick={() => suggestionsQuery.refetch()}
+              disabled={suggestionsQuery.isFetching}
+              className="flex cursor-pointer items-center gap-1 font-label-sm text-label-sm text-primary transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <span className="material-symbols-outlined text-[16px]">
+                refresh
+              </span>
+              Recalculate
+            </button>
+          </div>
+
+          {/* Card-style rows: each suggestion is an individually bordered card */}
+          {isDataLoading || suggestionsQuery.isLoading ? (
+            <div className="rounded-lg border border-outline-variant bg-surface-container-lowest p-4 shadow-sm">
+              <div className="flex items-start justify-between gap-4">
                 <div className="flex flex-col gap-2">
                   <Skeleton className="h-4 w-48" />
                   <Skeleton className="h-4 w-24" />
                 </div>
-                <Skeleton className="h-8 w-16 rounded-DEFAULT" />
+                <Skeleton className="h-8 w-16 shrink-0 rounded-DEFAULT" />
               </div>
-            ) : suggestions && suggestions.length > 0 ? (
-              suggestions.map((suggestion, index) => (
+            </div>
+          ) : suggestions && suggestions.length > 0 ? (
+            <div className="flex flex-col gap-3">
+              {suggestions.map((suggestion, index) => (
                 <div
                   key={index}
-                  className="flex items-center justify-between border-b border-outline-variant p-4 transition-colors last:border-b-0 hover:bg-surface-container-low"
+                  className="rounded-lg border border-outline-variant bg-surface-container-lowest p-4 shadow-sm transition-shadow hover:shadow-md"
                 >
-                  <div className="flex flex-col gap-1">
-                    <p className="font-body-md text-body-md text-on-surface">
-                      <span className="font-medium text-on-surface">
-                        {suggestion.from.name}
-                      </span>{" "}
-                      pays{" "}
-                      <span className="font-medium text-on-surface">
-                        {suggestion.to.name}
-                      </span>
-                    </p>
-                    <p className="font-mono-data font-medium text-secondary">
-                      ₹{suggestion.amount.toFixed(2)}
-                    </p>
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex flex-col gap-1">
+                      <p className="font-body-md text-body-md text-on-surface">
+                        <span className="font-semibold text-on-surface">
+                          {suggestion.from.name}
+                        </span>{" "}
+                        pays{" "}
+                        <span className="font-semibold text-on-surface">
+                          {suggestion.to.name}
+                        </span>
+                      </p>
+                      <p className="font-mono-data font-medium text-secondary">
+                        ₹{suggestion.amount.toFixed(2)}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setInputs((prev) => ({
+                          ...prev,
+                          paid_by: suggestion.from.id,
+                          paid_to: suggestion.to.id,
+                          amount: suggestion.amount.toFixed(2),
+                        }))
+                      }
+                      className="shrink-0 rounded-DEFAULT border border-primary bg-transparent px-3 py-1.5 font-label-sm text-label-sm font-semibold tracking-wide text-primary transition-all hover:bg-primary/5 hover:shadow-md"
+                    >
+                      Settle
+                    </button>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setInputs((prev) => ({
-                        ...prev,
-                        paid_by: suggestion.from.id,
-                        paid_to: suggestion.to.id,
-                        amount: suggestion.amount.toFixed(2),
-                      }))
-                    }
-                    className="rounded-DEFAULT border border-primary bg-transparent px-3 py-1.5 font-label-sm text-label-sm font-semibold tracking-wide text-primary transition-all hover:bg-primary/5 hover:shadow-md"
-                  >
-                    Settle
-                  </button>
                 </div>
-              ))
-            ) : (
-              <div className="flex min-h-19 items-center justify-center text-center">
-                <p className="font-body-md text-body-md text-on-surface-variant">
-                  All balances are settled!
-                </p>
-              </div>
-            )}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex min-h-19 items-center justify-center rounded-lg border border-outline-variant bg-surface-container-lowest text-center shadow-sm">
+              <p className="font-body-md text-body-md text-on-surface-variant">
+                All balances are settled!
+              </p>
+            </div>
+          )}
         </div>
 
+        {/* Settlements History */}
         <div className="flex flex-col gap-4">
           <h2 className="font-headline-md text-headline-md text-on-surface">
             Settlements History
           </h2>
 
           <SettlementFilters
-            filterProps={filterProps}
+            filterProps={wrappedFilterProps}
             members={group ? group.members : []}
           />
 
@@ -238,14 +368,14 @@ const SettleUp = () => {
               <table className="w-full border-collapse text-left">
                 <thead>
                   <tr className="border-b border-outline-variant bg-surface-container-low">
-                    <th className="w-24 px-4 py-3 font-label-sm text-label-sm font-semibold tracking-wider text-on-surface-variant uppercase">
+                    <th className="w-32 px-4 py-3 font-label-sm text-label-sm font-semibold tracking-wider text-on-surface-variant uppercase">
                       Date
                     </th>
                     <th className="w-32 px-4 py-3 font-label-sm text-label-sm font-semibold tracking-wider text-on-surface-variant uppercase">
-                      Payer
+                      Paid By
                     </th>
                     <th className="w-32 px-4 py-3 font-label-sm text-label-sm font-semibold tracking-wider text-on-surface-variant uppercase">
-                      Payee
+                      Paid To
                     </th>
                     <th className="w-32 px-4 py-3 text-right font-label-sm text-label-sm font-semibold tracking-wider text-on-surface-variant uppercase">
                       Amount
@@ -253,14 +383,11 @@ const SettleUp = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-outline-variant">
-                  {isInitializing ||
-                  hasConnectionError ||
-                  groupsIsLoading ||
-                  settlementsQuery.isLoading ? (
+                  {isDataLoading || settlementsQuery.isLoading ? (
                     Array.from({ length: 1 }).map((_, i) => (
                       <tr key={i} className="h-row-height-compact">
                         <td className="px-4 py-8">
-                          <Skeleton className="h-4 w-12" />
+                          <Skeleton className="h-4 w-24" />
                         </td>
                         <td className="px-4 py-8">
                           <Skeleton className="h-4 w-24" />
@@ -273,14 +400,14 @@ const SettleUp = () => {
                         </td>
                       </tr>
                     ))
-                  ) : filteredSettlements && filteredSettlements.length > 0 ? (
-                    filteredSettlements.map((settlement) => (
+                  ) : pagedSettlements && pagedSettlements.length > 0 ? (
+                    pagedSettlements.map((settlement) => (
                       <tr
                         key={settlement.id}
                         className="h-row-height-compact transition-colors hover:bg-surface-container-low/50"
                       >
                         <td className="px-4 py-2 font-mono-data text-sm whitespace-nowrap text-on-surface-variant">
-                          {formatDateToDisplay(settlement.date)}
+                          {formatDateForDisplay(settlement.date)}
                         </td>
                         <td className="px-4 py-2">
                           <div className="flex items-center gap-2">
@@ -326,12 +453,50 @@ const SettleUp = () => {
                 </tbody>
               </table>
             </div>
+
+            {/* Pagination bar — only shown when there are enough results to paginate */}
+            {!isDataLoading &&
+              !settlementsQuery.isLoading &&
+              totalSettlements > SETTLEMENTS_PER_PAGE && (
+                <div className="flex items-center justify-between border-t border-outline-variant px-4 py-3">
+                  <p className="font-label-sm text-label-sm text-on-surface-variant">
+                    Showing {showingFrom}&ndash;{showingTo} of{" "}
+                    {totalSettlements} settlements
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() =>
+                        setCurrentPage((p) => Math.max(1, p - 1))
+                      }
+                      disabled={safePage <= 1}
+                      className="flex h-8 cursor-pointer items-center gap-1 rounded-DEFAULT border border-primary bg-transparent px-3 font-label-sm text-label-sm font-semibold text-primary transition-all hover:bg-primary/5 disabled:cursor-not-allowed disabled:border-outline-variant disabled:text-on-surface-variant disabled:opacity-50"
+                    >
+                      <span className="material-symbols-outlined text-[16px]">
+                        chevron_left
+                      </span>
+                      Prev
+                    </button>
+                    <button
+                      onClick={() =>
+                        setCurrentPage((p) => Math.min(totalPages, p + 1))
+                      }
+                      disabled={safePage >= totalPages}
+                      className="flex h-8 cursor-pointer items-center gap-1 rounded-DEFAULT border border-primary bg-transparent px-3 font-label-sm text-label-sm font-semibold text-primary transition-all hover:bg-primary/5 disabled:cursor-not-allowed disabled:border-outline-variant disabled:text-on-surface-variant disabled:opacity-50"
+                    >
+                      Next
+                      <span className="material-symbols-outlined text-[16px]">
+                        chevron_right
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              )}
           </div>
         </div>
       </div>
 
-      {/* Right Column: Record Settlement Form */}
-      <div className="relative lg:col-span-5">
+      {/* Right column: Record Settlement form (sticky) */}
+      <div className="relative lg:col-span-1">
         <div className="sticky top-24 w-full rounded-lg border border-outline-variant bg-surface-container-lowest p-6 shadow-sm">
           <h2 className="mb-6 font-headline-md text-headline-md font-bold text-on-surface">
             Record Settlement

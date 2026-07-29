@@ -1,12 +1,22 @@
 import { useState } from "react";
 import { calculatePresetDates } from "../utils/dateFilters";
 
-export const useSettlementFilters = (settlements) => {
-  const [filterPaidBy, setFilterPaidBy] = useState("all");
-  const [filterPaidTo, setFilterPaidTo] = useState("all");
-  const [filterFromDate, setFilterFromDate] = useState("");
-  const [filterToDate, setFilterToDate] = useState("");
-  const [filterDatePreset, setFilterDatePreset] = useState("all");
+export const useSettlementFilters = (settlements, initialValues = {}) => {
+  const [filterPaidBy, setFilterPaidBy] = useState(
+    initialValues.filterPaidBy ?? "all",
+  );
+  const [filterPaidTo, setFilterPaidTo] = useState(
+    initialValues.filterPaidTo ?? "all",
+  );
+  const [filterFromDate, setFilterFromDate] = useState(
+    initialValues.filterFromDate ?? "",
+  );
+  const [filterToDate, setFilterToDate] = useState(
+    initialValues.filterToDate ?? "",
+  );
+  const [filterDatePreset, setFilterDatePreset] = useState(
+    initialValues.filterDatePreset ?? "all",
+  );
   const [isAdvancedFiltersExpanded, setIsAdvancedFiltersExpanded] =
     useState(false);
 

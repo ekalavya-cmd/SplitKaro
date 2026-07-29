@@ -13,6 +13,7 @@ import { LoadingSpinner } from "../components/LoadingSpinner";
 import { ErrorBlock } from "../components/ErrorBlock";
 import { Skeleton } from "../components/Skeleton";
 import { usePageQueryState } from "../hooks/usePageQueryState";
+import { formatDateForDisplay } from "../utils/dateFilters";
 
 const Dashboard = () => {
   const {
@@ -75,12 +76,6 @@ const Dashboard = () => {
 
   const { filteredExpenses, filterProps } = useExpenseFilters(expenses);
 
-  const formatDateToDisplay = (dateStr) => {
-    const date = new Date(dateStr);
-    const day = String(date.getDate()).padStart(2, "0");
-    const month = date.toLocaleString("en-US", { month: "short" });
-    return `${month} ${day}`;
-  };
 
   const setSplitTypeColor = (splitType) => {
     switch (splitType) {

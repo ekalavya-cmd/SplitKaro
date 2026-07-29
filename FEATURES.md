@@ -71,7 +71,8 @@
 |---|---|
 | ✅ Settlement suggestions | GET `/api/groups/:id/settlements/suggest` — greedy two-pointer algorithm that minimises transaction count (R3: fixed to use User schema). |
 | ✅ Suggestions shown on Dashboard | Dashboard shows suggested payments with a "Settle" button that navigates to `/settle-up` |
-| ✅ Suggestions shown on SettleUp page | SettleUp left panel shows the current suggestions list alongside the form |
+| ✅ Suggestions shown on SettleUp page | SettleUp left panel shows the current suggestions list alongside the form. Each suggestion renders as an individually bordered card row (payer/payee on one line, amount in secondary colour below, Settle button right-aligned). **SettleUp-page-specific style** — Dashboard Simplified Settlements panel is visually unchanged. |
+| ✅ Recalculate button on Simplified Settlements | Small "↻ Recalculate" text-link button in the Simplified Settlements header on the SettleUp page. Calls `suggestionsQuery.refetch()` directly — no page reload, no invalidation of other caches. Disabled while fetching. |
 | ✅ Record settlement | SettleUp form: select payer, payee, enter amount and date; server validates payer owes money and payee is owed money (R6b discovery: fixed to use User schema and verified working) |
 | ✅ Partial settlement | The backend accepts any amount up to but not exceeding `min(|payer balance|, payee balance)` (R6b discovery: fixed to use User schema and verified working) |
 | ✅ Settlement history table | SettleUp page shows all recorded settlements for the selected group (date, payer, payee, amount) (R6b discovery: fixed to use User schema and verified working) |
@@ -85,6 +86,8 @@
 | ✅ Filter by payer | Dropdown (All Payers / per-member) on SettleUp history table |
 | ✅ Filter by payee | Dropdown (All Payees / per-member) on SettleUp history table |
 | ✅ Filter by Date (Preset / Custom) | Shared preset selectors (Today, This Week, This Month, Last 30 Days, This Year) or custom From/To date inputs — reuses `dateFilters.js` utility |
+| ✅ URL-persisted filter state (SettleUp) | All Settlements History filter state (paidBy, paidTo, date preset/range) and current page synced to URL via `useSearchParams` with `{ replace: true }`. Params at default omitted (clean base URL). Non-custom presets recalculate dates on load. Param names: `paidBy`, `paidTo`, `preset`, `from`, `to`, `page`. |
+| ✅ Settlements History pagination | Client-side pagination: `SETTLEMENTS_PER_PAGE = 10` per page. Shows "Showing X–Y of Z settlements" with Prev/Next controls (identical ghost button style as Expenses page). Bar only shown when total > 10. Page resets to 1 on any filter change. |
 
 ### Navigation & Layout
 | Feature | Current behaviour |

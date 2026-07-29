@@ -42,3 +42,13 @@ export const calculatePresetDates = (preset) => {
   }
   return { fromDate: "", toDate: "" };
 };
+
+// Shared display formatter used by all date columns across Dashboard, Expenses, and SettleUp.
+// Produces "Mon DD, YYYY" — e.g. "Jul 27, 2026".
+export const formatDateForDisplay = (dateStr) => {
+  const date = new Date(dateStr);
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = date.toLocaleString("en-US", { month: "short" });
+  const year = date.getFullYear();
+  return `${month} ${day}, ${year}`;
+};

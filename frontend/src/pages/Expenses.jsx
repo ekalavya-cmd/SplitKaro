@@ -9,6 +9,7 @@ import { ErrorBlock } from "../components/ErrorBlock";
 import { Skeleton } from "../components/Skeleton";
 import { usePageQueryState } from "../hooks/usePageQueryState";
 import { calculatePresetDates } from "../utils/dateFilters";
+import { formatDateForDisplay } from "../utils/dateFilters";
 
 const EXPENSES_PER_PAGE = 10;
 
@@ -213,13 +214,6 @@ const Expenses = () => {
       ...prev,
       [id]: !prev[id],
     }));
-  };
-
-  const formatDateToDisplay = (dateStr) => {
-    const date = new Date(dateStr);
-    const day = String(date.getDate()).padStart(2, "0");
-    const month = date.toLocaleString("en-US", { month: "short" });
-    return `${month} ${day}`;
   };
 
   const setSplitTypeColor = (splitType) => {
