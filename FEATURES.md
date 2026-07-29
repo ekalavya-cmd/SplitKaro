@@ -87,7 +87,7 @@
 | ✅ Filter by payee | Dropdown (All Payees / per-member) on SettleUp history table |
 | ✅ Filter by Date (Preset / Custom) | Shared preset selectors (Today, This Week, This Month, Last 30 Days, This Year) or custom From/To date inputs — reuses `dateFilters.js` utility |
 | ✅ URL-persisted filter state (SettleUp) | All Settlements History filter state (paidBy, paidTo, date preset/range) and current page synced to URL via `useSearchParams` with `{ replace: true }`. Params at default omitted (clean base URL). Non-custom presets recalculate dates on load. Param names: `paidBy`, `paidTo`, `preset`, `from`, `to`, `page`. |
-| ✅ Settlements History pagination | Client-side pagination: `SETTLEMENTS_PER_PAGE = 10` per page. Shows "Showing X–Y of Z settlements" with Prev/Next controls (identical ghost button style as Expenses page). Bar only shown when total > 10. Page resets to 1 on any filter change. |
+| ✅ Settlements History pagination | Uses the shared `Pagination` component. Client-side pagination: `SETTLEMENTS_PER_PAGE = 10` per page. Shows "Showing X–Y of Z settlements" with Prev/Next controls. Bar only shown when total > 10. Page resets to 1 on any filter change. |
 
 ### Navigation & Layout
 | Feature | Current behaviour |
@@ -181,7 +181,7 @@
 |---|---|---|
 | Group activity log / feed | ⏳ | No audit table; deleting an expense leaves no trace |
 | Expense search (server-side) | ⏳ | All filtering is client-side; unbounded data set returned |
-| Pagination | ✅ | Client-side pagination on the Expenses page (`EXPENSES_PER_PAGE = 10`). Shows "Showing X–Y of Z expenses" with Prev/Next controls (secondary ghost button style per DESIGN.md). Page resets to 1 on any filter change. Page number URL-persisted via `?page=` (omitted when 1). Backend still returns full unbounded result sets; pagination happens over the already-fetched array. |
+| Pagination | ✅ | Uses the shared `Pagination` component on Expenses page (`EXPENSES_PER_PAGE = 10`). Shows "Showing X–Y of Z expenses" with Prev/Next controls (secondary ghost button style per DESIGN.md). Page resets to 1 on any filter change. Page number URL-persisted via `?page=` (omitted when 1). Backend still returns full unbounded result sets. |
 | Export to CSV / PDF | ⏳ | No export functionality |
 | Group archiving | ⏳ | Archive fully-settled groups to keep the UI clean without permanently deleting data; no archived/status column exists in the `groups` schema |
 | Spending analytics dashboard | ⏳ | Visual charts (pie, bar, timeline) showing each member's total spend, share of group expenses, and balance trend over time; no analytics endpoints or charting library exists |

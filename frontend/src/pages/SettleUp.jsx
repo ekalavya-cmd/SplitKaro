@@ -15,9 +15,11 @@ import {
 import { useSettlementFilters } from "../hooks/useSettlementFilters";
 import { SettlementFilters } from "../components/SettlementFilters";
 import { SimplifiedSettlements } from "../components/SimplifiedSettlements";
+import { Pagination } from "../components/Pagination";
 import { ErrorBlock } from "../components/ErrorBlock";
 import { Skeleton } from "../components/Skeleton";
 import { usePageQueryState } from "../hooks/usePageQueryState";
+import { usePagination } from "../hooks/usePagination";
 import {
   formatDateForDisplay,
   calculatePresetDates,
@@ -174,17 +176,12 @@ const SettleUp = () => {
 
   // Pagination calculations
   const totalSettlements = filteredSettlements.length;
-  const totalPages = Math.max(
-    1,
-    Math.ceil(totalSettlements / SETTLEMENTS_PER_PAGE),
+  const { totalPages, safePage, startIdx, endIdx, showingFrom, showingTo } = usePagination(
+    totalSettlements,
+    SETTLEMENTS_PER_PAGE,
+    currentPage
   );
-  // safePage clamps the stored page in case filteredSettlements shrinks
-  const safePage = Math.min(currentPage, totalPages);
-  const startIdx = (safePage - 1) * SETTLEMENTS_PER_PAGE;
-  const endIdx = Math.min(startIdx + SETTLEMENTS_PER_PAGE, totalSettlements);
   const pagedSettlements = filteredSettlements.slice(startIdx, endIdx);
-  const showingFrom = totalSettlements === 0 ? 0 : startIdx + 1;
-  const showingTo = endIdx;
 
   const isDataLoading = isInitializing || hasConnectionError || groupsIsLoading;
 
@@ -269,16 +266,6 @@ const SettleUp = () => {
     <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
       {/* Left column: heading + Simplified Settlements + Settlements History */}
       <div className="flex flex-col gap-8 lg:col-span-2">
-        {/* Page heading — no border/divider below */}
-        <div>
-          <h1 className="mb-2 font-headline-lg text-headline-lg font-bold text-on-surface">
-            Settle Up
-          </h1>
-          <p className="text-label-md font-label-md text-on-surface-variant">
-            Record payments between group members to clear balances
-          </p>
-        </div>
-
         {/* Settlements History */}
         <div className="flex flex-col gap-4">
           <h2 className="font-headline-md text-headline-md text-on-surface">
@@ -381,41 +368,20 @@ const SettleUp = () => {
               </table>
             </div>
 
-            {/* Pagination bar — only shown when there are enough results to paginate */}
-            {!isDataLoading &&
-              !settlementsQuery.isLoading &&
-              totalSettlements > SETTLEMENTS_PER_PAGE && (
-                <div className="flex items-center justify-between border-t border-outline-variant px-4 py-3">
-                  <p className="font-label-sm text-label-sm text-on-surface-variant">
-                    Showing {showingFrom}&ndash;{showingTo} of{" "}
-                    {totalSettlements} settlements
-                  </p>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                      disabled={safePage <= 1}
-                      className="flex h-8 cursor-pointer items-center gap-1 rounded-DEFAULT border border-primary bg-transparent px-3 font-label-sm text-label-sm font-semibold text-primary transition-all hover:bg-primary/5 disabled:cursor-not-allowed disabled:border-outline-variant disabled:text-on-surface-variant disabled:opacity-50"
-                    >
-                      <span className="material-symbols-outlined text-[16px]">
-                        chevron_left
-                      </span>
-                      Prev
-                    </button>
-                    <button
-                      onClick={() =>
-                        setCurrentPage((p) => Math.min(totalPages, p + 1))
-                      }
-                      disabled={safePage >= totalPages}
-                      className="flex h-8 cursor-pointer items-center gap-1 rounded-DEFAULT border border-primary bg-transparent px-3 font-label-sm text-label-sm font-semibold text-primary transition-all hover:bg-primary/5 disabled:cursor-not-allowed disabled:border-outline-variant disabled:text-on-surface-variant disabled:opacity-50"
-                    >
-                      Next
-                      <span className="material-symbols-outlined text-[16px]">
-                        chevron_right
-                      </span>
-                    </button>
-                  </div>
-                </div>
-              )}
+          {/* Pagination bar — only shown when there are enough results to paginate */}
+          {!isDataLoading &&
+            !settlementsQuery.isLoading &&
+            totalSettlements > SETTLEMENTS_PER_PAGE && (
+              <Pagination
+                safePage={safePage}
+                totalPages={totalPages}
+                showingFrom={showingFrom}
+                showingTo={showingTo}
+                totalItems={totalSettlements}
+                itemLabel="settlements"
+                onPageChange={setCurrentPage}
+              />
+            )}
           </div>
         </div>
       </div>

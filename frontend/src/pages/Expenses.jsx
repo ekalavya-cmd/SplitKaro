@@ -5,9 +5,11 @@ import { getGroup } from "../services/group.service";
 import { getExpenses, deleteExpense } from "../services/expense.service";
 import { useExpenseFilters } from "../hooks/useExpenseFilters";
 import { ExpenseFilters } from "../components/ExpenseFilters";
+import { Pagination } from "../components/Pagination";
 import { ErrorBlock } from "../components/ErrorBlock";
 import { Skeleton } from "../components/Skeleton";
 import { usePageQueryState } from "../hooks/usePageQueryState";
+import { usePagination } from "../hooks/usePagination";
 import { calculatePresetDates } from "../utils/dateFilters";
 import { formatDateForDisplay } from "../utils/dateFilters";
 
@@ -196,15 +198,12 @@ const Expenses = () => {
 
   // Pagination calculations
   const totalExpenses = filteredExpenses.length;
-  const totalPages = Math.max(1, Math.ceil(totalExpenses / EXPENSES_PER_PAGE));
-  // safePage clamps the stored page number in case filteredExpenses shrinks
-  // (e.g. URL param page=5 but filters only yield 1 page of results)
-  const safePage = Math.min(currentPage, totalPages);
-  const startIdx = (safePage - 1) * EXPENSES_PER_PAGE;
-  const endIdx = Math.min(startIdx + EXPENSES_PER_PAGE, totalExpenses);
+  const { totalPages, safePage, startIdx, endIdx, showingFrom, showingTo } = usePagination(
+    totalExpenses,
+    EXPENSES_PER_PAGE,
+    currentPage
+  );
   const pagedExpenses = filteredExpenses.slice(startIdx, endIdx);
-  const showingFrom = totalExpenses === 0 ? 0 : startIdx + 1;
-  const showingTo = endIdx;
 
   const isDataLoading =
     isInitializing ||
@@ -503,36 +502,15 @@ const Expenses = () => {
 
           {/* Pagination bar — only rendered when there are enough results to paginate */}
           {!isDataLoading && totalExpenses > EXPENSES_PER_PAGE && (
-            <div className="flex items-center justify-between border-t border-outline-variant px-4 py-3">
-              <p className="font-label-sm text-label-sm text-on-surface-variant">
-                Showing {showingFrom}&ndash;{showingTo} of {totalExpenses}{" "}
-                expenses
-              </p>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                  disabled={safePage <= 1}
-                  className="flex h-8 cursor-pointer items-center gap-1 rounded-DEFAULT border border-primary bg-transparent px-3 font-label-sm text-label-sm font-semibold text-primary transition-all hover:bg-primary/5 disabled:cursor-not-allowed disabled:border-outline-variant disabled:text-on-surface-variant disabled:opacity-50"
-                >
-                  <span className="material-symbols-outlined text-[16px]">
-                    chevron_left
-                  </span>
-                  Prev
-                </button>
-                <button
-                  onClick={() =>
-                    setCurrentPage((p) => Math.min(totalPages, p + 1))
-                  }
-                  disabled={safePage >= totalPages}
-                  className="flex h-8 cursor-pointer items-center gap-1 rounded-DEFAULT border border-primary bg-transparent px-3 font-label-sm text-label-sm font-semibold text-primary transition-all hover:bg-primary/5 disabled:cursor-not-allowed disabled:border-outline-variant disabled:text-on-surface-variant disabled:opacity-50"
-                >
-                  Next
-                  <span className="material-symbols-outlined text-[16px]">
-                    chevron_right
-                  </span>
-                </button>
-              </div>
-            </div>
+            <Pagination
+              safePage={safePage}
+              totalPages={totalPages}
+              showingFrom={showingFrom}
+              showingTo={showingTo}
+              totalItems={totalExpenses}
+              itemLabel="expenses"
+              onPageChange={setCurrentPage}
+            />
           )}
         </div>
       </div>
