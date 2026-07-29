@@ -7,14 +7,17 @@ import {
   getBalances,
   getSettlementSuggestions,
 } from "../services/settlement.service";
-import { useExpenseFilters } from "../hooks/useExpenseFilters";
-import { ExpenseFilters } from "../components/ExpenseFilters";
 import { LoadingSpinner } from "../components/LoadingSpinner";
 import { ErrorBlock } from "../components/ErrorBlock";
 import { Skeleton } from "../components/Skeleton";
 import { usePageQueryState } from "../hooks/usePageQueryState";
 import { formatDateForDisplay } from "../utils/dateFilters";
 import { SimplifiedSettlements } from "../components/SimplifiedSettlements";
+import { SpendByMemberChart } from "../components/analytics/SpendByMemberChart";
+import { SplitTypeChart } from "../components/analytics/SplitTypeChart";
+import { SpendingTimeChart } from "../components/analytics/SpendingTimeChart";
+
+const RECENT_EXPENSES_COUNT = 5;
 
 const Dashboard = () => {
   const {
@@ -75,7 +78,9 @@ const Dashboard = () => {
 
   const navigate = useNavigate();
 
-  const { filteredExpenses, filterProps } = useExpenseFilters(expenses);
+  const recentExpenses = [...expenses]
+    .sort((a, b) => new Date(b.date) - new Date(a.date))
+    .slice(0, RECENT_EXPENSES_COUNT);
 
   const setSplitTypeColor = (splitType) => {
     switch (splitType) {
@@ -225,60 +230,17 @@ const Dashboard = () => {
         />
       </div>
 
-      {/* Analytics Placeholders */}
+      {/* Analytics */}
       <div className="grid grid-cols-1 gap-gutter lg:grid-cols-3">
-        <div className="flex flex-col gap-4">
-          <h2 className="font-headline-md text-headline-md text-on-surface">
-            Spend by Member
-          </h2>
-          <div className="flex h-64 flex-col items-center justify-center gap-2 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface-variant shadow-sm">
-            <span className="material-symbols-outlined text-[48px] opacity-20">
-              pie_chart
-            </span>
-            <span className="font-label-sm text-label-sm tracking-wider uppercase opacity-50">
-              Placeholder
-            </span>
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-4">
-          <h2 className="font-headline-md text-headline-md text-on-surface">
-            Split Type Breakdown
-          </h2>
-          <div className="flex h-64 flex-col items-center justify-center gap-2 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface-variant shadow-sm">
-            <span className="material-symbols-outlined text-[48px] opacity-20">
-              donut_large
-            </span>
-            <span className="font-label-sm text-label-sm tracking-wider uppercase opacity-50">
-              Placeholder
-            </span>
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-4">
-          <h2 className="font-headline-md text-headline-md text-on-surface">
-            Spending Over Time
-          </h2>
-          <div className="flex h-64 flex-col items-center justify-center gap-2 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface-variant shadow-sm">
-            <span className="material-symbols-outlined text-[48px] opacity-20">
-              show_chart
-            </span>
-            <span className="font-label-sm text-label-sm tracking-wider uppercase opacity-50">
-              Placeholder
-            </span>
-          </div>
-        </div>
+        <SpendByMemberChart expenses={expenses} members={group?.members || []} />
+        <SplitTypeChart expenses={expenses} />
+        <SpendingTimeChart expenses={expenses} />
       </div>
 
       <div className="flex flex-col gap-4">
         <h2 className="font-headline-md text-headline-md text-on-surface">
-          {group ? group.name : "Select a group to view expenses"}
+          Recent Expenses
         </h2>
-
-        <ExpenseFilters
-          filterProps={filterProps}
-          members={group ? group.members : []}
-        />
 
         <div className="overflow-hidden rounded-lg border border-outline-variant bg-surface-container-lowest shadow-sm">
           <div className="overflow-x-auto">
@@ -326,8 +288,8 @@ const Dashboard = () => {
                       </td>
                     </tr>
                   ))
-                ) : filteredExpenses && filteredExpenses.length > 0 ? (
-                  filteredExpenses.map((expense) => (
+                ) : recentExpenses && recentExpenses.length > 0 ? (
+                  recentExpenses.map((expense) => (
                     <React.Fragment key={expense.id}>
                       <tr
                         onClick={() => toggleExpenseExpand(expense.id)}
@@ -471,9 +433,7 @@ const Dashboard = () => {
                       className="h-20 px-4 text-center text-body-md text-on-surface-variant"
                     >
                       {selectedGroupId
-                        ? expenses.length > 0
-                          ? "No matching expenses"
-                          : "No expenses for this group"
+                        ? "No expenses for this group"
                         : "Select a group to view expenses"}
                     </td>
                   </tr>

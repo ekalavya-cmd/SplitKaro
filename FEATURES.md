@@ -43,7 +43,7 @@
 | ✅ Add expense — percentage split | User enters per-member %; server validates they sum to 100 (±0.01) and computes currency amounts with penny-safe rounding (now sharing the remainder-distribution primitive with equal splits) |
 | ✅ Expense form with live split preview | `AddExpense.jsx` shows a read-only per-member preview panel for equal splits, and editable inputs for exact/percentage; running total shown |
 | ✅ List expenses for a group | GET `/api/groups/:id/expenses` — expenses with payer info and full split detail per member (R6b discovery: fixed to use User schema and verified working) |
-| ✅ View expenses on Dashboard | Expense table on Dashboard page with date, description, payer, amount, split type badge, split breakdown |
+| ✅ View expenses on Dashboard | Expense table on Dashboard page shows the 5 most recent expenses with date, description, payer, amount, split type badge, split breakdown |
 | ✅ View expenses on Expenses page | Dedicated Expenses page with same columns plus a Delete button per row |
 | ✅ Delete expense | DELETE `/api/groups/:id/expenses/:expenseId` — cascades to all associated `expense_splits` rows via DB CASCADE. Gated by group membership authorization, and validates that the expense belongs to the URL's group (returns 404 otherwise). |
 | ✅ Confirm-before-delete | Expenses page uses `window.confirm()` dialog before calling delete |
@@ -52,12 +52,12 @@
 ### Expense Filtering (client-side only)
 | Feature | Current behaviour |
 |---|---|
-| ✅ Filter by description | Shared component/hook (`ExpenseFilters`); debounced (300 ms) case-insensitive text search on Dashboard and Expenses pages |
-| ✅ Filter by split type | Shared dropdown filter (all / equal / exact / percentage) on Dashboard and Expenses pages |
-| ✅ Filter by payer | Shared dropdown filter populated from current group's members on Dashboard and Expenses pages |
-| ✅ Filter by Date (Preset / Custom) | Shared preset selectors (Today, This Week, This Month, Last 30 Days, This Year) or custom calendar selectors (From/To dates) using local timezone-safe dates on Dashboard and Expenses pages |
-| ✅ Filter by Amount | Shared Min and Max amount boundaries to filter the expense table on Dashboard and Expenses pages |
-| ✅ URL-persisted filter state (Expenses) | All Expenses page filter state (search, split type, payer, date preset/range, amount range) and current page are synced to the URL via `useSearchParams` with `{ replace: true }`. Params at their default value are omitted (clean base URL). Non-custom date presets recalculate from the current date on load. Dashboard filters remain component-local state only. |
+| ✅ Filter by description | Shared component/hook (`ExpenseFilters`); debounced (300 ms) case-insensitive text search on Expenses page |
+| ✅ Filter by split type | Shared dropdown filter (all / equal / exact / percentage) on Expenses page |
+| ✅ Filter by payer | Shared dropdown filter populated from current group's members on Expenses page |
+| ✅ Filter by Date (Preset / Custom) | Shared preset selectors (Today, This Week, This Month, Last 30 Days, This Year) or custom calendar selectors (From/To dates) using local timezone-safe dates on Expenses page |
+| ✅ Filter by Amount | Shared Min and Max amount boundaries to filter the expense table on Expenses page |
+| ✅ URL-persisted filter state (Expenses) | All Expenses page filter state (search, split type, payer, date preset/range, amount range) and current page are synced to the URL via `useSearchParams` with `{ replace: true }`. Params at their default value are omitted (clean base URL). Non-custom date presets recalculate from the current date on load. |
 
 ### Balance Tracking
 | Feature | Current behaviour |
@@ -184,7 +184,7 @@
 | Pagination | ✅ | Uses the shared `Pagination` component on Expenses page (`EXPENSES_PER_PAGE = 10`). Shows "Showing X–Y of Z expenses" with Prev/Next controls (secondary ghost button style per DESIGN.md). Page resets to 1 on any filter change. Page number URL-persisted via `?page=` (omitted when 1). Backend still returns full unbounded result sets. |
 | Export to CSV / PDF | ⏳ | No export functionality |
 | Group archiving | ⏳ | Archive fully-settled groups to keep the UI clean without permanently deleting data; no archived/status column exists in the `groups` schema |
-| Spending analytics dashboard | ⏳ | Visual charts (pie, bar, timeline) showing each member's total spend, share of group expenses, and balance trend over time; no analytics endpoints or charting library exists |
+| Spending analytics dashboard | ✅ | Real analytics visualizations on the Dashboard page computed client-side. "Spend by Member" uses Tailwind horizontal bars. "Split Type Breakdown" (donut) and "Spending Over Time" (line) use `recharts`. Features dynamic daily vs weekly grouping based on the group's total date span. |
 | Total balance across all groups (dashboard aggregate) | ⏳ | Additional aggregate view summing a user's position across all their groups. Unlike `GET /:id/balances` which correctly isolates a single group's finances, this represents the overall friend/dashboard balance. Likely implemented as a new endpoint (e.g. `GET /api/users/me/balances`) querying `group_members` to sum each group's `calculateGroupBalances` result for the user, rather than reimplementing balance math globally. |
 
 ### Infrastructure & Quality
