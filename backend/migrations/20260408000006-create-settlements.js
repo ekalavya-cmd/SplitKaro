@@ -3,24 +3,13 @@
 
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("group_members", {
+    await queryInterface.createTable("settlements", {
       id: {
         type: Sequelize.INTEGER,
         primaryKey: true,
         autoIncrement: true,
         allowNull: false,
       },
-
-      user_id: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        references: {
-          model: "users",
-          key: "id",
-        },
-        onDelete: "CASCADE",
-      },
-
       group_id: {
         type: Sequelize.INTEGER,
         allowNull: false,
@@ -30,19 +19,40 @@ module.exports = {
         },
         onDelete: "CASCADE",
       },
-
-      joined_at: {
+      paid_by: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: "users",
+          key: "id",
+        },
+        onDelete: "RESTRICT",
+        onUpdate: "RESTRICT",
+      },
+      paid_to: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: "users",
+          key: "id",
+        },
+        onDelete: "RESTRICT",
+        onUpdate: "RESTRICT",
+      },
+      amount: {
+        type: Sequelize.DECIMAL(10, 2),
+        allowNull: false,
+      },
+      date: {
         type: Sequelize.DATE,
         allowNull: false,
         defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
       },
-
       created_at: {
         type: Sequelize.DATE,
         allowNull: false,
         defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
       },
-
       updated_at: {
         type: Sequelize.DATE,
         allowNull: false,
@@ -50,29 +60,20 @@ module.exports = {
       },
     });
 
-    // Secondary index on user_id — used when loading all groups a user belongs to
-    await queryInterface.addIndex("group_members", ["user_id"], {
-      name: "group_members_user_id",
+    await queryInterface.addIndex("settlements", ["group_id"], {
+      name: "settlements_group_id",
     });
 
-    // Secondary index on group_id — used when loading all members of a group
-    await queryInterface.addIndex("group_members", ["group_id"], {
-      name: "group_members_group_id",
-    });
+    await queryInterface.sequelize.query(
+      "ALTER TABLE settlements ADD CONSTRAINT check_settlement_amount CHECK (amount > 0);"
+    );
 
-    // Composite unique index — prevents the same user from joining the same group twice
-    await queryInterface.addIndex("group_members", ["user_id", "group_id"], {
-      unique: true,
-      name: "group_members_user_id_group_id_unique",
-    });
+    await queryInterface.sequelize.query(
+      "ALTER TABLE settlements ADD CONSTRAINT check_settlement_self_pay CHECK (paid_by <> paid_to);"
+    );
   },
 
   async down(queryInterface, Sequelize) {
-    try {
-      await queryInterface.dropTable("group_members");
-    } catch (err) {
-      console.error("Error dropping group_members table:", err);
-      throw err;
-    }
+    await queryInterface.dropTable("settlements");
   },
 };

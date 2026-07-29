@@ -183,7 +183,7 @@ erDiagram
 
 ---
 
-## 5. Indexes
+## 5. Indexes and Constraints
 
 The following indexes are confirmed to exist based on the migrations and Sequelize model definitions.
 
@@ -211,6 +211,17 @@ The following indexes are confirmed to exist based on the migrations and Sequeli
 | `group_members` | `user_id, group_id` | UNIQUE (`group_members_user_id_group_id_unique`) | Migration |
 
 **Explicit secondary indexes and unique indexes are defined via migrations to optimize common queries and safeguard relationships.**
+
+### Database Constraints
+
+The following `CHECK` constraints exist at the database level to enforce data integrity below the Sequelize model layer:
+
+| Table | Constraint Name | Logic |
+|---|---|---|
+| `expenses` | `check_expense_amount` | `CHECK (amount > 0)` |
+| `expense_splits` | `check_split_amount_owed` | `CHECK (amount_owed >= 0)` |
+| `settlements` | `check_settlement_amount` | `CHECK (amount > 0)` |
+| `settlements` | `check_settlement_self_pay` | `CHECK (paid_by <> paid_to)` |
 
 ---
 
@@ -244,6 +255,10 @@ Features implied by the codebase that have no corresponding data model:
 
 ## 7. Migration Notes
 
-*   **check_settlement_self_pay**: A check constraint (`CHECK (paid_by <> paid_to)`) exists on the `settlements` table. The `repoint-settlements-to-users` migration originally failed because MySQL prohibits a CHECK constraint on a column with `ON UPDATE CASCADE`; this was fixed by changing both settlements FKs' `onUpdate` from `CASCADE` to `RESTRICT` (semantically safe since user IDs are immutable). No separate repair migration exists anymore — the fix is inline in the original migration.
+### The Members to Users Transition (Historical Context)
 
-*   **Sub-step 4c - members table dropped**: The `members` table was fully retired and dropped, completing the foundational transition from group-scoped members to platform-level `users`. All relationships are now mapped properly to `users`.
+Originally, the MVP schema tracked group participants using a group-scoped `members` table. Later, the platform evolved to support global `users` and a `group_members` join table for authentication. 
+
+The original migration history was extremely noisy, featuring table creations, massive foreign key repointing, index renaming, and eventually dropping the `members` table entirely. This sequence was eventually squashed into the clean, finalized schema you see today, where `users` exist from day one and `members` never existed. 
+
+*Historical constraint quirk*: During that transition, we discovered that MySQL 8.0 strictly prohibits adding a `CHECK` constraint (like `check_settlement_self_pay`) on any column that is subject to an `ON UPDATE CASCADE` referential action. As a result, all internal foreign keys in this schema use `ON UPDATE RESTRICT` (which is semantically safe since `id` primary keys are immutable) to allow check constraints to function properly.

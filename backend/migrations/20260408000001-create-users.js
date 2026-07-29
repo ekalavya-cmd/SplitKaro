@@ -3,70 +3,62 @@
 
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("expenses", {
+    await queryInterface.createTable("users", {
       id: {
         type: Sequelize.INTEGER,
         primaryKey: true,
         autoIncrement: true,
         allowNull: false,
       },
-
-      group_id: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        references: {
-          model: "groups",
-          key: "id",
-        },
-        onDelete: "CASCADE",
-      },
-
-      paid_by: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        references: {
-          model: "members",
-          key: "id",
-        },
-        onDelete: "CASCADE",
-      },
-
-      amount: {
-        type: Sequelize.DECIMAL(10, 2),
-        allowNull: false,
-      },
-
-      description: {
+      name: {
         type: Sequelize.STRING,
         allowNull: false,
       },
-
-      split_type: {
-        type: Sequelize.ENUM("equal", "exact", "percentage"),
+      email: {
+        type: Sequelize.STRING,
         allowNull: false,
       },
-
-      date: {
-        type: Sequelize.DATE,
-        allowNull: false,
-        defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
+      password_hash: {
+        type: Sequelize.STRING,
+        allowNull: true,
       },
-
+      google_id: {
+        type: Sequelize.STRING,
+        allowNull: true,
+      },
+      avatar_url: {
+        type: Sequelize.STRING,
+        allowNull: true,
+      },
+      is_email_verified: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+      },
       created_at: {
         type: Sequelize.DATE,
         allowNull: false,
         defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
       },
-
       updated_at: {
         type: Sequelize.DATE,
         allowNull: false,
         defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
       },
     });
+
+    await queryInterface.addIndex("users", ["email"], {
+      unique: true,
+      name: "users_email",
+    });
+
+    await queryInterface.addIndex("users", ["google_id"], {
+      unique: true,
+      name: "users_google_id",
+    });
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable("expenses");
+    await queryInterface.dropTable("users");
   },
 };

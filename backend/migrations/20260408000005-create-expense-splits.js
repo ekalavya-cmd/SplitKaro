@@ -3,70 +3,66 @@
 
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("settlements", {
+    await queryInterface.createTable("expense_splits", {
       id: {
         type: Sequelize.INTEGER,
         primaryKey: true,
         autoIncrement: true,
         allowNull: false,
       },
-
-      group_id: {
+      expense_id: {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
-          model: "groups",
+          model: "expenses",
           key: "id",
         },
         onDelete: "CASCADE",
       },
-
-      paid_by: {
+      user_id: {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
-          model: "members",
+          model: "users",
           key: "id",
         },
-        onDelete: "CASCADE",
+        onDelete: "RESTRICT",
       },
-
-      paid_to: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        references: {
-          model: "members",
-          key: "id",
-        },
-        onDelete: "CASCADE",
-      },
-
-      amount: {
+      amount_owed: {
         type: Sequelize.DECIMAL(10, 2),
         allowNull: false,
       },
-
-      date: {
-        type: Sequelize.DATE,
-        allowNull: false,
-        defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
-      },
-
       created_at: {
         type: Sequelize.DATE,
         allowNull: false,
         defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
       },
-
       updated_at: {
         type: Sequelize.DATE,
         allowNull: false,
         defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
       },
     });
+
+    await queryInterface.addIndex("expense_splits", ["expense_id"], {
+      name: "expense_splits_expense_id",
+    });
+
+    await queryInterface.addIndex("expense_splits", ["user_id"], {
+      name: "expense_splits_user_id",
+    });
+
+    await queryInterface.addIndex("expense_splits", ["expense_id", "user_id"], {
+      unique: true,
+      name: "expense_splits_expense_id_user_id_unique",
+    });
+
+    await queryInterface.sequelize.query(
+      "ALTER TABLE expense_splits ADD CONSTRAINT check_split_amount_owed CHECK (amount_owed >= 0);"
+    );
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable("settlements");
+    await queryInterface.dropTable("expense_splits");
   },
 };
