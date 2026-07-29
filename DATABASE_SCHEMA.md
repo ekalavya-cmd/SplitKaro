@@ -244,6 +244,6 @@ Features implied by the codebase that have no corresponding data model:
 
 ## 7. Migration Notes
 
-*   **check_settlement_self_pay**: A check constraint (`CHECK (paid_by <> paid_to)`) exists on the `settlements` table. It was dropped and recreated during the `repair-settlements-fk-repoint` migration to bypass a MySQL limitation that blocks adding a foreign key referential action to a column that is actively referenced by a check constraint.
+*   **check_settlement_self_pay**: A check constraint (`CHECK (paid_by <> paid_to)`) exists on the `settlements` table. The `repoint-settlements-to-users` migration originally failed because MySQL prohibits a CHECK constraint on a column with `ON UPDATE CASCADE`; this was fixed by changing both settlements FKs' `onUpdate` from `CASCADE` to `RESTRICT` (semantically safe since user IDs are immutable). No separate repair migration exists anymore — the fix is inline in the original migration.
 
 *   **Sub-step 4c - members table dropped**: The `members` table was fully retired and dropped, completing the foundational transition from group-scoped members to platform-level `users`. All relationships are now mapped properly to `users`.

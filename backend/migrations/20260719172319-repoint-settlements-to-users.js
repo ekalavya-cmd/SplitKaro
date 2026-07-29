@@ -74,7 +74,7 @@ module.exports = {
       name: "settlements_paid_by_users_fk",
       references: { table: "users", field: "id" },
       onDelete: "RESTRICT",
-      onUpdate: "CASCADE",
+      onUpdate: "RESTRICT",
     });
 
     // ── 2. settlements.paid_to: drop old FK (→ members.id), add new FK (→ users.id) ───────────
@@ -104,7 +104,7 @@ module.exports = {
       name: "settlements_paid_to_users_fk",
       references: { table: "users", field: "id" },
       onDelete: "RESTRICT",
-      onUpdate: "CASCADE",
+      onUpdate: "RESTRICT",
     });
 
     // ── 3. Restore the check constraint now that both FKs are in place ───────────────────────
@@ -143,7 +143,7 @@ module.exports = {
         name: "settlements_paid_to_members_fk",
         references: { table: "members", field: "id" },
         onDelete: "CASCADE",
-        onUpdate: "CASCADE",
+        onUpdate: "RESTRICT",
       });
 
       // ── Reverse paid_by changes ──────────────────────────────────────────────────────────────
@@ -169,7 +169,7 @@ module.exports = {
         name: "settlements_paid_by_members_fk",
         references: { table: "members", field: "id" },
         onDelete: "CASCADE",
-        onUpdate: "CASCADE",
+        onUpdate: "RESTRICT",
       });
 
       // ── Restore the check constraint after all FKs are back in place ──────────────────────
