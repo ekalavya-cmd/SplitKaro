@@ -14,6 +14,7 @@ import { ErrorBlock } from "../components/ErrorBlock";
 import { Skeleton } from "../components/Skeleton";
 import { usePageQueryState } from "../hooks/usePageQueryState";
 import { formatDateForDisplay } from "../utils/dateFilters";
+import { SimplifiedSettlements } from "../components/SimplifiedSettlements";
 
 const Dashboard = () => {
   const {
@@ -75,7 +76,6 @@ const Dashboard = () => {
   const navigate = useNavigate();
 
   const { filteredExpenses, filterProps } = useExpenseFilters(expenses);
-
 
   const setSplitTypeColor = (splitType) => {
     switch (splitType) {
@@ -205,67 +205,24 @@ const Dashboard = () => {
         </div>
 
         {/* Simplified Settlements */}
-        <div className="flex flex-col gap-4">
-          <h2 className="font-headline-md text-headline-md text-on-surface">
-            Simplified Settlements
-          </h2>
-          <div className="flex flex-col overflow-hidden rounded-lg border border-outline-variant bg-surface-container-lowest shadow-sm">
-            {isInitializing ||
+        <SimplifiedSettlements
+          suggestions={suggestions}
+          isLoading={
+            isInitializing ||
             hasConnectionError ||
             groupsIsLoading ||
-            suggestionsQuery.isLoading ? (
-              <div className="flex min-h-19 items-center justify-between border-b border-outline-variant p-4 last:border-b-0">
-                <div className="flex flex-col gap-2">
-                  <Skeleton className="h-4 w-48" />
-                  <Skeleton className="h-4 w-24" />
-                </div>
-                <Skeleton className="h-8 w-16 rounded-DEFAULT" />
-              </div>
-            ) : suggestions && suggestions.length > 0 ? (
-              suggestions.map((suggestion, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between border-b border-outline-variant p-4 transition-colors last:border-b-0 hover:bg-surface-container-low"
-                >
-                  <div className="flex flex-col gap-1">
-                    <p className="font-body-md text-body-md text-on-surface">
-                      <span className="font-medium text-on-surface">
-                        {suggestion.from.name}
-                      </span>{" "}
-                      pays{" "}
-                      <span className="font-medium text-on-surface">
-                        {suggestion.to.name}
-                      </span>
-                    </p>
-                    <p className="font-mono-data font-medium text-secondary">
-                      ₹{suggestion.amount.toFixed(2)}
-                    </p>
-                  </div>
-                  <button
-                    onClick={() =>
-                      navigate(`/settle-up`, {
-                        state: {
-                          paid_by: suggestion.from.id,
-                          paid_to: suggestion.to.id,
-                          amount: suggestion.amount.toFixed(2),
-                        },
-                      })
-                    }
-                    className="rounded-DEFAULT border border-primary bg-transparent px-3 py-1.5 font-label-sm text-label-sm font-semibold tracking-wide text-primary transition-all hover:bg-primary/5 hover:shadow-md"
-                  >
-                    Settle
-                  </button>
-                </div>
-              ))
-            ) : (
-              <div className="flex min-h-19 items-center justify-center text-center">
-                <p className="font-body-md text-body-md text-on-surface-variant">
-                  All balances are settled!
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
+            suggestionsQuery.isLoading
+          }
+          onSettle={(from, to, amount) =>
+            navigate("/settle-up", {
+              state: {
+                paid_by: from.id,
+                paid_to: to.id,
+                amount: amount.toFixed(2),
+              },
+            })
+          }
+        />
       </div>
 
       {/* Analytics Placeholders */}
@@ -377,7 +334,7 @@ const Dashboard = () => {
                         className="group h-row-height-compact cursor-pointer transition-colors select-none hover:bg-surface-container-low/50"
                       >
                         <td className="px-4 py-2 font-mono-data text-sm text-on-surface-variant">
-                          {formatDateToDisplay(expense.date)}
+                          {formatDateForDisplay(expense.date)}
                         </td>
                         <td className="px-4 py-2 font-body-md font-medium text-on-surface">
                           {expense.description}
@@ -445,7 +402,7 @@ const Dashboard = () => {
                                       </span>
                                     </span>
                                     <span>
-                                      {formatDateToDisplay(expense.date)}
+                                      {formatDateForDisplay(expense.date)}
                                     </span>
                                   </div>
                                 </div>

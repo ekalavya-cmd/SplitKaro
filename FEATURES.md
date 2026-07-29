@@ -70,9 +70,9 @@
 | Feature | Current behaviour |
 |---|---|
 | ✅ Settlement suggestions | GET `/api/groups/:id/settlements/suggest` — greedy two-pointer algorithm that minimises transaction count (R3: fixed to use User schema). |
-| ✅ Suggestions shown on Dashboard | Dashboard shows suggested payments with a "Settle" button that navigates to `/settle-up` |
-| ✅ Suggestions shown on SettleUp page | SettleUp left panel shows the current suggestions list alongside the form. Each suggestion renders as an individually bordered card row (payer/payee on one line, amount in secondary colour below, Settle button right-aligned). **SettleUp-page-specific style** — Dashboard Simplified Settlements panel is visually unchanged. |
-| ✅ Recalculate button on Simplified Settlements | Small "↻ Recalculate" text-link button in the Simplified Settlements header on the SettleUp page. Calls `suggestionsQuery.refetch()` directly — no page reload, no invalidation of other caches. Disabled while fetching. |
+| ✅ Suggestions shown on Dashboard | Uses the shared `SimplifiedSettlements` component. Displays suggested payments in card-row style; "Settle" button navigates to `/settle-up`. |
+| ✅ Suggestions shown on SettleUp page | Uses the shared `SimplifiedSettlements` component. Displays suggested payments in card-row style alongside the form. |
+| ✅ Recalculate button on Simplified Settlements | Small "↻ Recalculate" text-link button in the Simplified Settlements header, conditionally enabled via `showRecalculate` (used on SettleUp page). Calls `suggestionsQuery.refetch()` directly. |
 | ✅ Record settlement | SettleUp form: select payer, payee, enter amount and date; server validates payer owes money and payee is owed money (R6b discovery: fixed to use User schema and verified working) |
 | ✅ Partial settlement | The backend accepts any amount up to but not exceeding `min(|payer balance|, payee balance)` (R6b discovery: fixed to use User schema and verified working) |
 | ✅ Settlement history table | SettleUp page shows all recorded settlements for the selected group (date, payer, payee, amount) (R6b discovery: fixed to use User schema and verified working) |
