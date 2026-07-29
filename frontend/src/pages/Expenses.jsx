@@ -207,7 +207,10 @@ const Expenses = () => {
   const showingTo = endIdx;
 
   const isDataLoading =
-    isInitializing || hasConnectionError || groupsIsLoading || expensesQuery.isLoading;
+    isInitializing ||
+    hasConnectionError ||
+    groupsIsLoading ||
+    expensesQuery.isLoading;
 
   const toggleExpenseExpand = (id) => {
     setExpandedExpenseIds((prev) => ({
@@ -325,7 +328,7 @@ const Expenses = () => {
                         className="group h-row-height-compact cursor-pointer transition-colors select-none hover:bg-surface-container-low/50"
                       >
                         <td className="px-4 py-2 font-mono-data text-sm whitespace-nowrap text-on-surface-variant">
-                          {formatDateToDisplay(expense.date)}
+                          {formatDateForDisplay(expense.date)}
                         </td>
                         <td className="px-4 py-2 font-body-md font-medium text-on-surface">
                           {expense.description}
@@ -418,7 +421,7 @@ const Expenses = () => {
                                       </span>
                                     </span>
                                     <span>
-                                      {formatDateToDisplay(expense.date)}
+                                      {formatDateForDisplay(expense.date)}
                                     </span>
                                   </div>
                                 </div>
@@ -507,9 +510,7 @@ const Expenses = () => {
               </p>
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() =>
-                    setCurrentPage((p) => Math.max(1, p - 1))
-                  }
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={safePage <= 1}
                   className="flex h-8 cursor-pointer items-center gap-1 rounded-DEFAULT border border-primary bg-transparent px-3 font-label-sm text-label-sm font-semibold text-primary transition-all hover:bg-primary/5 disabled:cursor-not-allowed disabled:border-outline-variant disabled:text-on-surface-variant disabled:opacity-50"
                 >
