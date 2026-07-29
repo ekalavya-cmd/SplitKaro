@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { useLocation, useOutletContext, useSearchParams } from "react-router-dom";
+import {
+  useLocation,
+  useOutletContext,
+  useSearchParams,
+} from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getGroup } from "../services/group.service";
 import {
@@ -170,7 +174,10 @@ const SettleUp = () => {
 
   // Pagination calculations
   const totalSettlements = filteredSettlements.length;
-  const totalPages = Math.max(1, Math.ceil(totalSettlements / SETTLEMENTS_PER_PAGE));
+  const totalPages = Math.max(
+    1,
+    Math.ceil(totalSettlements / SETTLEMENTS_PER_PAGE),
+  );
   // safePage clamps the stored page in case filteredSettlements shrinks
   const safePage = Math.min(currentPage, totalPages);
   const startIdx = (safePage - 1) * SETTLEMENTS_PER_PAGE;
@@ -179,8 +186,7 @@ const SettleUp = () => {
   const showingFrom = totalSettlements === 0 ? 0 : startIdx + 1;
   const showingTo = endIdx;
 
-  const isDataLoading =
-    isInitializing || hasConnectionError || groupsIsLoading;
+  const isDataLoading = isInitializing || hasConnectionError || groupsIsLoading;
 
   const [inputs, setInputs] = useState(() => {
     const state = location.state || {};
@@ -263,7 +269,6 @@ const SettleUp = () => {
     <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
       {/* Left column: heading + Simplified Settlements + Settlements History */}
       <div className="flex flex-col gap-8 lg:col-span-2">
-
         {/* Page heading — no border/divider below */}
         <div>
           <h1 className="mb-2 font-headline-lg text-headline-lg font-bold text-on-surface">
@@ -273,23 +278,6 @@ const SettleUp = () => {
             Record payments between group members to clear balances
           </p>
         </div>
-
-        {/* Simplified Settlements */}
-        <SimplifiedSettlements
-          suggestions={suggestions}
-          isLoading={isDataLoading || suggestionsQuery.isLoading}
-          onSettle={(from, to, amount) =>
-            setInputs((prev) => ({
-              ...prev,
-              paid_by: from.id,
-              paid_to: to.id,
-              amount: amount.toFixed(2),
-            }))
-          }
-          showRecalculate={true}
-          isFetching={suggestionsQuery.isFetching}
-          onRecalculate={() => suggestionsQuery.refetch()}
-        />
 
         {/* Settlements History */}
         <div className="flex flex-col gap-4">
@@ -404,9 +392,7 @@ const SettleUp = () => {
                   </p>
                   <div className="flex items-center gap-2">
                     <button
-                      onClick={() =>
-                        setCurrentPage((p) => Math.max(1, p - 1))
-                      }
+                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                       disabled={safePage <= 1}
                       className="flex h-8 cursor-pointer items-center gap-1 rounded-DEFAULT border border-primary bg-transparent px-3 font-label-sm text-label-sm font-semibold text-primary transition-all hover:bg-primary/5 disabled:cursor-not-allowed disabled:border-outline-variant disabled:text-on-surface-variant disabled:opacity-50"
                     >
@@ -434,9 +420,27 @@ const SettleUp = () => {
         </div>
       </div>
 
-      {/* Right column: Record Settlement form (sticky) */}
-      <div className="relative lg:col-span-1">
-        <div className="sticky top-24 w-full rounded-lg border border-outline-variant bg-surface-container-lowest p-6 shadow-sm">
+      {/* Right column: Simplified Settlements + Record Settlement form */}
+      <div className="flex flex-col gap-8 lg:col-span-1">
+        {/* Simplified Settlements */}
+        <SimplifiedSettlements
+          suggestions={suggestions}
+          isLoading={isDataLoading || suggestionsQuery.isLoading}
+          onSettle={(from, to, amount) =>
+            setInputs((prev) => ({
+              ...prev,
+              paid_by: from.id,
+              paid_to: to.id,
+              amount: amount.toFixed(2),
+            }))
+          }
+          showRecalculate={true}
+          isFetching={suggestionsQuery.isFetching}
+          onRecalculate={() => suggestionsQuery.refetch()}
+        />
+
+        {/* Record Settlement form */}
+        <div className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest p-6 shadow-sm">
           <h2 className="mb-6 font-headline-md text-headline-md font-bold text-on-surface">
             Record Settlement
           </h2>

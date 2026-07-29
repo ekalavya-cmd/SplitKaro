@@ -71,7 +71,7 @@
 |---|---|
 | ✅ Settlement suggestions | GET `/api/groups/:id/settlements/suggest` — greedy two-pointer algorithm that minimises transaction count (R3: fixed to use User schema). |
 | ✅ Suggestions shown on Dashboard | Uses the shared `SimplifiedSettlements` component. Displays suggested payments in card-row style; "Settle" button navigates to `/settle-up`. |
-| ✅ Suggestions shown on SettleUp page | Uses the shared `SimplifiedSettlements` component. Displays suggested payments in card-row style alongside the form. |
+| ✅ Suggestions shown on SettleUp page | Uses the shared `SimplifiedSettlements` component. Displays suggested payments in card-row style stacked above the form in the right column. |
 | ✅ Recalculate button on Simplified Settlements | Small "↻ Recalculate" text-link button in the Simplified Settlements header, conditionally enabled via `showRecalculate` (used on SettleUp page). Calls `suggestionsQuery.refetch()` directly. |
 | ✅ Record settlement | SettleUp form: select payer, payee, enter amount and date; server validates payer owes money and payee is owed money (R6b discovery: fixed to use User schema and verified working) |
 | ✅ Partial settlement | The backend accepts any amount up to but not exceeding `min(|payer balance|, payee balance)` (R6b discovery: fixed to use User schema and verified working) |
