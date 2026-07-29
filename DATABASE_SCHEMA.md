@@ -235,6 +235,7 @@ The following `CHECK` constraints exist at the database level to enforce data in
 |---|---|
 | No currency field | All monetary values are stored as plain `DECIMAL(10,2)` with no currency column. The UI hard-codes `₹` (Indian Rupee). Multi-currency support would require a schema change. |
 | `description` on `groups` and `expenses` is unbounded VARCHAR(255) | Sequelize maps `DataTypes.STRING` to `VARCHAR(255)`. Long descriptions are silently truncated. A `TEXT` column would be more appropriate for the expense description. |
+| Validation mismatch | `expenses.amount` has a DB-level `CHECK (amount > 0)`, but the Sequelize model allows `min: 0`. A ₹0 expense passes JS validation but crashes at the DB layer. |
 
 ---
 
