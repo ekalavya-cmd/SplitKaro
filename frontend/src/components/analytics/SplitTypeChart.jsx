@@ -57,7 +57,7 @@ export const SplitTypeChart = ({ expenses }) => {
               <Tooltip 
                 formatter={(value) => `₹${Number(value).toFixed(2)}`}
                 contentStyle={{ borderRadius: '8px', border: '1px solid #c7c4d8', fontSize: '14px' }}
-                itemStyle={{ color: '#191c1d' }}
+                itemStyle={{ color: '#191c1d', fontFamily: 'Geist Mono, monospace' }}
               />
             </PieChart>
           </ResponsiveContainer>

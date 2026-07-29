@@ -71,7 +71,7 @@ export const SpendingTimeChart = ({ expenses }) => {
               minTickGap={20}
             />
             <YAxis 
-              tick={{ fontSize: 12, fill: '#464555' }} 
+              tick={{ fontSize: 12, fill: '#464555', fontFamily: 'Geist Mono, monospace' }} 
               axisLine={false}
               tickLine={false}
               tickFormatter={(val) => `₹${val}`}
@@ -81,6 +81,7 @@ export const SpendingTimeChart = ({ expenses }) => {
               labelFormatter={(label) => isWeekly ? `Week of ${formatDate(label)}` : formatDate(label)}
               formatter={(value) => [`₹${Number(value).toFixed(2)}`, "Spend"]}
               contentStyle={{ borderRadius: '8px', border: '1px solid #c7c4d8', fontSize: '14px' }}
+              itemStyle={{ fontFamily: 'Geist Mono, monospace' }}
             />
             <Line 
               type="monotone" 
