@@ -116,7 +116,7 @@ To maintain a sleek fintech aesthetic, heavy drop shadows are avoided in favor o
 ### Badges & Pills
 - **Split-Types**: Container is `bg-surface-variant text-on-surface-variant border-outline-variant`. Each type features a distinct colored dot mapped to theme tokens:
   - **Equal**: `bg-primary` dot
-  - **Exact**: `bg-secondary` dot
+  - **Exact**: `bg-tertiary-container` dot (#a44100)
   - **Percentage**: `bg-secondary-fixed-dim` dot (darker variant chosen over base `secondary-fixed` for improved contrast against the `surface-variant` background)
 - **Payment Status (Inflow)**: Emerald green logic (e.g. `bg-secondary-container text-on-secondary-container`).
 - **Payment Status (Outflow)**: Rose red logic (e.g. `bg-error-container text-on-error-container`).
@@ -156,7 +156,7 @@ A dedicated set of colors extracted from Dashboard data visualizations (Spend by
 > These tokens are reserved **strictly for categorical chart series**. Do NOT reuse the semantic secondary (positive/inflow) or error (negative/outflow) tokens for charts, as they carry specific financial-status meaning elsewhere in the app. The reuse of `primary` and fixed tokens is a conscious, low-stakes reuse that does not conflict with semantic status meanings.
 
 - **Chart 1 (Deep Indigo)**: `primary` (`#3525cd`)
-- **Chart 2 (Warm Rust/Tertiary)**: `tertiary` (`#7e3000`) - *Replaced original Teal to preserve its semantic inflow meaning.*
+- **Chart 2 (Warm Rust/Tertiary)**: `tertiary-container` (`#a44100`) - *Replaced original Teal to preserve its semantic inflow meaning.*
 - **Chart 3 (Mint)**: `secondary-fixed` (`#89f5e7`)
 - **Chart 4 (Soft Lavender)**: `primary-fixed` (`#e2dfff`)
 

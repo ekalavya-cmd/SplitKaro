@@ -1,10 +1,10 @@
 import React from "react";
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
 
 // Using DESIGN.md chart palette tokens
 const COLORS = {
   equal: "#3525cd", // primary
-  exact: "#7e3000", // tertiary
+  exact: "#a44100", // tertiary-container
   percentage: "#89f5e7", // secondary-fixed
 };
 
@@ -16,8 +16,8 @@ export const SplitTypeChart = ({ expenses }) => {
   };
 
   expenses.forEach((ex) => {
-    if (typeAmounts[ex.split_type] !== undefined) {
-      typeAmounts[ex.split_type] += Number(ex.amount);
+    if (typeAmounts[ex.splitType] !== undefined) {
+      typeAmounts[ex.splitType] += Number(ex.amount);
     }
   });
 
@@ -58,6 +58,13 @@ export const SplitTypeChart = ({ expenses }) => {
                 formatter={(value) => `₹${Number(value).toFixed(2)}`}
                 contentStyle={{ borderRadius: '8px', border: '1px solid #c7c4d8', fontSize: '14px' }}
                 itemStyle={{ color: '#191c1d', fontFamily: 'Geist Mono, monospace' }}
+              />
+              <Legend 
+                verticalAlign="bottom" 
+                height={36} 
+                iconType="circle" 
+                wrapperStyle={{ paddingTop: "15px" }}
+                formatter={(value) => <span style={{ color: '#191c1d' }}>{value}</span>}
               />
             </PieChart>
           </ResponsiveContainer>

@@ -1,11 +1,20 @@
 import React from "react";
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+} from "recharts";
+import { formatDateToLocalYMD } from "../../utils/dateFilters";
 
 export const SpendingTimeChart = ({ expenses }) => {
   if (expenses.length === 0) {
     return (
-      <div className="flex h-64 flex-col relative rounded-lg border border-outline-variant bg-surface-container-lowest shadow-sm p-4">
-        <h2 className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant mb-2">
+      <div className="relative flex h-64 flex-col rounded-lg border border-outline-variant bg-surface-container-lowest p-4 shadow-sm">
+        <h2 className="mb-2 font-label-sm text-label-sm tracking-wider text-on-surface-variant uppercase">
           Spending Over Time
         </h2>
         <div className="flex h-full items-center justify-center text-label-sm text-on-surface-variant opacity-50">
@@ -16,7 +25,7 @@ export const SpendingTimeChart = ({ expenses }) => {
   }
 
   // Find date range
-  const dates = expenses.map(e => new Date(`${e.date}T00:00:00`).getTime());
+  const dates = expenses.map((e) => new Date(e.date).getTime());
   const minDate = Math.min(...dates);
   const maxDate = Math.max(...dates);
   const daysDiff = (maxDate - minDate) / (1000 * 60 * 60 * 24);
@@ -25,68 +34,88 @@ export const SpendingTimeChart = ({ expenses }) => {
   const isWeekly = daysDiff > 45;
 
   const grouped = {};
-  expenses.forEach(ex => {
-    const d = new Date(`${ex.date}T00:00:00`);
+  expenses.forEach((ex) => {
+    const d = new Date(ex.date);
     let key;
     if (isWeekly) {
       // Group by ISO week (Monday)
       const day = d.getDay();
-      const diff = d.getDate() - day + (day === 0 ? -6 : 1); 
+      const diff = d.getDate() - day + (day === 0 ? -6 : 1);
       const monday = new Date(d.setDate(diff));
-      key = monday.toISOString().split('T')[0];
+      key = formatDateToLocalYMD(monday);
     } else {
-      key = ex.date;
+      key = formatDateToLocalYMD(d);
     }
-    
+
     if (!grouped[key]) {
       grouped[key] = 0;
     }
     grouped[key] += Number(ex.amount);
   });
 
-  const data = Object.keys(grouped).sort().map(key => ({
-    date: key,
-    amount: grouped[key]
-  }));
+  const data = Object.keys(grouped)
+    .sort()
+    .map((key) => ({
+      date: key,
+      amount: grouped[key],
+    }));
 
   const formatDate = (dateStr) => {
     const d = new Date(`${dateStr}T00:00:00`);
-    return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
   };
 
   return (
-    <div className="flex h-64 flex-col relative rounded-lg border border-outline-variant bg-surface-container-lowest shadow-sm p-4">
-      <h2 className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant mb-2">
+    <div className="relative flex h-64 flex-col rounded-lg border border-outline-variant bg-surface-container-lowest p-4 shadow-sm">
+      <h2 className="mb-2 font-label-sm text-label-sm tracking-wider text-on-surface-variant uppercase">
         Spending Over Time
       </h2>
-      <div className="flex-1 w-full h-full -ml-4 mt-2">
+      <div className="mt-2 h-full w-full flex-1">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data}>
-            <XAxis 
-              dataKey="date" 
-              tickFormatter={formatDate} 
-              tick={{ fontSize: 12, fill: '#464555' }} 
+          <LineChart
+            data={data}
+            margin={{ top: 10, right: 19, left: -28, bottom: 0 }}
+          >
+            <CartesianGrid
+              stroke="#c7c4d8"
+              vertical={false}
+              strokeDasharray="3 3"
+            />
+            <XAxis
+              dataKey="date"
+              tickFormatter={formatDate}
+              tick={{ fontSize: 12, fill: "#464555" }}
               axisLine={false}
               tickLine={false}
               minTickGap={20}
             />
-            <YAxis 
-              tick={{ fontSize: 12, fill: '#464555', fontFamily: 'Geist Mono, monospace' }} 
+            <YAxis
+              tick={{
+                fontSize: 12,
+                fill: "#464555",
+                fontFamily: "Geist Mono, monospace",
+              }}
               axisLine={false}
               tickLine={false}
               tickFormatter={(val) => `₹${val}`}
-              width={60}
+              width={80}
             />
-            <Tooltip 
-              labelFormatter={(label) => isWeekly ? `Week of ${formatDate(label)}` : formatDate(label)}
+            <Tooltip
+              labelFormatter={(label) =>
+                isWeekly ? `Week of ${formatDate(label)}` : formatDate(label)
+              }
               formatter={(value) => [`₹${Number(value).toFixed(2)}`, "Spend"]}
-              contentStyle={{ borderRadius: '8px', border: '1px solid #c7c4d8', fontSize: '14px' }}
-              itemStyle={{ fontFamily: 'Geist Mono, monospace' }}
+              contentStyle={{
+                borderRadius: "8px",
+                border: "1px solid #c7c4d8",
+                fontSize: "14px",
+              }}
+              itemStyle={{ fontFamily: "Geist Mono, monospace" }}
             />
-            <Line 
-              type="monotone" 
-              dataKey="amount" 
-              stroke="#3525cd" 
+            <Line
+              type="monotone"
+              dataKey="amount"
+              stroke="#3525cd"
               strokeWidth={2}
               dot={{ r: 4, fill: "#3525cd", strokeWidth: 0 }}
               activeDot={{ r: 6 }}

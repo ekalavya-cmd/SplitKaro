@@ -87,7 +87,7 @@ const Dashboard = () => {
       case "equal":
         return "bg-primary";
       case "exact":
-        return "bg-secondary";
+        return "bg-tertiary-container";
       case "percentage":
         return "bg-secondary-fixed-dim";
       default:
@@ -114,7 +114,7 @@ const Dashboard = () => {
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="mb-8 grid grid-cols-1 gap-gutter lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-gutter lg:grid-cols-3">
         {/* Balances */}
         <div className="flex flex-col gap-4 lg:col-span-2">
           <h2 className="font-headline-md text-headline-md text-on-surface">
@@ -295,7 +295,7 @@ const Dashboard = () => {
                         onClick={() => toggleExpenseExpand(expense.id)}
                         className="group h-row-height-compact cursor-pointer transition-colors select-none hover:bg-surface-container-low/50"
                       >
-                        <td className="px-4 py-2 font-mono-data text-sm text-on-surface-variant">
+                        <td className="px-4 py-2 font-mono-data text-sm whitespace-nowrap text-on-surface-variant">
                           {formatDateForDisplay(expense.date)}
                         </td>
                         <td className="px-4 py-2 font-body-md font-medium text-on-surface">

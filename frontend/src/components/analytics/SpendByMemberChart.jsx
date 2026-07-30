@@ -11,8 +11,8 @@ export const SpendByMemberChart = ({ expenses, members }) => {
   }, {});
 
   expenses.forEach((expense) => {
-    if (memberSpends[expense.paid_by]) {
-      memberSpends[expense.paid_by].amount += Number(expense.amount);
+    if (memberSpends[expense.paidBy]) {
+      memberSpends[expense.paidBy].amount += Number(expense.amount);
     }
   });
 
