@@ -58,7 +58,8 @@ The following features are **fully implemented** in the current version:
     - **Percentage** — assign a percentage to each member (must sum to 100%)
 - **View Expenses** per group, with payer details and per-member split breakdown
 - **Delete Expenses** with transactional safety
-- **Filter Expenses** on the Dashboard by description (debounced search), split type, and payer
+- **Filter Expenses** on the Expenses page by description (debounced search), split type, payer, date (preset/custom), and amount with URL-persisted filter state
+- **Pagination** on the Expenses page (client-side)
 
 ### 📊 Balance Calculation
 - **Real-time Balance Computation** — calculates each member's net balance (what they paid vs. what they owe, accounting for settlements)
@@ -73,7 +74,14 @@ The following features are **fully implemented** in the current version:
 - **Record Payments** between members to mark debts as cleared
 - **Validation** — prevents settling more than what is owed, prevents self-settlements, and validates both payer and payee are group members
 - **Settlement History** — view all past settlements for a group
+- **Filter Settlements** by payer, payee, and date (preset/custom) with URL-persisted state
+- **Pagination** on the Settle Up page (client-side)
 - **Delete Settlements** to undo a recorded payment
+
+### 📈 Analytics Dashboard
+- **Spend by Member** — horizontal bar chart showing each member's total spend
+- **Split Type Breakdown** — donut chart showing the distribution of expenses across equal, exact, and percentage splits
+- **Spending Over Time** — line chart showing cumulative group spending trends with dynamic daily/weekly bucketing
 
 ### 🔗 Frontend Pages
 | Page | Route | Description |
@@ -579,7 +587,6 @@ Copy `backend/.env.example` to `backend/.env` and fill in the values.
 | **Export Reports** | Download a group's full expense and settlement history as a **PDF** or **CSV** file |
 | **Group Archiving** | Archive fully-settled groups to keep the UI clean without permanently deleting data |
 | **Reminders & Nudges** | Automatically remind group members with pending balances to settle up via email or in-app notification |
-| **Spending Analytics Dashboard** | Visual charts (pie, bar, timeline) showing each member's total spend, share of group expenses, and balance trend over time |
 
 ---
 
