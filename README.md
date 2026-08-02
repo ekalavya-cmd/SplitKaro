@@ -45,11 +45,13 @@ The name "SplitKaro" is a mix of English and Hindi, where _"Karo"_ means _"to do
 The following features are **fully implemented** in the current version:
 
 ### 👥 Group Management
+
 - **Create Groups** with a name, optional description, and members
 - **View All Groups** — list all existing groups
 - **View Group Details** — see a group's info along with all its members
 
 ### 💸 Expense Tracking
+
 - **Add Expenses** to a group with:
   - Description, total amount, date, and who paid
   - Three flexible split types:
@@ -62,15 +64,18 @@ The following features are **fully implemented** in the current version:
 - **Pagination** on the Expenses page (client-side)
 
 ### 📊 Balance Calculation
+
 - **Real-time Balance Computation** — calculates each member's net balance (what they paid vs. what they owe, accounting for settlements)
 - Visual balance cards: green (is owed), red (owes), grey (settled)
 - Balance integrity validation — ensures all balances sum to zero
 
 ### 🤝 Settlement Suggestions
+
 - **Smart Settlement Suggestions** — uses a greedy algorithm to compute the minimum number of transactions needed to settle all debts within a group
 - Displayed on both the Dashboard and the Settle Up page
 
 ### 💳 Settlement Recording
+
 - **Record Payments** between members to mark debts as cleared
 - **Validation** — prevents settling more than what is owed, prevents self-settlements, and validates both payer and payee are group members
 - **Settlement History** — view all past settlements for a group
@@ -79,56 +84,61 @@ The following features are **fully implemented** in the current version:
 - **Delete Settlements** to undo a recorded payment
 
 ### 📈 Analytics Dashboard
+
 - **Spend by Member** — horizontal bar chart showing each member's total spend
 - **Split Type Breakdown** — donut chart showing the distribution of expenses across equal, exact, and percentage splits
 - **Spending Over Time** — line chart showing cumulative group spending trends with dynamic daily/weekly bucketing
 
 ### 🔗 Frontend Pages
-| Page | Route | Description |
-|------|-------|-------------|
-| Dashboard | `/` | Overview of group balances, settlement suggestions, and filterable expense table |
-| Expenses | `/expenses` | Full expense list with delete functionality |
-| Add Expense | `/add-expense/:id` | Form to add a new expense with dynamic split UI |
-| Settle Up | `/settle-up` | Record settlements and view settlement history |
-| 404 Error | `*` | Friendly not-found page |
+
+| Page        | Route              | Description                                                                      |
+| ----------- | ------------------ | -------------------------------------------------------------------------------- |
+| Dashboard   | `/`                | Overview of group balances, settlement suggestions, and filterable expense table |
+| Expenses    | `/expenses`        | Full expense list with delete functionality                                      |
+| Add Expense | `/add-expense/:id` | Form to add a new expense with dynamic split UI                                  |
+| Settle Up   | `/settle-up`       | Record settlements and view settlement history                                   |
+| 404 Error   | `*`                | Friendly not-found page                                                          |
 
 ---
 
 ## Tech Stack 🛠️
 
 ### Backend
-| Technology | Version | Purpose |
-|------------|---------|---------|
-| **Node.js** | — | Runtime environment |
-| **Express.js** | v5.x | Web framework (REST API) |
-| **Sequelize** | v6.x | ORM for database interaction |
-| **MySQL2** | v3.x | MySQL database driver |
-| **Redis (node-redis)** | v6.x | Refresh token storage (rotating tokens) |
-| **jsonwebtoken** | v9.x | JWT access token signing and verification |
-| **bcrypt** | v5.x | Password hashing (cost factor 12) |
-| **cookie-parser** | v1.x | httpOnly cookie parsing for refresh tokens |
-| **Winston** | v3.x | Centralized structured logging |
-| **winston-daily-rotate-file** | v5.x | Rolling log file transport |
-| **dotenv** | v17.x | Environment variable management |
-| **cors** | v2.x | Cross-origin request handling |
-| **nodemon** | v3.x | Development auto-reload |
+
+| Technology                    | Version | Purpose                                    |
+| ----------------------------- | ------- | ------------------------------------------ |
+| **Node.js**                   | —       | Runtime environment                        |
+| **Express.js**                | v5.x    | Web framework (REST API)                   |
+| **Sequelize**                 | v6.x    | ORM for database interaction               |
+| **MySQL2**                    | v3.x    | MySQL database driver                      |
+| **Redis (node-redis)**        | v6.x    | Refresh token storage (rotating tokens)    |
+| **jsonwebtoken**              | v9.x    | JWT access token signing and verification  |
+| **bcrypt**                    | v5.x    | Password hashing (cost factor 12)          |
+| **cookie-parser**             | v1.x    | httpOnly cookie parsing for refresh tokens |
+| **Winston**                   | v3.x    | Centralized structured logging             |
+| **winston-daily-rotate-file** | v5.x    | Rolling log file transport                 |
+| **dotenv**                    | v17.x   | Environment variable management            |
+| **cors**                      | v2.x    | Cross-origin request handling              |
+| **nodemon**                   | v3.x    | Development auto-reload                    |
 
 ### Frontend
-| Technology | Version | Purpose |
-|------------|---------|---------|
-| **React** | v18.x | UI library |
-| **React Router DOM** | v7.x | Client-side routing |
-| **Vite** | v8.x | Build tool and dev server |
-| **Tailwind CSS** | v4.x | Utility-first CSS styling |
-| **Axios** | v1.x | HTTP client for API calls |
-| **ESLint** | v9.x | Code linting |
-| **Prettier** | — | Code formatting (with Tailwind plugin) |
+
+| Technology           | Version | Purpose                                |
+| -------------------- | ------- | -------------------------------------- |
+| **React**            | v18.x   | UI library                             |
+| **React Router DOM** | v7.x    | Client-side routing                    |
+| **Vite**             | v8.x    | Build tool and dev server              |
+| **Tailwind CSS**     | v4.x    | Utility-first CSS styling              |
+| **Axios**            | v1.x    | HTTP client for API calls              |
+| **ESLint**           | v9.x    | Code linting                           |
+| **Prettier**         | —       | Code formatting (with Tailwind plugin) |
 
 ### Database
-| Technology | Purpose |
-|------------|---------|
-| **MySQL** | Relational database |
-| **Redis** | Refresh token store |
+
+| Technology               | Purpose                          |
+| ------------------------ | -------------------------------- |
+| **MySQL**                | Relational database              |
+| **Redis**                | Refresh token store              |
 | **Sequelize Migrations** | Schema versioning and management |
 
 ---
@@ -180,12 +190,14 @@ SplitKaro follows a classic **Client–Server** architecture with a clear separa
 ```
 
 ### Backend Design Patterns
+
 - **Layered Architecture**: Routes → Controllers → Services → Models (ORM)
 - **Service Layer**: All business logic lives in `services/`, keeping controllers thin
 - **Transactional Safety**: All multi-step write operations (create group + members, delete expense/settlement) are wrapped in Sequelize transactions with rollback support
 - **Centralized Error Handling**: Controllers catch service-level errors with structured `{ status, message }` objects and forward appropriate HTTP responses
 
 ### Frontend Design Patterns
+
 - **Service Abstraction**: Modular services (`auth.service.js`, `group.service.js`, etc.) provide clean API facades over the raw Axios instance
 - **Axios Interceptors**: `http.client.js` centralizes error normalization and token attachment at the HTTP layer
 - **Custom Hooks**: `useDebounce` for debounced input filtering
@@ -342,6 +354,7 @@ splitKaro/
 ```
 
 **Key Relationships:**
+
 - A `User` belongs to many `Groups` (and vice versa) through the `group_members` join table
 - `groups.created_by` is a separate FK pointing to the `User` who created the group
 - An `Expense` belongs to a `Group` and a `User` (payer), and has many `ExpenseSplits`
@@ -359,34 +372,34 @@ Base URL: `http://localhost:3000/api`
 
 ### Groups
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/groups` | List all groups |
-| `GET` | `/groups/:id` | Get a group with its members |
-| `POST` | `/groups` | Create a group with members |
-| `GET` | `/groups/:id/expenses` | Get all expenses for a group |
-| `POST` | `/groups/:id/expenses` | Add an expense to a group |
-| `GET` | `/groups/:id/balances` | Calculate net balances for all members |
-| `GET` | `/groups/:id/settlements/suggest` | Get suggested settlement transactions |
-| `POST` | `/groups/:id/settlements` | Record a settlement payment |
-| `GET` | `/groups/:id/settlements` | List all settlements for a group |
-| `DELETE` | `/groups/settlements/:id` | Delete a settlement record |
+| Method   | Endpoint                          | Description                            |
+| -------- | --------------------------------- | -------------------------------------- |
+| `GET`    | `/groups`                         | List all groups                        |
+| `GET`    | `/groups/:id`                     | Get a group with its members           |
+| `POST`   | `/groups`                         | Create a group with members            |
+| `GET`    | `/groups/:id/expenses`            | Get all expenses for a group           |
+| `POST`   | `/groups/:id/expenses`            | Add an expense to a group              |
+| `GET`    | `/groups/:id/balances`            | Calculate net balances for all members |
+| `GET`    | `/groups/:id/settlements/suggest` | Get suggested settlement transactions  |
+| `POST`   | `/groups/:id/settlements`         | Record a settlement payment            |
+| `GET`    | `/groups/:id/settlements`         | List all settlements for a group       |
+| `DELETE` | `/groups/settlements/:id`         | Delete a settlement record             |
 
 ### Expenses
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
+| Method   | Endpoint        | Description       |
+| -------- | --------------- | ----------------- |
 | `DELETE` | `/expenses/:id` | Delete an expense |
 
 ### Authentication
 
-| Method | Endpoint | Auth required | Description |
-|--------|----------|---------------|-------------|
-| `POST` | `/auth/register` | — | Create account; returns access token + sets refresh cookie |
-| `POST` | `/auth/login` | — | Login; returns access token + sets refresh cookie |
-| `POST` | `/auth/refresh` | Cookie | Exchange refresh cookie for a new access token (token rotation) |
-| `POST` | `/auth/logout` | Bearer token | Revoke current session refresh token and clear cookie |
-| `POST` | `/auth/logout-all` | Bearer token | Revoke all sessions for this user across all devices |
+| Method | Endpoint           | Auth required | Description                                                     |
+| ------ | ------------------ | ------------- | --------------------------------------------------------------- |
+| `POST` | `/auth/register`   | —             | Create account; returns access token + sets refresh cookie      |
+| `POST` | `/auth/login`      | —             | Login; returns access token + sets refresh cookie               |
+| `POST` | `/auth/refresh`    | Cookie        | Exchange refresh cookie for a new access token (token rotation) |
+| `POST` | `/auth/logout`     | Bearer token  | Revoke current session refresh token and clear cookie           |
+| `POST` | `/auth/logout-all` | Bearer token  | Revoke all sessions for this user across all devices            |
 
 ### Example: Create Group
 
@@ -457,12 +470,14 @@ POST /api/groups/1/settlements
 ### Backend Setup
 
 1. **Clone the repository:**
+
    ```bash
    git clone https://github.com/ekalavya-zwt/splitKaro.git
    cd splitKaro/backend
    ```
 
 2. **Install dependencies:**
+
    ```bash
    npm install
    ```
@@ -470,6 +485,7 @@ POST /api/groups/1/settlements
 3. **Configure environment variables:**
 
    Copy `backend/.env.example` to `backend/.env` and fill in your values:
+
    ```env
    DB_HOST=localhost
    DB_USER=root
@@ -482,16 +498,19 @@ POST /api/groups/1/settlements
    ```
 
 4. **Create the MySQL database:**
+
    ```sql
    CREATE DATABASE splitKaro_db;
    ```
 
 5. **Run database migrations:**
+
    ```bash
    npx sequelize-cli db:migrate
    ```
 
 6. **Start the development server:**
+
    ```bash
    npm run dev
    ```
@@ -503,11 +522,13 @@ POST /api/groups/1/settlements
 ### Frontend Setup
 
 1. **Navigate to the frontend directory:**
+
    ```bash
    cd ../frontend
    ```
 
 2. **Install dependencies:**
+
    ```bash
    npm install
    ```
@@ -515,11 +536,13 @@ POST /api/groups/1/settlements
 3. **Configure environment variables:**
 
    Create a `.env` file inside `frontend/`:
+
    ```env
    VITE_API_URL=http://localhost:3000/api
    ```
 
 4. **Start the development server:**
+
    ```bash
    npm run dev
    ```
@@ -532,23 +555,23 @@ POST /api/groups/1/settlements
 
 ### Backend (`backend/.env`)
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `DB_HOST` | MySQL host | `localhost` |
-| `DB_USER` | MySQL username | `root` |
-| `DB_PASSWORD` | MySQL password | _(your password)_ |
-| `DB_NAME` | MySQL database name | `splitKaro_db` |
-| `PORT` | Port the Express server listens on | `3000` |
-| `REDIS_URL` | Redis connection URL | `redis://127.0.0.1:6379` |
-| `JWT_ACCESS_SECRET` | Secret key for signing JWT access tokens | _(generate a 64-char random hex string)_ |
-| `LOG_LEVEL` | Winston log level (`debug`/`info`/`warn`/`error`) | `debug` |
+| Variable            | Description                                       | Default                                  |
+| ------------------- | ------------------------------------------------- | ---------------------------------------- |
+| `DB_HOST`           | MySQL host                                        | `localhost`                              |
+| `DB_USER`           | MySQL username                                    | `root`                                   |
+| `DB_PASSWORD`       | MySQL password                                    | _(your password)_                        |
+| `DB_NAME`           | MySQL database name                               | `splitKaro_db`                           |
+| `PORT`              | Port the Express server listens on                | `3000`                                   |
+| `REDIS_URL`         | Redis connection URL                              | `redis://127.0.0.1:6379`                 |
+| `JWT_ACCESS_SECRET` | Secret key for signing JWT access tokens          | _(generate a 64-char random hex string)_ |
+| `LOG_LEVEL`         | Winston log level (`debug`/`info`/`warn`/`error`) | `debug`                                  |
 
 Copy `backend/.env.example` to `backend/.env` and fill in the values.
 
 ### Frontend (`frontend/.env`)
 
-| Variable | Description | Default |
-|----------|-------------|---------|
+| Variable       | Description                  | Default                     |
+| -------------- | ---------------------------- | --------------------------- |
 | `VITE_API_URL` | Base URL for the backend API | `http://localhost:3000/api` |
 
 > ⚠️ **Never commit your `.env` files.** Both are listed in `.gitignore`.
@@ -574,19 +597,19 @@ Copy `backend/.env.example` to `backend/.env` and fill in the values.
 
 > Features planned for upcoming development.
 
-| Feature | Description |
-|---------|-------------|
-| **UPI QR-Based Settlements** | Payers can attach their UPI QR code to a group so payees can scan and pay directly — no need to ask for payment details separately |
-| **Real-Time Notifications** | Live push notifications (e.g. via WebSockets or SSE) so members are instantly notified when a new expense is added or a settlement is recorded |
-| **Email Invites** | Send email invitations to people to join a group, removing the need for manual member addition |
-| **Recent Activity Feed** | A chronological log of all group and expense activity (expense added, settlement recorded, member joined, etc.) visible per group |
-| **Expense Categories & Tags** | Categorise expenses (🍔 Food, ✈️ Travel, 🏨 Stay, 🎉 Entertainment) and visualise spending by category with charts |
-| **Receipt Attachments** | Attach a photo of a receipt to any expense for transparency and record-keeping |
-| **Recurring Expenses** | Set up auto-repeating expenses (e.g. monthly rent, Netflix subscription) that are created and split automatically on a schedule |
-| **Multi-Currency Support** | Record expenses in different currencies with automatic conversion — essential for international trips |
-| **Export Reports** | Download a group's full expense and settlement history as a **PDF** or **CSV** file |
-| **Group Archiving** | Archive fully-settled groups to keep the UI clean without permanently deleting data |
-| **Reminders & Nudges** | Automatically remind group members with pending balances to settle up via email or in-app notification |
+| Feature                       | Description                                                                                                                                    |
+| ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| **UPI QR-Based Settlements**  | Payers can attach their UPI QR code to a group so payees can scan and pay directly — no need to ask for payment details separately             |
+| **Real-Time Notifications**   | Live push notifications (e.g. via WebSockets or SSE) so members are instantly notified when a new expense is added or a settlement is recorded |
+| **Email Invites**             | Send email invitations to people to join a group, removing the need for manual member addition                                                 |
+| **Recent Activity Feed**      | A chronological log of all group and expense activity (expense added, settlement recorded, member joined, etc.) visible per group              |
+| **Expense Categories & Tags** | Categorise expenses (🍔 Food, ✈️ Travel, 🏨 Stay, 🎉 Entertainment) and visualise spending by category with charts                             |
+| **Receipt Attachments**       | Attach a photo of a receipt to any expense for transparency and record-keeping                                                                 |
+| **Recurring Expenses**        | Set up auto-repeating expenses (e.g. monthly rent, Netflix subscription) that are created and split automatically on a schedule                |
+| **Multi-Currency Support**    | Record expenses in different currencies with automatic conversion — essential for international trips                                          |
+| **Export Reports**            | Download a group's full expense and settlement history as a **PDF** or **CSV** file                                                            |
+| **Group Archiving**           | Archive fully-settled groups to keep the UI clean without permanently deleting data                                                            |
+| **Reminders & Nudges**        | Automatically remind group members with pending balances to settle up via email or in-app notification                                         |
 
 ---
 

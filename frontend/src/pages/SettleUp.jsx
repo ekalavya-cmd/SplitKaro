@@ -1,15 +1,10 @@
 import React, { useState, useEffect } from "react";
-import {
-  useLocation,
-  useOutletContext,
-  useSearchParams,
-} from "react-router-dom";
+import { useOutletContext, useSearchParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getGroup } from "../services/group.service";
 import {
   getSettlementSuggestions,
   getSettlements,
-  createSettlement,
   deleteSettlement,
 } from "../services/settlement.service";
 import { useSettlementFilters } from "../hooks/useSettlementFilters";
@@ -18,6 +13,7 @@ import { SimplifiedSettlements } from "../components/SimplifiedSettlements";
 import { Pagination } from "../components/Pagination";
 import { ErrorBlock } from "../components/ErrorBlock";
 import { Skeleton } from "../components/Skeleton";
+import { RecordSettlementModal } from "../components/RecordSettlementModal";
 import { usePageQueryState } from "../hooks/usePageQueryState";
 import { usePagination } from "../hooks/usePagination";
 import {
@@ -27,13 +23,6 @@ import {
 
 const SETTLEMENTS_PER_PAGE = 10;
 
-const clearInputs = {
-  paid_by: "",
-  paid_to: "",
-  amount: "",
-  date: new Date().toISOString().split("T")[0],
-};
-
 const SettleUp = () => {
   const {
     selectedGroupId,
@@ -42,8 +31,9 @@ const SettleUp = () => {
     groupsIsLoading,
   } = useOutletContext();
   const queryClient = useQueryClient();
-  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
+  const [isSettlementModalOpen, setIsSettlementModalOpen] = useState(false);
+  const [settlementModalData, setSettlementModalData] = useState(null);
 
   // Derive initial filter values from URL params.
   // useState only reads these on the first render; re-renders ignore them.
@@ -176,50 +166,11 @@ const SettleUp = () => {
 
   // Pagination calculations
   const totalSettlements = filteredSettlements.length;
-  const { totalPages, safePage, startIdx, endIdx, showingFrom, showingTo } = usePagination(
-    totalSettlements,
-    SETTLEMENTS_PER_PAGE,
-    currentPage
-  );
+  const { totalPages, safePage, startIdx, endIdx, showingFrom, showingTo } =
+    usePagination(totalSettlements, SETTLEMENTS_PER_PAGE, currentPage);
   const pagedSettlements = filteredSettlements.slice(startIdx, endIdx);
 
   const isDataLoading = isInitializing || hasConnectionError || groupsIsLoading;
-
-  const [inputs, setInputs] = useState(() => {
-    const state = location.state || {};
-    return {
-      ...clearInputs,
-      paid_by: state.paid_by || "",
-      paid_to: state.paid_to || "",
-      amount: state.amount || "",
-    };
-  });
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setInputs((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const createSettlementMutation = useMutation({
-    mutationFn: ({ groupId, inputs }) => createSettlement(groupId, inputs),
-    onSuccess: (data, variables) => {
-      alert("Settlement recorded successfully!");
-      queryClient.invalidateQueries({
-        queryKey: ["groups", variables.groupId, "balances"],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["groups", variables.groupId, "settlements", "suggest"],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["groups", variables.groupId, "settlements"],
-      });
-      setInputs(clearInputs);
-    },
-    onError: (error) => {
-      console.error("Error recording settlement:", error);
-      alert("Failed to record settlement. Please try again.");
-    },
-  });
 
   const deleteSettlementMutation = useMutation({
     mutationFn: ({ settlementId }) => deleteSettlement(settlementId),
@@ -235,15 +186,6 @@ const SettleUp = () => {
       });
     },
   });
-
-  const handleFormSubmit = (e) => {
-    e.preventDefault();
-    if (!selectedGroupId) {
-      alert("Please select a group first.");
-      return;
-    }
-    createSettlementMutation.mutate({ groupId: selectedGroupId, inputs });
-  };
 
   if (isError) {
     return (
@@ -368,179 +310,52 @@ const SettleUp = () => {
               </table>
             </div>
 
-          {/* Pagination bar — only shown when there are enough results to paginate */}
-          {!isDataLoading &&
-            !settlementsQuery.isLoading &&
-            totalSettlements > SETTLEMENTS_PER_PAGE && (
-              <Pagination
-                safePage={safePage}
-                totalPages={totalPages}
-                showingFrom={showingFrom}
-                showingTo={showingTo}
-                totalItems={totalSettlements}
-                itemLabel="settlements"
-                onPageChange={setCurrentPage}
-              />
-            )}
+            {/* Pagination bar — only shown when there are enough results to paginate */}
+            {!isDataLoading &&
+              !settlementsQuery.isLoading &&
+              totalSettlements > SETTLEMENTS_PER_PAGE && (
+                <Pagination
+                  safePage={safePage}
+                  totalPages={totalPages}
+                  showingFrom={showingFrom}
+                  showingTo={showingTo}
+                  totalItems={totalSettlements}
+                  itemLabel="settlements"
+                  onPageChange={setCurrentPage}
+                />
+              )}
           </div>
         </div>
       </div>
 
       {/* Right column: Simplified Settlements + Record Settlement form */}
       <div className="flex flex-col gap-8 lg:col-span-1">
-        {/* Simplified Settlements */}
         <SimplifiedSettlements
           suggestions={suggestions}
           isLoading={isDataLoading || suggestionsQuery.isLoading}
-          onSettle={(from, to, amount) =>
-            setInputs((prev) => ({
-              ...prev,
+          onSettle={(from, to, amount) => {
+            setSettlementModalData({
               paid_by: from.id,
               paid_to: to.id,
               amount: amount.toFixed(2),
-            }))
-          }
+            });
+            setIsSettlementModalOpen(true);
+          }}
           showRecalculate={true}
           isFetching={suggestionsQuery.isFetching}
           onRecalculate={() => suggestionsQuery.refetch()}
         />
-
-        {/* Record Settlement form */}
-        <div className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest p-6 shadow-sm">
-          <h2 className="mb-6 font-headline-md text-headline-md font-bold text-on-surface">
-            Record Settlement
-          </h2>
-          <form onSubmit={handleFormSubmit} className="flex flex-col gap-4">
-            <div className="flex flex-col">
-              <label
-                htmlFor="paid_by"
-                className="mb-2 font-label-sm text-label-sm tracking-wider text-on-surface-variant uppercase"
-              >
-                Payer
-              </label>
-              <select
-                id="paid_by"
-                name="paid_by"
-                value={inputs.paid_by}
-                onChange={handleInputChange}
-                required
-                className="h-10 w-full cursor-pointer rounded-lg border border-outline-variant bg-surface-container-lowest px-4 font-body-md text-body-md text-on-surface transition-shadow focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
-              >
-                <option value="" disabled>
-                  Select Payer
-                </option>
-                {isInitializing ||
-                hasConnectionError ||
-                groupsIsLoading ||
-                groupQuery.isLoading ? (
-                  <option value="" disabled>
-                    Loading...
-                  </option>
-                ) : group && group.members && group.members.length > 0 ? (
-                  group.members.map((member) => (
-                    <option key={member.id} value={member.id}>
-                      {member.name}
-                    </option>
-                  ))
-                ) : (
-                  <option value="" disabled>
-                    No members available
-                  </option>
-                )}
-              </select>
-            </div>
-
-            <div className="flex flex-col">
-              <label
-                htmlFor="paid_to"
-                className="mb-2 font-label-sm text-label-sm tracking-wider text-on-surface-variant uppercase"
-              >
-                Payee
-              </label>
-              <select
-                id="paid_to"
-                name="paid_to"
-                value={inputs.paid_to}
-                onChange={handleInputChange}
-                required
-                className="h-10 w-full cursor-pointer rounded-lg border border-outline-variant bg-surface-container-lowest px-4 font-body-md text-body-md text-on-surface transition-shadow focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
-              >
-                <option value="" disabled>
-                  Select Payee
-                </option>
-                {isInitializing ||
-                hasConnectionError ||
-                groupsIsLoading ||
-                groupQuery.isLoading ? (
-                  <option value="" disabled>
-                    Loading...
-                  </option>
-                ) : group && group.members && group.members.length > 0 ? (
-                  group.members.map((member) => (
-                    <option key={member.id} value={member.id}>
-                      {member.name}
-                    </option>
-                  ))
-                ) : (
-                  <option value="" disabled>
-                    No members available
-                  </option>
-                )}
-              </select>
-            </div>
-
-            <div className="flex flex-col">
-              <label
-                htmlFor="amount"
-                className="mb-2 font-label-sm text-label-sm tracking-wider text-on-surface-variant uppercase"
-              >
-                Amount
-              </label>
-              <input
-                type="number"
-                id="amount"
-                name="amount"
-                value={inputs.amount}
-                onChange={handleInputChange}
-                placeholder="Enter amount"
-                step="0.01"
-                required
-                className="h-10 w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 font-body-md text-body-md text-on-surface transition-shadow focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
-              />
-            </div>
-
-            <div className="flex flex-col">
-              <label
-                htmlFor="date"
-                className="mb-2 font-label-sm text-label-sm tracking-wider text-on-surface-variant uppercase"
-              >
-                Date
-              </label>
-              <input
-                type="date"
-                id="date"
-                name="date"
-                value={inputs.date}
-                onChange={handleInputChange}
-                required
-                className="h-10 w-full cursor-pointer rounded-lg border border-outline-variant bg-surface-container-lowest px-4 font-body-md text-body-md text-on-surface transition-shadow focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={
-                hasConnectionError || createSettlementMutation.isPending
-              }
-              className="mt-2 flex h-10 w-full items-center justify-center gap-2 rounded-DEFAULT bg-primary px-4 font-label-sm text-label-sm font-semibold tracking-wide text-on-primary transition-all hover:bg-primary/90 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {createSettlementMutation.isPending
-                ? "Recording..."
-                : "Record Payment"}
-            </button>
-          </form>
-        </div>
       </div>
+
+      <RecordSettlementModal
+        isOpen={isSettlementModalOpen}
+        onClose={() => {
+          setIsSettlementModalOpen(false);
+          setSettlementModalData(null);
+        }}
+        groupId={selectedGroupId}
+        initialData={settlementModalData}
+      />
     </div>
   );
 };

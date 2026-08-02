@@ -1,13 +1,14 @@
 import React, { useState } from "react";
-import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Link, Outlet, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getGroups } from "../services/group.service";
 import { useAuth } from "../context/useAuth";
+import { AddExpenseModal } from "../components/AddExpenseModal";
 
 const Layout = () => {
   const [selectedGroupId, setSelectedGroupId] = useState("");
+  const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false);
   const location = useLocation();
-  const navigate = useNavigate();
 
   const { isAuthenticated, isInitializing, hasConnectionError, logout } =
     useAuth();
@@ -186,7 +187,7 @@ const Layout = () => {
             </button>
 
             <button
-              onClick={() => navigate(`/add-expense/${selectedGroupId}`)}
+              onClick={() => setIsAddExpenseOpen(true)}
               disabled={!selectedGroupId}
               className="flex h-9 items-center justify-center gap-2 rounded-DEFAULT bg-primary px-4 font-label-sm text-label-sm font-semibold tracking-wide text-on-primary transition-all hover:bg-primary/90 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50"
             >
@@ -219,6 +220,12 @@ const Layout = () => {
           </div>
         </main>
       </div>
+
+      <AddExpenseModal
+        isOpen={isAddExpenseOpen}
+        onClose={() => setIsAddExpenseOpen(false)}
+        groupId={selectedGroupId}
+      />
     </div>
   );
 };

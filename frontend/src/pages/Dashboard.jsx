@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate, useOutletContext } from "react-router-dom";
+import { useOutletContext } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getGroup } from "../services/group.service";
 import { getExpenses } from "../services/expense.service";
@@ -16,6 +16,7 @@ import { SimplifiedSettlements } from "../components/SimplifiedSettlements";
 import { SpendByMemberChart } from "../components/analytics/SpendByMemberChart";
 import { SplitTypeChart } from "../components/analytics/SplitTypeChart";
 import { SpendingTimeChart } from "../components/analytics/SpendingTimeChart";
+import { RecordSettlementModal } from "../components/RecordSettlementModal";
 
 const RECENT_EXPENSES_COUNT = 5;
 
@@ -27,6 +28,8 @@ const Dashboard = () => {
     groupsIsLoading,
   } = useOutletContext();
   const [expandedExpenseIds, setExpandedExpenseIds] = useState({});
+  const [isSettlementModalOpen, setIsSettlementModalOpen] = useState(false);
+  const [settlementModalData, setSettlementModalData] = useState(null);
 
   const groupQuery = useQuery({
     queryKey: ["groups", selectedGroupId],
@@ -75,8 +78,6 @@ const Dashboard = () => {
       [id]: !prev[id],
     }));
   };
-
-  const navigate = useNavigate();
 
   const recentExpenses = [...expenses]
     .sort((a, b) => new Date(b.date) - new Date(a.date))
@@ -218,23 +219,47 @@ const Dashboard = () => {
             groupsIsLoading ||
             suggestionsQuery.isLoading
           }
-          onSettle={(from, to, amount) =>
-            navigate("/settle-up", {
-              state: {
-                paid_by: from.id,
-                paid_to: to.id,
-                amount: amount.toFixed(2),
-              },
-            })
-          }
+          onSettle={(from, to, amount) => {
+            setSettlementModalData({
+              paid_by: from.id,
+              paid_to: to.id,
+              amount: amount.toFixed(2),
+            });
+            setIsSettlementModalOpen(true);
+          }}
         />
       </div>
 
       {/* Analytics */}
       <div className="grid grid-cols-1 gap-gutter lg:grid-cols-3">
-        <SpendByMemberChart expenses={expenses} members={group?.members || []} />
-        <SplitTypeChart expenses={expenses} />
-        <SpendingTimeChart expenses={expenses} />
+        <SpendByMemberChart
+          expenses={expenses}
+          members={group?.members || []}
+          isLoading={
+            isInitializing ||
+            hasConnectionError ||
+            groupsIsLoading ||
+            expensesQuery.isLoading
+          }
+        />
+        <SplitTypeChart
+          expenses={expenses}
+          isLoading={
+            isInitializing ||
+            hasConnectionError ||
+            groupsIsLoading ||
+            expensesQuery.isLoading
+          }
+        />
+        <SpendingTimeChart
+          expenses={expenses}
+          isLoading={
+            isInitializing ||
+            hasConnectionError ||
+            groupsIsLoading ||
+            expensesQuery.isLoading
+          }
+        />
       </div>
 
       <div className="flex flex-col gap-4">
@@ -443,6 +468,16 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
+
+      <RecordSettlementModal
+        isOpen={isSettlementModalOpen}
+        onClose={() => {
+          setIsSettlementModalOpen(false);
+          setSettlementModalData(null);
+        }}
+        groupId={selectedGroupId}
+        initialData={settlementModalData}
+      />
     </div>
   );
 };

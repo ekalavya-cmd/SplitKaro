@@ -9,51 +9,68 @@
 ## Conventions
 
 ### Base URL
+
 ```
 http://localhost:3000/api
 ```
+
 Configured via `VITE_API_URL` in the frontend `.env`.  
 The backend port is set by `PORT` in the backend `.env` (default `3000`).
 
 ### Authentication
+
 Protected endpoints require a valid JWT access token in the `Authorization` header:
+
 ```
 Authorization: Bearer <accessToken>
 ```
+
 Access tokens are issued by `POST /api/auth/login` and `POST /api/auth/register` (in the JSON body).
 Refresh tokens are delivered and read via an `httpOnly` cookie named `refreshToken` and are never
 included in the JSON response body.
 
 ### Content negotiation
+
 All requests and responses use `Content-Type: application/json`.  
 The frontend axios instance sets this header globally.
 
 ### Standard error shape
+
 The backend always responds with, and the frontend axios interceptor correctly reads:
+
 ```json
 { "message": "Human-readable error description" }
 ```
+
 This is fully consistent across all API endpoints, and validation/error strings are correctly passed to the frontend.
 
 ### Success response shape
+
 All endpoints wrap their payload in an object with a `message` and data field:
+
 ```json
 { "message": "...", "<resource>": { ... } }
 ```
+
 or for lists:
+
 ```json
 { "message": "...", "<plural_resource>": [...] }
 ```
+
 This includes `GET /groups` (wrapped in `groups`) and `GET /groups/:id/settlements/suggest` (wrapped in `suggestions`).
 
 ### Pagination
+
 **Not implemented.** All list endpoints return the full, unbounded result set.
 
 ### Side effects
+
 There are **no** events emitted, background jobs queued, or webhooks fired by
 any endpoint. All operations are synchronous request/response.
 
 ### Transactions
+
 Write endpoints that touch multiple tables (`POST /groups`, `POST /groups/:id/expenses`,
 `DELETE /groups/:id/expenses/:expenseId`, `DELETE /groups/settlements/:id`) wrap their operations
 in a Sequelize database transaction with rollback on failure.
@@ -71,15 +88,17 @@ List groups the authenticated user is a member of.
 **Request body:** None
 
 **Response `200`**
+
 ```json
 {
   "message": "Groups fetched successfully",
   "groups": [
     { "id": 1, "name": "Trip to Bali Expenses", "description": "..." },
-    { "id": 2, "name": "Household Expenses",    "description": null }
+    { "id": 2, "name": "Household Expenses", "description": null }
   ]
 }
 ```
+
 `description` may be `null`.
 
 **Error responses:** None explicitly handled — a DB error propagates as an
@@ -97,6 +116,7 @@ Fetch a single group with its members.
 **Request body:** None
 
 **Response `200`**
+
 ```json
 {
   "id": 1,
@@ -104,19 +124,20 @@ Fetch a single group with its members.
   "description": "Group for managing expenses during our trip to Bali",
   "members": [
     { "id": 1, "name": "Alice", "email": "alice@example.com" },
-    { "id": 2, "name": "Bob",   "email": "bob@example.com" }
+    { "id": 2, "name": "Bob", "email": "bob@example.com" }
   ]
 }
 ```
+
 Members are ordered by `id ASC`.
 
 **Error responses**
 
-| Status | Body | Condition |
-|---|---|---|
-| `403` | `{ "message": "You are not a member of this group." }` | Authenticated user is not a member of this group |
-| `404` | `{ "message": "Group not found" }` | No group with given `:id` |
-| `500` | `{ "message": "Internal Server Error" }` | Unexpected DB error |
+| Status | Body                                                   | Condition                                        |
+| ------ | ------------------------------------------------------ | ------------------------------------------------ |
+| `403`  | `{ "message": "You are not a member of this group." }` | Authenticated user is not a member of this group |
+| `404`  | `{ "message": "Group not found" }`                     | No group with given `:id`                        |
+| `500`  | `{ "message": "Internal Server Error" }`               | Unexpected DB error                              |
 
 ---
 
@@ -127,6 +148,7 @@ added as its first member, and a unique `inviteToken` is generated.
 
 **Auth:** Required (`Authorization: Bearer <accessToken>`)  
 **Request body**
+
 ```json
 {
   "name": "Weekend Trip",
@@ -134,12 +156,13 @@ added as its first member, and a unique `inviteToken` is generated.
 }
 ```
 
-| Field | Required | Type | Notes |
-|---|---|---|---|
-| `name` | Yes | string | Non-empty |
-| `description` | No | string | Stored as NULL if omitted |
+| Field         | Required | Type   | Notes                     |
+| ------------- | -------- | ------ | ------------------------- |
+| `name`        | Yes      | string | Non-empty                 |
+| `description` | No       | string | Stored as NULL if omitted |
 
 **Response `201`**
+
 ```json
 {
   "message": "Group created successfully",
@@ -157,16 +180,16 @@ added as its first member, and a unique `inviteToken` is generated.
 
 **Error responses**
 
-| Status | Body | Condition |
-|---|---|---|
-| `400` | `{ "message": "Group name is required." }` | `name` is missing or empty |
-| `401` | `{ "message": "Access token required" }` | No/malformed Authorization header |
-| `401` | `{ "message": "Access token expired" }` | Token expired |
-| `401` | `{ "message": "Invalid access token" }` | Token invalid |
-| `403` | `{ "message": "You are not a member of this group." }` | Requesting user is not part of the URL's group |
-| `404` | `{ "message": "Expense not found" }` | ID does not exist |
-| `404` | `{ "message": "Expense not found in this group." }` | Expense exists but belongs to a different group |
-| `500` | `{ "message": "Something went wrong. Please try again." }` | Unexpected server/DB error |
+| Status | Body                                                       | Condition                                       |
+| ------ | ---------------------------------------------------------- | ----------------------------------------------- |
+| `400`  | `{ "message": "Group name is required." }`                 | `name` is missing or empty                      |
+| `401`  | `{ "message": "Access token required" }`                   | No/malformed Authorization header               |
+| `401`  | `{ "message": "Access token expired" }`                    | Token expired                                   |
+| `401`  | `{ "message": "Invalid access token" }`                    | Token invalid                                   |
+| `403`  | `{ "message": "You are not a member of this group." }`     | Requesting user is not part of the URL's group  |
+| `404`  | `{ "message": "Expense not found" }`                       | ID does not exist                               |
+| `404`  | `{ "message": "Expense not found in this group." }`        | Expense exists but belongs to a different group |
+| `500`  | `{ "message": "Something went wrong. Please try again." }` | Unexpected server/DB error                      |
 
 > **Note:** Members are no longer added inline during group creation. Other users
 > join later using the returned `inviteToken` via the endpoints below.
@@ -183,6 +206,7 @@ Retrieve basic group information to preview an invitation before joining. Does N
 **Request body:** None
 
 **Response `200`**
+
 ```json
 {
   "id": 3,
@@ -194,10 +218,10 @@ Retrieve basic group information to preview an invitation before joining. Does N
 
 **Error responses**
 
-| Status | Body | Condition |
-|---|---|---|
-| `404` | `{ "message": "Invalid or expired invite link." }` | Token does not match any group |
-| `500` | `{ "message": "Something went wrong. Please try again." }` | Unexpected server/DB error |
+| Status | Body                                                       | Condition                      |
+| ------ | ---------------------------------------------------------- | ------------------------------ |
+| `404`  | `{ "message": "Invalid or expired invite link." }`         | Token does not match any group |
+| `500`  | `{ "message": "Something went wrong. Please try again." }` | Unexpected server/DB error     |
 
 ---
 
@@ -210,6 +234,7 @@ Join a group using its invite token.
 **Request body:** None
 
 **Response `200`**
+
 ```json
 {
   "message": "Successfully joined the group",
@@ -223,12 +248,12 @@ Join a group using its invite token.
 
 **Error responses**
 
-| Status | Body | Condition |
-|---|---|---|
-| `401` | `{ "message": "Access token required" }` | No/malformed Authorization header |
-| `404` | `{ "message": "Invalid or expired invite link." }` | Token does not match any group |
-| `409` | `{ "message": "You are already a member of this group." }` | The authenticated user is already in the group |
-| `500` | `{ "message": "Something went wrong. Please try again." }` | Unexpected server/DB error |
+| Status | Body                                                       | Condition                                      |
+| ------ | ---------------------------------------------------------- | ---------------------------------------------- |
+| `401`  | `{ "message": "Access token required" }`                   | No/malformed Authorization header              |
+| `404`  | `{ "message": "Invalid or expired invite link." }`         | Token does not match any group                 |
+| `409`  | `{ "message": "You are already a member of this group." }` | The authenticated user is already in the group |
+| `500`  | `{ "message": "Something went wrong. Please try again." }` | Unexpected server/DB error                     |
 
 ---
 
@@ -244,6 +269,7 @@ List all expenses for a group, including payer info and per-member split details
 **Request body:** None
 
 **Response `200`**
+
 ```json
 {
   "message": "Expenses fetched successfully",
@@ -269,17 +295,18 @@ List all expenses for a group, including payer info and per-member split details
   ]
 }
 ```
+
 Expenses are ordered by `id ASC`. Splits within each expense are ordered by
 `userId ASC`. `amount` and `amountOwed` are returned as **strings** (MySQL
 `DECIMAL` serialised by Sequelize).
 
 **Error responses**
 
-| Status | Body | Condition |
-|---|---|---|
-| `403` | `{ "message": "You are not a member of this group." }` | Authenticated user is not a member of this group |
-| `404` | `{ "message": "Group not found" }` | No group with given `:id` |
-| `500` | `{ "message": "Internal Server Error" }` | Unexpected DB error |
+| Status | Body                                                   | Condition                                        |
+| ------ | ------------------------------------------------------ | ------------------------------------------------ |
+| `403`  | `{ "message": "You are not a member of this group." }` | Authenticated user is not a member of this group |
+| `404`  | `{ "message": "Group not found" }`                     | No group with given `:id`                        |
+| `500`  | `{ "message": "Internal Server Error" }`               | Unexpected DB error                              |
 
 ---
 
@@ -291,42 +318,47 @@ row per group member, all in a single transaction.
 **Auth:** Required (`Authorization: Bearer <accessToken>`)  
 **Path param:** `id` — integer group ID  
 **Request body**
+
 ```json
 {
   "paid_by": 1,
-  "amount": 1600.00,
+  "amount": 1600.0,
   "description": "Hotel booking",
   "split_type": "equal",
   "date": "2026-07-15",
-  "splits": { }
+  "splits": {}
 }
 ```
 
-| Field | Required | Type | Notes |
-|---|---|---|---|
-| `paid_by` | Yes | integer | Must be an `id` of a member in this group |
-| `amount` | Yes | number | Must be > 0 |
-| `description` | Yes | string | Non-empty |
-| `split_type` | Yes | string | One of `"equal"`, `"exact"`, `"percentage"` |
-| `date` | Yes | string | Any date string parseable by `new Date()` |
-| `splits` | Conditional | object | Required for `"exact"` and `"percentage"`; ignored for `"equal"` |
+| Field         | Required    | Type    | Notes                                                            |
+| ------------- | ----------- | ------- | ---------------------------------------------------------------- |
+| `paid_by`     | Yes         | integer | Must be an `id` of a member in this group                        |
+| `amount`      | Yes         | number  | Must be > 0                                                      |
+| `description` | Yes         | string  | Non-empty                                                        |
+| `split_type`  | Yes         | string  | One of `"equal"`, `"exact"`, `"percentage"`                      |
+| `date`        | Yes         | string  | Any date string parseable by `new Date()`                        |
+| `splits`      | Conditional | object  | Required for `"exact"` and `"percentage"`; ignored for `"equal"` |
 
 **`splits` object shape (for `exact` and `percentage`):**
+
 ```json
 {
   "<userId>": <value>
 }
 ```
+
 Keys are user ID integers serialised as strings (JavaScript object keys).
 Values are the amount (for `exact`) or the percentage (for `percentage`).
 **Every member in the group must appear as a key** — partial splits are rejected.
 
 **Split-type rules enforced in service:**
+
 - `equal` — amount divided evenly; penny remainder distributed sequentially.
 - `exact` — sum of all split values must equal `amount` (tolerance: ±0.01).
 - `percentage` — sum of all percentages must equal `100` (tolerance: ±0.01); amounts computed server-side with penny-remainder distribution.
 
 **Response `201`**
+
 ```json
 {
   "message": "Expense created successfully",
@@ -350,23 +382,23 @@ Values are the amount (for `exact`) or the percentage (for `percentage`).
 
 **Error responses**
 
-| Status | Body | Condition |
-|---|---|---|
-| `400` | `{ "message": "paid_by, amount, description, split_type, and date are required" }` | Any required field missing |
-| `400` | `{ "message": "split_type must be 'equal', 'exact', or 'percentage'" }` | Invalid split_type value |
-| `400` | `{ "message": "paid_by must be a valid member of the group" }` | `paid_by` is not a member of this group |
-| `400` | `{ "message": "Invalid date format" }` | `date` is not parseable |
-| `400` | `{ "message": "Amount must be greater than 0" }` | `amount` ≤ 0 |
-| `400` | `{ "message": "splits object is required for exact split type" }` | `splits` missing for `exact` |
-| `400` | `{ "message": "splits object is required for percentage split type" }` | `splits` missing for `percentage` |
-| `400` | `{ "message": "Invalid member IDs in splits: ..." }` | A key in `splits` does not match any group member |
-| `400` | `{ "message": "Missing splits for member IDs: ..." }` | A group member is absent from `splits` |
-| `400` | `{ "message": "Split amounts sum to X, but total amount is Y" }` | `exact` splits don't sum to `amount` |
-| `400` | `{ "message": "Percentages sum to X, but must sum to exactly 100" }` | `percentage` splits don't sum to 100 |
-| `403` | `{ "message": "You are not a member of this group." }` | Authenticated user is not a member of this group |
-| `404` | `{ "message": "Group not found" }` | No group with given `:id` |
-| `400` | `{ "message": "Group must have members before adding expenses" }` | Group exists but has no members |
-| `500` | `{ "message": "Internal Server Error" }` | Unexpected DB error; transaction rolled back |
+| Status | Body                                                                               | Condition                                         |
+| ------ | ---------------------------------------------------------------------------------- | ------------------------------------------------- |
+| `400`  | `{ "message": "paid_by, amount, description, split_type, and date are required" }` | Any required field missing                        |
+| `400`  | `{ "message": "split_type must be 'equal', 'exact', or 'percentage'" }`            | Invalid split_type value                          |
+| `400`  | `{ "message": "paid_by must be a valid member of the group" }`                     | `paid_by` is not a member of this group           |
+| `400`  | `{ "message": "Invalid date format" }`                                             | `date` is not parseable                           |
+| `400`  | `{ "message": "Amount must be greater than 0" }`                                   | `amount` ≤ 0                                      |
+| `400`  | `{ "message": "splits object is required for exact split type" }`                  | `splits` missing for `exact`                      |
+| `400`  | `{ "message": "splits object is required for percentage split type" }`             | `splits` missing for `percentage`                 |
+| `400`  | `{ "message": "Invalid member IDs in splits: ..." }`                               | A key in `splits` does not match any group member |
+| `400`  | `{ "message": "Missing splits for member IDs: ..." }`                              | A group member is absent from `splits`            |
+| `400`  | `{ "message": "Split amounts sum to X, but total amount is Y" }`                   | `exact` splits don't sum to `amount`              |
+| `400`  | `{ "message": "Percentages sum to X, but must sum to exactly 100" }`               | `percentage` splits don't sum to 100              |
+| `403`  | `{ "message": "You are not a member of this group." }`                             | Authenticated user is not a member of this group  |
+| `404`  | `{ "message": "Group not found" }`                                                 | No group with given `:id`                         |
+| `400`  | `{ "message": "Group must have members before adding expenses" }`                  | Group exists but has no members                   |
+| `500`  | `{ "message": "Internal Server Error" }`                                           | Unexpected DB error; transaction rolled back      |
 
 ---
 
@@ -381,17 +413,18 @@ database CASCADE). Wrapped in a transaction.
 **Request body:** None
 
 **Response `200`**
+
 ```json
 { "message": "Expense deleted successfully" }
 ```
 
 **Error responses**
 
-| Status | Body | Condition |
-|---|---|---|
-| `403` | `{ "message": "You are not a member of this group." }` | Authenticated user is not a member of the group this expense belongs to |
-| `404` | `{ "message": "Expense not found" }` | No expense with given `:id` exists |
-| `500` | `{ "message": "Internal Server Error" }` | Unexpected DB error |
+| Status | Body                                                   | Condition                                                               |
+| ------ | ------------------------------------------------------ | ----------------------------------------------------------------------- |
+| `403`  | `{ "message": "You are not a member of this group." }` | Authenticated user is not a member of the group this expense belongs to |
+| `404`  | `{ "message": "Expense not found" }`                   | No expense with given `:id` exists                                      |
+| `500`  | `{ "message": "Internal Server Error" }`               | Unexpected DB error                                                     |
 
 ---
 
@@ -404,9 +437,11 @@ Balance is computed in real time from all `expenses`, `expense_splits`, and
 `settlements` rows — there is no cached or pre-computed balance column.
 
 **Formula per member:**
+
 ```
 balance = total_paid - total_owed - settlements_received + settlements_paid
 ```
+
 A positive balance means the member is owed money; negative means they owe money.
 
 **Auth:** Required (`Authorization: Bearer <accessToken>`)  
@@ -415,28 +450,30 @@ A positive balance means the member is owed money; negative means they owe money
 **Request body:** None
 
 **Response `200`**
+
 ```json
 {
   "message": "Balances calculated successfully",
   "balances": [
-    { "user_id": 1, "name": "Alice", "balance": 650.00 },
-    { "user_id": 2, "name": "Bob",   "balance": -250.00 }
+    { "user_id": 1, "name": "Alice", "balance": 650.0 },
+    { "user_id": 2, "name": "Bob", "balance": -250.0 }
   ]
 }
 ```
+
 The service validates that all balances sum to zero (within ±0.01). If they
 do not, it throws a `500` with a descriptive message indicating a calculation
 bug.
 
 **Error responses**
 
-| Status | Body | Condition |
-|---|---|---|
-| `403` | `{ "message": "You are not a member of this group." }` | Authenticated user is not a member of this group |
-| `404` | `{ "message": "Group not found" }` | No group with given `:id` |
-| `400` | `{ "message": "Group must have members" }` | Group has no members |
-| `500` | `{ "message": "Balance calculation error: sum of balances (X) does not equal zero. This indicates a bug in the calculation logic." }` | Rounding error or data corruption |
-| `500` | `{ "message": "Internal Server Error" }` | Unexpected DB error |
+| Status | Body                                                                                                                                  | Condition                                        |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
+| `403`  | `{ "message": "You are not a member of this group." }`                                                                                | Authenticated user is not a member of this group |
+| `404`  | `{ "message": "Group not found" }`                                                                                                    | No group with given `:id`                        |
+| `400`  | `{ "message": "Group must have members" }`                                                                                            | Group has no members                             |
+| `500`  | `{ "message": "Balance calculation error: sum of balances (X) does not equal zero. This indicates a bug in the calculation logic." }` | Rounding error or data corruption                |
+| `500`  | `{ "message": "Internal Server Error" }`                                                                                              | Unexpected DB error                              |
 
 ---
 
@@ -454,28 +491,30 @@ largest debtor repeatedly until all balances are zero.
 **Request body:** None
 
 **Response `200`**
+
 ```json
 {
   "message": "Settlement suggestions fetched successfully",
   "suggestions": [
     {
       "from": { "id": 3, "name": "Charlie" },
-      "to":   { "id": 1, "name": "Alice" },
-      "amount": 350.00
+      "to": { "id": 1, "name": "Alice" },
+      "amount": 350.0
     }
   ]
 }
 ```
+
 Returns an empty array `suggestions: []` when all balances are zero (everyone is settled).
 
 **Error responses**
 
-| Status | Body | Condition |
-|---|---|---|
-| `403` | `{ "message": "You are not a member of this group." }` | Authenticated user is not a member of this group |
-| `404` | `{ "message": "Group not found" }` | Propagated from `calculateGroupBalances` |
-| `400` | `{ "message": "Group must have members" }` | Propagated from `calculateGroupBalances` |
-| `500` | `{ "message": "Internal Server Error" }` | Unexpected DB error |
+| Status | Body                                                   | Condition                                        |
+| ------ | ------------------------------------------------------ | ------------------------------------------------ |
+| `403`  | `{ "message": "You are not a member of this group." }` | Authenticated user is not a member of this group |
+| `404`  | `{ "message": "Group not found" }`                     | Propagated from `calculateGroupBalances`         |
+| `400`  | `{ "message": "Group must have members" }`             | Propagated from `calculateGroupBalances`         |
+| `500`  | `{ "message": "Internal Server Error" }`               | Unexpected DB error                              |
 
 ---
 
@@ -488,23 +527,25 @@ amount does not exceed what the payer owes the payee.
 **Auth:** Required (`Authorization: Bearer <accessToken>`)  
 **Path param:** `id` — integer group ID  
 **Request body**
+
 ```json
 {
   "paid_by": 2,
   "paid_to": 1,
-  "amount": 250.00,
+  "amount": 250.0,
   "date": "2026-07-15"
 }
 ```
 
-| Field | Required | Type | Notes |
-|---|---|---|---|
-| `paid_by` | Yes | integer | Must be a member of this group with a negative balance |
-| `paid_to` | Yes | integer | Must be a member of this group with a positive balance |
-| `amount` | Yes | number | Must be > 0 and ≤ min(|payer balance|, payee balance) |
-| `date` | No | string | Defaults to `new Date()` if omitted |
+| Field     | Required | Type    | Notes                                                  |
+| --------- | -------- | ------- | ------------------------------------------------------ | ------------- | ---------------- |
+| `paid_by` | Yes      | integer | Must be a member of this group with a negative balance |
+| `paid_to` | Yes      | integer | Must be a member of this group with a positive balance |
+| `amount`  | Yes      | number  | Must be > 0 and ≤ min(                                 | payer balance | , payee balance) |
+| `date`    | No       | string  | Defaults to `new Date()` if omitted                    |
 
 **Response `201`**
+
 ```json
 {
   "message": "Settlement recorded successfully",
@@ -523,22 +564,22 @@ amount does not exceed what the payer owes the payee.
 
 **Error responses**
 
-| Status | Body | Condition |
-|---|---|---|
-| `400` | `{ "message": "paid_by, paid_to, and amount are required" }` | Any of those three fields is missing |
-| `400` | `{ "message": "Cannot record settlement to yourself" }` | `paid_by === paid_to` |
-| `403` | `{ "message": "You are not a member of this group." }` | Authenticated user is not a member of this group |
-| `404` | `{ "message": "Group not found" }` | No group with given `:id` |
-| `400` | `{ "message": "Group must have members before recording settlements" }` | Group has no members |
-| `400` | `{ "message": "paid_by must be a valid member of the group" }` | Payer not in group |
-| `400` | `{ "message": "paid_to must be a valid member of the group" }` | Payee not in group |
-| `400` | `{ "message": "Amount must be greater than 0" }` | `amount` ≤ 0 |
-| `400` | `{ "message": "Invalid date format" }` | `date` provided but not parseable |
-| `400` | `{ "message": "<name> does not owe any money" }` | Payer has a non-negative balance |
-| `400` | `{ "message": "<name> is not owed any money" }` | Payee has a non-positive balance |
-| `400` | `{ "message": "Amount cannot exceed <max> (what <payer> owes <payee>)" }` | Amount exceeds what the payer can pay the payee |
-| `500` | `{ "message": "Error calculating balances" }` | `calculateGroupBalances` returns unexpected data |
-| `500` | `{ "message": "Internal Server Error" }` | Unexpected DB error |
+| Status | Body                                                                      | Condition                                        |
+| ------ | ------------------------------------------------------------------------- | ------------------------------------------------ |
+| `400`  | `{ "message": "paid_by, paid_to, and amount are required" }`              | Any of those three fields is missing             |
+| `400`  | `{ "message": "Cannot record settlement to yourself" }`                   | `paid_by === paid_to`                            |
+| `403`  | `{ "message": "You are not a member of this group." }`                    | Authenticated user is not a member of this group |
+| `404`  | `{ "message": "Group not found" }`                                        | No group with given `:id`                        |
+| `400`  | `{ "message": "Group must have members before recording settlements" }`   | Group has no members                             |
+| `400`  | `{ "message": "paid_by must be a valid member of the group" }`            | Payer not in group                               |
+| `400`  | `{ "message": "paid_to must be a valid member of the group" }`            | Payee not in group                               |
+| `400`  | `{ "message": "Amount must be greater than 0" }`                          | `amount` ≤ 0                                     |
+| `400`  | `{ "message": "Invalid date format" }`                                    | `date` provided but not parseable                |
+| `400`  | `{ "message": "<name> does not owe any money" }`                          | Payer has a non-negative balance                 |
+| `400`  | `{ "message": "<name> is not owed any money" }`                           | Payee has a non-positive balance                 |
+| `400`  | `{ "message": "Amount cannot exceed <max> (what <payer> owes <payee>)" }` | Amount exceeds what the payer can pay the payee  |
+| `500`  | `{ "message": "Error calculating balances" }`                             | `calculateGroupBalances` returns unexpected data |
+| `500`  | `{ "message": "Internal Server Error" }`                                  | Unexpected DB error                              |
 
 ---
 
@@ -553,6 +594,7 @@ included.
 **Request body:** None
 
 **Response `200`**
+
 ```json
 {
   "message": "Settlements fetched successfully",
@@ -562,7 +604,7 @@ included.
       "groupId": 1,
       "paidBy": 2,
       "paidTo": 1,
-      "payer": { "name": "Bob",   "email": "bob@example.com" },
+      "payer": { "name": "Bob", "email": "bob@example.com" },
       "payee": { "name": "Alice", "email": "alice@example.com" },
       "amount": "900.00",
       "date": "2026-04-09T00:00:00.000Z"
@@ -570,15 +612,16 @@ included.
   ]
 }
 ```
+
 Settlements are ordered by `id ASC`.
 
 **Error responses**
 
-| Status | Body | Condition |
-|---|---|---|
-| `403` | `{ "message": "You are not a member of this group." }` | Authenticated user is not a member of this group |
-| `404` | `{ "message": "Group not found" }` | No group with given `:id` |
-| `500` | `{ "message": "Internal Server Error" }` | Unexpected DB error |
+| Status | Body                                                   | Condition                                        |
+| ------ | ------------------------------------------------------ | ------------------------------------------------ |
+| `403`  | `{ "message": "You are not a member of this group." }` | Authenticated user is not a member of this group |
+| `404`  | `{ "message": "Group not found" }`                     | No group with given `:id`                        |
+| `500`  | `{ "message": "Internal Server Error" }`               | Unexpected DB error                              |
 
 ---
 
@@ -591,17 +634,18 @@ Delete a recorded settlement. Wrapped in a transaction.
 **Request body:** None
 
 **Response `200`**
+
 ```json
 { "message": "Settlement deleted successfully" }
 ```
 
 **Error responses**
 
-| Status | Body | Condition |
-|---|---|---|
-| `403` | `{ "message": "You are not a member of this group." }` | Authenticated user is not a member of the group this settlement belongs to |
-| `404` | `{ "message": "Settlement not found" }` | No settlement with given `:id` exists |
-| `500` | `{ "message": "Internal Server Error" }` | Unexpected DB error |
+| Status | Body                                                   | Condition                                                                  |
+| ------ | ------------------------------------------------------ | -------------------------------------------------------------------------- |
+| `403`  | `{ "message": "You are not a member of this group." }` | Authenticated user is not a member of the group this settlement belongs to |
+| `404`  | `{ "message": "Settlement not found" }`                | No settlement with given `:id` exists                                      |
+| `500`  | `{ "message": "Internal Server Error" }`               | Unexpected DB error                                                        |
 
 > **Routing note:** The full mounted path is `/api/groups/settlements/:id`.
 > The routing ambiguity is resolved by declaring the `delete("/settlements/:id", ...)`
@@ -612,21 +656,21 @@ Delete a recorded settlement. Wrapped in a transaction.
 
 ## Endpoint Summary
 
-| Method | Path | Purpose |
-|---|---|---|
-| `GET` | `/api/groups` | List all groups |
-| `POST` | `/api/groups` | Create a group with members |
-| `GET` | `/api/groups/invite/:token` | Preview a group by its invite token |
-| `POST` | `/api/groups/invite/:token/join` | Join a group using its invite token |
-| `GET` | `/api/groups/:id` | Get a group with its members |
-| `GET` | `/api/groups/:id/expenses` | List all expenses for a group |
-| `POST` | `/api/groups/:id/expenses` | Add an expense to a group |
-| `GET` | `/api/groups/:id/balances` | Get per-member balances for a group |
-| `GET` | `/api/groups/:id/settlements/suggest` | Get suggested settlement payments |
-| `GET` | `/api/groups/:id/settlements` | List recorded settlements for a group |
-| `POST` | `/api/groups/:id/settlements` | Record a settlement payment |
-| `DELETE` | `/api/groups/settlements/:id` | Delete a settlement record |
-| `DELETE` | `/api/groups/:id/expenses/:expenseId` | Delete an expense and its splits |
+| Method   | Path                                  | Purpose                               |
+| -------- | ------------------------------------- | ------------------------------------- |
+| `GET`    | `/api/groups`                         | List all groups                       |
+| `POST`   | `/api/groups`                         | Create a group with members           |
+| `GET`    | `/api/groups/invite/:token`           | Preview a group by its invite token   |
+| `POST`   | `/api/groups/invite/:token/join`      | Join a group using its invite token   |
+| `GET`    | `/api/groups/:id`                     | Get a group with its members          |
+| `GET`    | `/api/groups/:id/expenses`            | List all expenses for a group         |
+| `POST`   | `/api/groups/:id/expenses`            | Add an expense to a group             |
+| `GET`    | `/api/groups/:id/balances`            | Get per-member balances for a group   |
+| `GET`    | `/api/groups/:id/settlements/suggest` | Get suggested settlement payments     |
+| `GET`    | `/api/groups/:id/settlements`         | List recorded settlements for a group |
+| `POST`   | `/api/groups/:id/settlements`         | Record a settlement payment           |
+| `DELETE` | `/api/groups/settlements/:id`         | Delete a settlement record            |
+| `DELETE` | `/api/groups/:id/expenses/:expenseId` | Delete an expense and its splits      |
 
 **Total: 13 endpoints across 1 router (excluding Auth).**
 
@@ -634,15 +678,15 @@ Delete a recorded settlement. Wrapped in a transaction.
 
 ## Flagged Inconsistencies (All Resolved)
 
-| # | Issue | Affected endpoints | Resolution |
-|---|---|---|---|
-| 1 | `GET /groups` returns a bare array | `GET /groups` | **Resolved**: Wrapped in `{ message, groups }` on the backend. Frontend service layer unwraps it to maintain compatibility. |
-| 2 | `GET /groups/:id/settlements/suggest` returns a bare array | `GET /groups/:id/settlements/suggest` | **Resolved**: Wrapped in `{ message, suggestions }` on the backend. Frontend service layer unwraps it. |
-| 3 | Frontend error interceptor reads `data.error` instead of `data.message` | All endpoints | **Resolved**: Updated axios interceptor to read `data?.message`. Real backend error messages are now displayed. |
-| 4 | DELETE endpoints return `500` instead of `404` for missing IDs | Both DELETE endpoints | **Resolved**: Added null guards in service layers to throw a proper `404` response. |
-| 5 | `POST /groups` validates in the controller instead of the service | POST endpoints | **Resolved**: Field validation moved into the service layer, keeping error catching in the controller. |
-| 6 | Error string hard-codes `₹` symbol | `POST /groups/:id/settlements` | **Resolved**: Removed `₹` from the server-side error string. |
-| 7 | Routing ambiguity on `/api/groups/settlements/:id` | `DELETE /groups/settlements/:id` | **Resolved**: Moved the DELETE route above the generic dynamic ID route in the backend router file. |
+| #   | Issue                                                                   | Affected endpoints                    | Resolution                                                                                                                  |
+| --- | ----------------------------------------------------------------------- | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| 1   | `GET /groups` returns a bare array                                      | `GET /groups`                         | **Resolved**: Wrapped in `{ message, groups }` on the backend. Frontend service layer unwraps it to maintain compatibility. |
+| 2   | `GET /groups/:id/settlements/suggest` returns a bare array              | `GET /groups/:id/settlements/suggest` | **Resolved**: Wrapped in `{ message, suggestions }` on the backend. Frontend service layer unwraps it.                      |
+| 3   | Frontend error interceptor reads `data.error` instead of `data.message` | All endpoints                         | **Resolved**: Updated axios interceptor to read `data?.message`. Real backend error messages are now displayed.             |
+| 4   | DELETE endpoints return `500` instead of `404` for missing IDs          | Both DELETE endpoints                 | **Resolved**: Added null guards in service layers to throw a proper `404` response.                                         |
+| 5   | `POST /groups` validates in the controller instead of the service       | POST endpoints                        | **Resolved**: Field validation moved into the service layer, keeping error catching in the controller.                      |
+| 6   | Error string hard-codes `₹` symbol                                      | `POST /groups/:id/settlements`        | **Resolved**: Removed `₹` from the server-side error string.                                                                |
+| 7   | Routing ambiguity on `/api/groups/settlements/:id`                      | `DELETE /groups/settlements/:id`      | **Resolved**: Moved the DELETE route above the generic dynamic ID route in the backend router file.                         |
 
 ---
 
@@ -658,6 +702,7 @@ Create a new account with email + password and auto-issue tokens (auto-login aft
 
 **Auth:** None  
 **Request body**
+
 ```json
 {
   "name": "Alice",
@@ -666,13 +711,14 @@ Create a new account with email + password and auto-issue tokens (auto-login aft
 }
 ```
 
-| Field | Required | Type | Notes |
-|---|---|---|---|
-| `name` | Yes | string | Non-empty; max 100 characters |
-| `email` | Yes | string | Must be a valid email format |
-| `password` | Yes | string | 8–72 characters (72 is bcrypt's hard truncation limit — longer passwords are rejected) |
+| Field      | Required | Type   | Notes                                                                                  |
+| ---------- | -------- | ------ | -------------------------------------------------------------------------------------- |
+| `name`     | Yes      | string | Non-empty; max 100 characters                                                          |
+| `email`    | Yes      | string | Must be a valid email format                                                           |
+| `password` | Yes      | string | 8–72 characters (72 is bcrypt's hard truncation limit — longer passwords are rejected) |
 
 **Response `201`**
+
 ```json
 {
   "message": "Registration successful.",
@@ -689,15 +735,16 @@ Create a new account with email + password and auto-issue tokens (auto-login aft
   "accessToken": "<jwt>"
 }
 ```
+
 The `refreshToken` is set as an `httpOnly` cookie named `refreshToken` — it is **not** in the JSON body.
 
 **Error responses**
 
-| Status | Body | Condition |
-|---|---|---|
-| `400` | `{ "message": "<field-specific validation message>" }` | Missing/invalid input |
-| `409` | `{ "message": "An account with this email already exists." }` | Duplicate email |
-| `500` | `{ "message": "Something went wrong. Please try again." }` | Unexpected server error |
+| Status | Body                                                          | Condition               |
+| ------ | ------------------------------------------------------------- | ----------------------- |
+| `400`  | `{ "message": "<field-specific validation message>" }`        | Missing/invalid input   |
+| `409`  | `{ "message": "An account with this email already exists." }` | Duplicate email         |
+| `500`  | `{ "message": "Something went wrong. Please try again." }`    | Unexpected server error |
 
 ---
 
@@ -707,6 +754,7 @@ Authenticate with email + password and receive a fresh token pair.
 
 **Auth:** None  
 **Request body**
+
 ```json
 {
   "email": "alice@example.com",
@@ -715,6 +763,7 @@ Authenticate with email + password and receive a fresh token pair.
 ```
 
 **Response `200`**
+
 ```json
 {
   "message": "Login successful.",
@@ -722,16 +771,17 @@ Authenticate with email + password and receive a fresh token pair.
   "accessToken": "<jwt>"
 }
 ```
+
 The `refreshToken` is set as an `httpOnly` cookie — not in the JSON body.
 
 **Error responses**
 
-| Status | Body | Condition |
-|---|---|---|
-| `400` | `{ "message": "<field-specific validation message>" }` | Missing input |
-| `401` | `{ "message": "Invalid email or password." }` | Email not found or wrong password (deliberately generic — prevents email enumeration) |
-| `401` | `{ "message": "This account uses Google Sign-In. Please log in with Google." }` | Account has no password (Google-only) |
-| `500` | `{ "message": "Something went wrong. Please try again." }` | Unexpected server error |
+| Status | Body                                                                            | Condition                                                                             |
+| ------ | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `400`  | `{ "message": "<field-specific validation message>" }`                          | Missing input                                                                         |
+| `401`  | `{ "message": "Invalid email or password." }`                                   | Email not found or wrong password (deliberately generic — prevents email enumeration) |
+| `401`  | `{ "message": "This account uses Google Sign-In. Please log in with Google." }` | Account has no password (Google-only)                                                 |
+| `500`  | `{ "message": "Something went wrong. Please try again." }`                      | Unexpected server error                                                               |
 
 ---
 
@@ -747,18 +797,20 @@ The old refresh token is immediately invalidated on use (rotation).
 The cookie value is a self-contained composite string `{userId}.{tokenId}.{rawToken}` — the endpoint extracts the `userId` from it to locate the correct Redis key without requiring a separate header or query parameter.
 
 **Response `200`**
+
 ```json
 { "accessToken": "<new-jwt>" }
 ```
+
 A new `refreshToken` cookie is also set (rotated).
 
 **Error responses**
 
-| Status | Body | Condition |
-|---|---|---|
-| `401` | `{ "message": "No refresh token provided." }` | Cookie missing |
-| `401` | `{ "message": "Invalid or expired refresh token. Please log in again." }` | Cookie malformed, Redis key not found, or hash mismatch |
-| `500` | `{ "message": "Something went wrong. Please try again." }` | Unexpected server error |
+| Status | Body                                                                      | Condition                                               |
+| ------ | ------------------------------------------------------------------------- | ------------------------------------------------------- |
+| `401`  | `{ "message": "No refresh token provided." }`                             | Cookie missing                                          |
+| `401`  | `{ "message": "Invalid or expired refresh token. Please log in again." }` | Cookie malformed, Redis key not found, or hash mismatch |
+| `500`  | `{ "message": "Something went wrong. Please try again." }`                | Unexpected server error                                 |
 
 ---
 
@@ -771,17 +823,18 @@ Revoke the current session's refresh token in Redis and clear the cookie.
 **Cookies:** `refreshToken` cookie is read and the specific Redis entry is deleted (not just the cookie cleared)
 
 **Response `200`**
+
 ```json
 { "message": "Logged out successfully." }
 ```
 
 **Error responses**
 
-| Status | Body | Condition |
-|---|---|---|
-| `401` | `{ "message": "Access token required" }` | No/malformed Authorization header |
-| `401` | `{ "message": "Access token expired" }` | Access token past its 15-minute TTL |
-| `401` | `{ "message": "Invalid access token" }` | Bad JWT signature or other error |
+| Status | Body                                     | Condition                           |
+| ------ | ---------------------------------------- | ----------------------------------- |
+| `401`  | `{ "message": "Access token required" }` | No/malformed Authorization header   |
+| `401`  | `{ "message": "Access token expired" }`  | Access token past its 15-minute TTL |
+| `401`  | `{ "message": "Invalid access token" }`  | Bad JWT signature or other error    |
 
 ---
 
@@ -793,6 +846,7 @@ Revoke **all** refresh tokens for the current user across all devices.
 **Request body:** None
 
 **Response `200`**
+
 ```json
 { "message": "Logged out from all devices." }
 ```

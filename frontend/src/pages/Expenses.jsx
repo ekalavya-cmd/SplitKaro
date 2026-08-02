@@ -198,11 +198,8 @@ const Expenses = () => {
 
   // Pagination calculations
   const totalExpenses = filteredExpenses.length;
-  const { totalPages, safePage, startIdx, endIdx, showingFrom, showingTo } = usePagination(
-    totalExpenses,
-    EXPENSES_PER_PAGE,
-    currentPage
-  );
+  const { totalPages, safePage, startIdx, endIdx, showingFrom, showingTo } =
+    usePagination(totalExpenses, EXPENSES_PER_PAGE, currentPage);
   const pagedExpenses = filteredExpenses.slice(startIdx, endIdx);
 
   const isDataLoading =

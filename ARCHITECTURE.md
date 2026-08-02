@@ -167,50 +167,61 @@ splitKaro/
 ## 4. Key Architectural Decisions
 
 ### Layered backend (Routes → Controllers → Services → Models)
+
 Each layer has a single responsibility: routes bind URLs to handlers, controllers translate HTTP to service calls and back, services contain all business logic, models define schema and associations. This is consistent throughout the codebase.
 
 ### Sequelize ORM with MySQL
+
 All database interaction goes through Sequelize models. The `models/index.js` auto-discovers every `.js` file in the models directory and calls its `associate` method, making it easy to add new models without touching the loader.
 
 ### Database transactions for write operations
+
 `createGroupWithMembers`, `createExpenseForGroup`, `deleteExpense`, and `deleteSettlement` all use explicit Sequelize transactions with commit/rollback, preventing partial writes.
 
 ### Integer-safe monetary arithmetic
+
 `splitMath.js` provides shared primitives to operate in integer cents (`totalAmount * 100`) and distribute penny remainders one-by-one to avoid floating-point drift. This single utility is now used by both the equal-split and percentage-split paths to guarantee identical rounding behavior.
 
 ### Server-side balance calculation
+
 User balances and settlement suggestions are computed on the server in `calculateGroupBalances` and `suggestSettlementForGroup`. The suggestion algorithm is a greedy two-pointer approach (largest creditor vs. largest debtor) that minimises the number of transactions.
 
 ### Axios instance with centralised error interceptor and token handling
+
 `http.client.js` creates a single axios instance pointed at `VITE_API_URL` with `withCredentials: true`. A request interceptor automatically attaches the JWT `Authorization` header from `token.store.js` if available. A response interceptor normalises all error shapes to `{ status, message }` before they reach service or component code.
 
 ### Frontend state: React Query + AuthContext
+
 Historically, all data fetching and state lived inside individual page components via `useState`/`useEffect`.
 Now, page-local UI-only state (e.g., form inputs, modal visibility) still stays as local `useState`, but there are two strict exceptions for global data:
+
 1. **Global Auth/Client State:** Managed by `AuthContext` (React Context), tracking login status and the current user.
 2. **Server State:** Managed by TanStack Query (React Query v5), which caches and synchronises API data. This is fully implemented across all pages, meaning components instantly reuse cached data (e.g. `["groups"]`) rather than duplicating network requests on navigation. Mutations also automatically invalidate related queries, replacing manual data-refresh calls.
 
 ### Split types: equal, exact, percentage
+
 The `splitType` field is a MySQL `ENUM('equal','exact','percentage')` enforced at both the DB and service layers. The service validates that exact-split amounts sum to the total, and that percentage-split values sum to 100.
 
 ### CORS locked to http://localhost:5173
+
 The Express server explicitly allows only the Vite dev-server origin. This is hard-coded in `server.js`.
 
 ### Environment configuration via .env files
+
 Backend uses `dotenv`; frontend uses Vite's `import.meta.env`. Both `.env` files are present in the repo (not gitignored at this time).
 
 ---
 
 ## 5. Known Gaps / TODOs
 
-| Area | Issue |
-|---|---|
-| **CORS origin hard-coded** | `origin: "http://localhost:5173"` in `server.js` will break any non-local deployment without a code change. Should be driven from an environment variable. |
+| Area                               | Issue                                                                                                                                                                                                                                  |
+| ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **CORS origin hard-coded**         | `origin: "http://localhost:5173"` in `server.js` will break any non-local deployment without a code change. Should be driven from an environment variable.                                                                             |
 | **No input validation middleware** | Validation logic is spread across auth controller (HTTP boundary) and service layer (business rules). There is no schema-validation library (e.g., Zod, Joi, express-validator) applied consistently across group/expense controllers. |
-
 
 | **No frontend error boundaries** | React error boundaries are not implemented. An uncaught render error will crash the entire SPA. |
 | **Config only has development environment** | `config/config.js` defines only a `development` block. There is no `production` or `test` configuration. |
+
 > For missing product features (auth frontend, tests, rate limiting, pagination, Docker/CI), see `FEATURES.md`.
 > For model-level gaps, see `DATABASE_SCHEMA.md §6 Not Yet Modeled`.
 > For API-level bugs, see `API_REFERENCE.md §Flagged Inconsistencies`.

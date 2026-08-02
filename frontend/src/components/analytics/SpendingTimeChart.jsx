@@ -9,15 +9,29 @@ import {
   CartesianGrid,
 } from "recharts";
 import { formatDateToLocalYMD } from "../../utils/dateFilters";
+import { Skeleton } from "../Skeleton";
 
-export const SpendingTimeChart = ({ expenses }) => {
+export const SpendingTimeChart = ({ expenses, isLoading }) => {
+  if (isLoading) {
+    return (
+      <div className="relative flex h-64 flex-col rounded-lg border border-outline-variant bg-surface-container-lowest p-4 shadow-sm">
+        <h2 className="mb-2 font-label-sm text-label-sm tracking-wider text-on-surface-variant uppercase">
+          Spending Over Time
+        </h2>
+        <div className="mt-2 h-full w-full flex-1">
+          <Skeleton className="h-full w-full rounded-md" />
+        </div>
+      </div>
+    );
+  }
+
   if (expenses.length === 0) {
     return (
       <div className="relative flex h-64 flex-col rounded-lg border border-outline-variant bg-surface-container-lowest p-4 shadow-sm">
         <h2 className="mb-2 font-label-sm text-label-sm tracking-wider text-on-surface-variant uppercase">
           Spending Over Time
         </h2>
-        <div className="flex h-full items-center justify-center text-label-sm text-on-surface-variant opacity-50">
+        <div className="flex h-full items-center justify-center font-body-lg text-body-lg text-on-surface-variant opacity-50">
           No expenses
         </div>
       </div>

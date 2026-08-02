@@ -11,6 +11,7 @@ SplitKaro is a group bill-splitting web app (Splitwise-style): users create grou
 ## 2. Standards
 
 **Backend**
+
 - Module system: CommonJS (`require` / `module.exports`)
 - Layer order: `routes/` → `controllers/` → `services/` → `models/` — business logic lives only in services
 - Services throw plain error objects `{ status, message }` on validation failures; controllers catch and forward them
@@ -19,6 +20,7 @@ SplitKaro is a group bill-splitting web app (Splitwise-style): users create grou
 - DB column naming: `snake_case` in migrations and DB; Sequelize `underscored: true` maps to `camelCase` in JS
 
 **Frontend**
+
 - Module system: ES modules (`import` / `export`)
 - All API calls go through `src/api/splitKaroAPI.js` (axios instance) → `src/services/splitKaroService.js` (one function per endpoint) → page component
 - State: Page-local UI state uses `useState`. Global auth uses `AuthContext`. API caching/fetching uses `TanStack Query` (currently migrating). No Redux/Zustand.
@@ -40,12 +42,12 @@ SplitKaro is a group bill-splitting web app (Splitwise-style): users create grou
 
 ## 4. Documentation Map
 
-| File | Read when… |
-|---|---|
-| `ARCHITECTURE.md` | Making any structural change: new layer, new service, changing how client/server communicate |
+| File                 | Read when…                                                                                   |
+| -------------------- | -------------------------------------------------------------------------------------------- |
+| `ARCHITECTURE.md`    | Making any structural change: new layer, new service, changing how client/server communicate |
 | `DATABASE_SCHEMA.md` | Touching models, migrations, or any Sequelize query; adding/removing columns or associations |
-| `API_REFERENCE.md` | Adding, modifying, or removing any route, controller function, or response shape |
-| `FEATURES.md` | Checking whether something is already built/planned; **update it after every feature ships** |
+| `API_REFERENCE.md`   | Adding, modifying, or removing any route, controller function, or response shape             |
+| `FEATURES.md`        | Checking whether something is already built/planned; **update it after every feature ships** |
 
 ---
 
