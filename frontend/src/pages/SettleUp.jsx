@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useOutletContext, useSearchParams } from "react-router-dom";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getGroup } from "../services/group.service";
+import { useGroupQuery } from "../queries/useGroupsQueries";
 import {
-  getSettlementSuggestions,
-  getSettlements,
-  deleteSettlement,
-} from "../services/settlement.service";
+  useSettlementsQuery,
+  useSettlementSuggestionsQuery,
+} from "../queries/useSettlementsQueries";
+import { useDeleteSettlement } from "../mutations/useSettlementMutations";
 import { useSettlementFilters } from "../hooks/useSettlementFilters";
 import { SettlementFilters } from "../components/SettlementFilters";
 import { SimplifiedSettlements } from "../components/SimplifiedSettlements";
@@ -14,7 +13,7 @@ import { Pagination } from "../components/Pagination";
 import { ErrorBlock } from "../components/ErrorBlock";
 import { Skeleton } from "../components/Skeleton";
 import { RecordSettlementModal } from "../components/RecordSettlementModal";
-import { usePageQueryState } from "../hooks/usePageQueryState";
+import { usePageLoadingState } from "../hooks/usePageLoadingState";
 import { usePagination } from "../hooks/usePagination";
 import {
   formatDateForDisplay,
@@ -24,13 +23,7 @@ import {
 const SETTLEMENTS_PER_PAGE = 10;
 
 const SettleUp = () => {
-  const {
-    selectedGroupId,
-    isInitializing,
-    hasConnectionError,
-    groupsIsLoading,
-  } = useOutletContext();
-  const queryClient = useQueryClient();
+  const { selectedGroupId } = useOutletContext();
   const [searchParams, setSearchParams] = useSearchParams();
   const [isSettlementModalOpen, setIsSettlementModalOpen] = useState(false);
   const [settlementModalData, setSettlementModalData] = useState(null);
@@ -61,28 +54,16 @@ const SettleUp = () => {
     return Number.isFinite(p) && p > 0 ? p : 1;
   });
 
-  const groupQuery = useQuery({
-    queryKey: ["groups", selectedGroupId],
-    queryFn: () => getGroup(selectedGroupId),
-    enabled: !!selectedGroupId,
-  });
+  const groupQuery = useGroupQuery(selectedGroupId);
   const group = groupQuery.data;
 
-  const suggestionsQuery = useQuery({
-    queryKey: ["groups", selectedGroupId, "settlements", "suggest"],
-    queryFn: () => getSettlementSuggestions(selectedGroupId),
-    enabled: !!selectedGroupId,
-  });
+  const suggestionsQuery = useSettlementSuggestionsQuery(selectedGroupId);
   const suggestions = suggestionsQuery.data || [];
 
-  const settlementsQuery = useQuery({
-    queryKey: ["groups", selectedGroupId, "settlements"],
-    queryFn: () => getSettlements(selectedGroupId),
-    enabled: !!selectedGroupId,
-  });
+  const settlementsQuery = useSettlementsQuery(selectedGroupId);
   const settlementsData = settlementsQuery.data || { settlements: [] };
 
-  const { isError, errors, refetchAll } = usePageQueryState([
+  const { isDataLoading, isError, errors, refetchAll } = usePageLoadingState([
     groupQuery,
     suggestionsQuery,
     settlementsQuery,
@@ -170,22 +151,7 @@ const SettleUp = () => {
     usePagination(totalSettlements, SETTLEMENTS_PER_PAGE, currentPage);
   const pagedSettlements = filteredSettlements.slice(startIdx, endIdx);
 
-  const isDataLoading = isInitializing || hasConnectionError || groupsIsLoading;
-
-  const deleteSettlementMutation = useMutation({
-    mutationFn: ({ settlementId }) => deleteSettlement(settlementId),
-    onSuccess: (data, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: ["groups", variables.groupId, "balances"],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["groups", variables.groupId, "settlements", "suggest"],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["groups", variables.groupId, "settlements"],
-      });
-    },
-  });
+  const deleteSettlementMutation = useDeleteSettlement();
 
   if (isError) {
     return (

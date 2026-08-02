@@ -1,7 +1,6 @@
 import React, { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getGroup } from "../services/group.service";
-import { createExpense } from "../services/expense.service";
+import { useGroupQuery } from "../queries/useGroupsQueries";
+import { useCreateExpense } from "../mutations/useExpenseMutations";
 import { Skeleton } from "./Skeleton";
 import { Modal } from "./Modal";
 
@@ -15,7 +14,6 @@ const clearInputs = {
 };
 
 export const AddExpenseModal = ({ isOpen, onClose, groupId }) => {
-  const queryClient = useQueryClient();
   const [inputs, setInputs] = useState(clearInputs);
   const [exactSplits, setExactSplits] = useState({});
   const [percentageSplits, setPercentageSplits] = useState({});
@@ -31,32 +29,13 @@ export const AddExpenseModal = ({ isOpen, onClose, groupId }) => {
     }
   }
 
-  const groupQuery = useQuery({
-    queryKey: ["groups", groupId],
-    queryFn: () => getGroup(groupId),
-    enabled: !!groupId && isOpen,
-  });
+  const groupQuery = useGroupQuery(groupId, { enabled: !!groupId && isOpen });
   const group = groupQuery.data;
 
-  const createExpenseMutation = useMutation({
-    mutationFn: ({ groupId, inputs }) => createExpense(groupId, inputs),
-    onSuccess: (data, variables) => {
-      alert("Expense added successfully!");
-      queryClient.invalidateQueries({
-        queryKey: ["groups", variables.groupId, "expenses"],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["groups", variables.groupId, "balances"],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["groups", variables.groupId, "settlements", "suggest"],
-      });
+  const createExpenseMutation = useCreateExpense({
+    onSuccess: () => {
       setInputs(clearInputs);
       onClose();
-    },
-    onError: (error) => {
-      console.error("Error creating expense:", error);
-      alert("Failed to add expense. Please try again.");
     },
   });
 

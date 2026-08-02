@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useOutletContext, useSearchParams } from "react-router-dom";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getGroup } from "../services/group.service";
-import { getExpenses, deleteExpense } from "../services/expense.service";
+import { useGroupQuery } from "../queries/useGroupsQueries";
+import { useExpensesQuery } from "../queries/useExpensesQueries";
+import { useDeleteExpense } from "../mutations/useExpenseMutations";
 import { useExpenseFilters } from "../hooks/useExpenseFilters";
 import { ExpenseFilters } from "../components/ExpenseFilters";
 import { Pagination } from "../components/Pagination";
 import { ErrorBlock } from "../components/ErrorBlock";
 import { Skeleton } from "../components/Skeleton";
-import { usePageQueryState } from "../hooks/usePageQueryState";
+import { usePageLoadingState } from "../hooks/usePageLoadingState";
 import { usePagination } from "../hooks/usePagination";
 import { calculatePresetDates } from "../utils/dateFilters";
 import { formatDateForDisplay } from "../utils/dateFilters";
@@ -16,13 +16,7 @@ import { formatDateForDisplay } from "../utils/dateFilters";
 const EXPENSES_PER_PAGE = 10;
 
 const Expenses = () => {
-  const {
-    selectedGroupId,
-    isInitializing,
-    hasConnectionError,
-    groupsIsLoading,
-  } = useOutletContext();
-  const queryClient = useQueryClient();
+  const { selectedGroupId } = useOutletContext();
   const [expandedExpenseIds, setExpandedExpenseIds] = useState({});
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -55,46 +49,18 @@ const Expenses = () => {
     return Number.isFinite(p) && p > 0 ? p : 1;
   });
 
-  const groupQuery = useQuery({
-    queryKey: ["groups", selectedGroupId],
-    queryFn: () => getGroup(selectedGroupId),
-    enabled: !!selectedGroupId,
-  });
+  const groupQuery = useGroupQuery(selectedGroupId);
   const group = groupQuery.data;
 
-  const expensesQuery = useQuery({
-    queryKey: ["groups", selectedGroupId, "expenses"],
-    queryFn: async () => {
-      const data = await getExpenses(selectedGroupId);
-      return data.expenses || [];
-    },
-    enabled: !!selectedGroupId,
-  });
+  const expensesQuery = useExpensesQuery(selectedGroupId);
   const expenses = expensesQuery.data || [];
 
-  const { isError, errors, refetchAll } = usePageQueryState([
+  const { isDataLoading, isError, errors, refetchAll } = usePageLoadingState([
     groupQuery,
     expensesQuery,
   ]);
 
-  const deleteExpenseMutation = useMutation({
-    mutationFn: ({ groupId, expenseId }) => deleteExpense(groupId, expenseId),
-    onSuccess: (data, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: ["groups", variables.groupId, "expenses"],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["groups", variables.groupId, "balances"],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["groups", variables.groupId, "settlements", "suggest"],
-      });
-    },
-    onError: (error) => {
-      console.error("Error deleting expense:", error);
-      alert("Failed to delete expense. Please try again.");
-    },
-  });
+  const deleteExpenseMutation = useDeleteExpense();
 
   const { filteredExpenses, filterProps } = useExpenseFilters(
     expenses,
@@ -201,12 +167,6 @@ const Expenses = () => {
   const { totalPages, safePage, startIdx, endIdx, showingFrom, showingTo } =
     usePagination(totalExpenses, EXPENSES_PER_PAGE, currentPage);
   const pagedExpenses = filteredExpenses.slice(startIdx, endIdx);
-
-  const isDataLoading =
-    isInitializing ||
-    hasConnectionError ||
-    groupsIsLoading ||
-    expensesQuery.isLoading;
 
   const toggleExpenseExpand = (id) => {
     setExpandedExpenseIds((prev) => ({

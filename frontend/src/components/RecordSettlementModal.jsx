@@ -1,8 +1,7 @@
 import React, { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Modal } from "./Modal";
-import { getGroup } from "../services/group.service";
-import { createSettlement } from "../services/settlement.service";
+import { useGroupQuery } from "../queries/useGroupsQueries";
+import { useCreateSettlement } from "../mutations/useSettlementMutations";
 
 const clearInputs = {
   paid_by: "",
@@ -17,14 +16,9 @@ export const RecordSettlementModal = ({
   groupId,
   initialData,
 }) => {
-  const queryClient = useQueryClient();
   const [inputs, setInputs] = useState(clearInputs);
 
-  const groupQuery = useQuery({
-    queryKey: ["groups", groupId],
-    queryFn: () => getGroup(groupId),
-    enabled: !!groupId && isOpen,
-  });
+  const groupQuery = useGroupQuery(groupId, { enabled: !!groupId && isOpen });
   const group = groupQuery.data;
 
   // Adjust state during render based on prop changes (React recommended pattern)
@@ -35,9 +29,9 @@ export const RecordSettlementModal = ({
       if (initialData) {
         setInputs({
           ...clearInputs,
-          paid_by: initialData.paid_by || "",
-          paid_to: initialData.paid_to || "",
-          amount: initialData.amount || "",
+          paid_by: initialData?.paid_by || "",
+          paid_to: initialData?.paid_to || "",
+          amount: initialData?.amount || "",
         });
       } else {
         setInputs(clearInputs);
@@ -52,23 +46,13 @@ export const RecordSettlementModal = ({
     setInputs((prev) => ({ ...prev, [name]: value }));
   };
 
-  const createSettlementMutation = useMutation({
-    mutationFn: ({ groupId, inputs }) => createSettlement(groupId, inputs),
-    onSuccess: (data, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: ["groups", variables.groupId, "balances"],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["groups", variables.groupId, "settlements", "suggest"],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["groups", variables.groupId, "settlements"],
-      });
-      onClose(); // Close modal on success
+  const createSettlementMutation = useCreateSettlement({
+    onSuccess: () => {
+      onClose();
     },
     onError: (error) => {
-      console.error("Error recording settlement:", error);
-      alert(error.response?.data?.message || "Failed to record settlement.");
+      console.error("Error creating settlement:", error);
+      alert(error.message || "Failed to record settlement. Please try again.");
     },
   });
 

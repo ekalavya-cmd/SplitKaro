@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { getGroups } from "../services/group.service";
+import { useAllGroupsQuery } from "../queries/useGroupsQueries";
 import { useAuth } from "../context/useAuth";
 import { AddExpenseModal } from "../components/AddExpenseModal";
 
@@ -17,9 +16,7 @@ const Layout = () => {
     data: groups = [],
     isLoading,
     isError,
-  } = useQuery({
-    queryKey: ["groups"],
-    queryFn: getGroups,
+  } = useAllGroupsQuery({
     enabled: isAuthenticated && !isInitializing,
   });
 

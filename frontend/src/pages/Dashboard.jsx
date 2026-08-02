@@ -1,16 +1,13 @@
 import React, { useState } from "react";
 import { useOutletContext } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { getGroup } from "../services/group.service";
-import { getExpenses } from "../services/expense.service";
-import {
-  getBalances,
-  getSettlementSuggestions,
-} from "../services/settlement.service";
+import { useGroupQuery } from "../queries/useGroupsQueries";
+import { useBalancesQuery } from "../queries/useBalancesQueries";
+import { useExpensesQuery } from "../queries/useExpensesQueries";
+import { useSettlementSuggestionsQuery } from "../queries/useSettlementsQueries";
 import { LoadingSpinner } from "../components/LoadingSpinner";
 import { ErrorBlock } from "../components/ErrorBlock";
 import { Skeleton } from "../components/Skeleton";
-import { usePageQueryState } from "../hooks/usePageQueryState";
+import { usePageLoadingState } from "../hooks/usePageLoadingState";
 import { formatDateForDisplay } from "../utils/dateFilters";
 import { SimplifiedSettlements } from "../components/SimplifiedSettlements";
 import { SpendByMemberChart } from "../components/analytics/SpendByMemberChart";
@@ -21,51 +18,24 @@ import { RecordSettlementModal } from "../components/RecordSettlementModal";
 const RECENT_EXPENSES_COUNT = 5;
 
 const Dashboard = () => {
-  const {
-    selectedGroupId,
-    isInitializing,
-    hasConnectionError,
-    groupsIsLoading,
-  } = useOutletContext();
+  const { selectedGroupId } = useOutletContext();
   const [expandedExpenseIds, setExpandedExpenseIds] = useState({});
   const [isSettlementModalOpen, setIsSettlementModalOpen] = useState(false);
   const [settlementModalData, setSettlementModalData] = useState(null);
 
-  const groupQuery = useQuery({
-    queryKey: ["groups", selectedGroupId],
-    queryFn: () => getGroup(selectedGroupId),
-    enabled: !!selectedGroupId,
-  });
+  const groupQuery = useGroupQuery(selectedGroupId);
   const group = groupQuery.data;
 
-  const expensesQuery = useQuery({
-    queryKey: ["groups", selectedGroupId, "expenses"],
-    queryFn: async () => {
-      const data = await getExpenses(selectedGroupId);
-      return data.expenses || [];
-    },
-    enabled: !!selectedGroupId,
-  });
+  const expensesQuery = useExpensesQuery(selectedGroupId);
   const expenses = expensesQuery.data || [];
 
-  const balancesQuery = useQuery({
-    queryKey: ["groups", selectedGroupId, "balances"],
-    queryFn: async () => {
-      const data = await getBalances(selectedGroupId);
-      return data.balances || [];
-    },
-    enabled: !!selectedGroupId,
-  });
+  const balancesQuery = useBalancesQuery(selectedGroupId);
   const balances = balancesQuery.data || [];
 
-  const suggestionsQuery = useQuery({
-    queryKey: ["groups", selectedGroupId, "settlements", "suggest"],
-    queryFn: () => getSettlementSuggestions(selectedGroupId),
-    enabled: !!selectedGroupId,
-  });
+  const suggestionsQuery = useSettlementSuggestionsQuery(selectedGroupId);
   const suggestions = suggestionsQuery.data || [];
 
-  const { isError, errors, refetchAll } = usePageQueryState([
+  const { isDataLoading, isError, errors, refetchAll } = usePageLoadingState([
     groupQuery,
     expensesQuery,
     balancesQuery,
@@ -121,10 +91,7 @@ const Dashboard = () => {
           <h2 className="font-headline-md text-headline-md text-on-surface">
             Overview
           </h2>
-          {isInitializing ||
-          hasConnectionError ||
-          groupsIsLoading ||
-          balancesQuery.isLoading ? (
+          {isDataLoading ? (
             <div className="grid grid-cols-1 gap-gutter sm:grid-cols-3">
               {[1, 2, 3].map((i) => (
                 <div
@@ -213,12 +180,7 @@ const Dashboard = () => {
         {/* Simplified Settlements */}
         <SimplifiedSettlements
           suggestions={suggestions}
-          isLoading={
-            isInitializing ||
-            hasConnectionError ||
-            groupsIsLoading ||
-            suggestionsQuery.isLoading
-          }
+          isLoading={isDataLoading}
           onSettle={(from, to, amount) => {
             setSettlementModalData({
               paid_by: from.id,
@@ -235,31 +197,10 @@ const Dashboard = () => {
         <SpendByMemberChart
           expenses={expenses}
           members={group?.members || []}
-          isLoading={
-            isInitializing ||
-            hasConnectionError ||
-            groupsIsLoading ||
-            expensesQuery.isLoading
-          }
+          isLoading={isDataLoading}
         />
-        <SplitTypeChart
-          expenses={expenses}
-          isLoading={
-            isInitializing ||
-            hasConnectionError ||
-            groupsIsLoading ||
-            expensesQuery.isLoading
-          }
-        />
-        <SpendingTimeChart
-          expenses={expenses}
-          isLoading={
-            isInitializing ||
-            hasConnectionError ||
-            groupsIsLoading ||
-            expensesQuery.isLoading
-          }
-        />
+        <SplitTypeChart expenses={expenses} isLoading={isDataLoading} />
+        <SpendingTimeChart expenses={expenses} isLoading={isDataLoading} />
       </div>
 
       <div className="flex flex-col gap-4">
@@ -290,10 +231,7 @@ const Dashboard = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-outline-variant">
-                {isInitializing ||
-                hasConnectionError ||
-                groupsIsLoading ||
-                expensesQuery.isLoading ? (
+                {isDataLoading ? (
                   Array.from({ length: 1 }).map((_, i) => (
                     <tr key={i} className="h-row-height-compact">
                       <td className="px-4 py-8">
