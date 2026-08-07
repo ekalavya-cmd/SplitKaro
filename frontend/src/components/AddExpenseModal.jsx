@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useGroupQuery } from "../queries/useGroupsQueries";
@@ -30,7 +30,7 @@ const expenseSchema = z
 
     if (data.split_type === "exact") {
       const sum = splitValues.reduce((acc, v) => acc + (Number(v) || 0), 0);
-      if (Math.abs(sum - data.amount) > 0.01) {
+      if (Math.round(sum * 100) !== Math.round(data.amount * 100)) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           path: ["splits"],
@@ -41,7 +41,7 @@ const expenseSchema = z
 
     if (data.split_type === "percentage") {
       const sum = splitValues.reduce((acc, v) => acc + (Number(v) || 0), 0);
-      if (Math.abs(sum - 100) > 0.01) {
+      if (Math.round(sum * 100) !== 10000) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           path: ["splits"],
@@ -76,7 +76,7 @@ export const AddExpenseModal = ({ isOpen, onClose, groupId }) => {
     handleSubmit,
     reset,
     setValue,
-    watch,
+    control,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(expenseSchema),
@@ -90,8 +90,8 @@ export const AddExpenseModal = ({ isOpen, onClose, groupId }) => {
     },
   });
 
-  const splitType = watch("split_type");
-  const amount = watch("amount");
+  const splitType = useWatch({ control, name: "split_type" });
+  const amount = useWatch({ control, name: "amount" });
 
   // Reset on close (render-phase pattern to avoid setState-in-effect lint)
   const [prevIsOpen, setPrevIsOpen] = useState(isOpen);

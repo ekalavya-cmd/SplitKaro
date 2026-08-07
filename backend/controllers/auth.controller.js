@@ -20,43 +20,6 @@ function refreshCookieOptions() {
   };
 }
 
-// ─── input validators ────────────────────────────────────────────────────────
-
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-function validateRegisterInput({ name, email, password }) {
-  if (!name || typeof name !== "string" || !name.trim()) {
-    return "Name is required.";
-  }
-  if (name.trim().length > 100) {
-    return "Name must be 100 characters or fewer.";
-  }
-  if (!email || typeof email !== "string" || !EMAIL_REGEX.test(email.trim())) {
-    return "A valid email address is required.";
-  }
-  if (!password || typeof password !== "string") {
-    return "Password is required.";
-  }
-  if (password.length < 8) {
-    return "Password must be at least 8 characters.";
-  }
-  // bcrypt silently truncates passwords longer than 72 bytes — we reject them
-  // instead so the user is never surprised by a truncation they didn't know about.
-  if (password.length > 72) {
-    return "Password must be 72 characters or fewer.";
-  }
-  return null; // no error
-}
-
-function validateLoginInput({ email, password }) {
-  if (!email || typeof email !== "string" || !email.trim()) {
-    return "Email is required.";
-  }
-  if (!password || typeof password !== "string" || !password.trim()) {
-    return "Password is required.";
-  }
-  return null;
-}
 
 // ─── error handler helper ────────────────────────────────────────────────────
 
@@ -82,10 +45,6 @@ async function register(req, res) {
   const { name, email, password } = req.body;
   const deviceInfo = req.headers["user-agent"] || "unknown";
 
-  const validationError = validateRegisterInput({ name, email, password });
-  if (validationError) {
-    return res.status(400).json({ message: validationError });
-  }
 
   try {
     const { user, accessToken, refreshToken } = await authService.registerUser(
@@ -106,10 +65,6 @@ async function login(req, res) {
   const { email, password } = req.body;
   const deviceInfo = req.headers["user-agent"] || "unknown";
 
-  const validationError = validateLoginInput({ email, password });
-  if (validationError) {
-    return res.status(400).json({ message: validationError });
-  }
 
   try {
     const { user, accessToken, refreshToken } = await authService.loginUser(

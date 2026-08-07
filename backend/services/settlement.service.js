@@ -193,20 +193,6 @@ async function suggestSettlementForGroup(groupId) {
 async function recordSettlementForGroup(groupId, settlementData) {
   const { paid_by, paid_to, amount, date } = settlementData;
 
-  if (!paid_by || !paid_to || !amount) {
-    throw {
-      status: 400,
-      message: "paid_by, paid_to, and amount are required",
-    };
-  }
-
-  if (paid_by === paid_to) {
-    throw {
-      status: 400,
-      message: "Cannot record settlement to yourself",
-    };
-  }
-
   const group = await Groups.findByPk(groupId, {
     include: {
       model: User,
@@ -247,9 +233,6 @@ async function recordSettlementForGroup(groupId, settlementData) {
   }
 
   const parsedAmount = Math.round(Number(amount) * 100);
-  if (parsedAmount <= 0) {
-    throw { status: 400, message: "Amount must be greater than 0" };
-  }
 
   const parsedDate = validateAndParseDate(date);
 

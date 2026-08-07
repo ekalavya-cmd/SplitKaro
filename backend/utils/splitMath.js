@@ -8,6 +8,10 @@ function distributeRemainder(amounts, remainder) {
   const adjustment = remainder > 0 ? 1 : -1;
   const count = Math.abs(remainder);
 
+  if (count > amounts.length) {
+    throw new Error(`Critical invariant violation: Remainder (${remainder}) exceeds the number of members (${amounts.length}) and cannot be safely absorbed.`);
+  }
+
   for (let i = 0; i < count; i++) {
     result[i] += adjustment;
   }

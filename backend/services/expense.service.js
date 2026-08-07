@@ -15,25 +15,6 @@ async function createExpenseForGroup(groupId, expenseData) {
   const { paid_by, amount, description, split_type, date, splits } =
     expenseData;
 
-  if (!paid_by || !amount || !description || !split_type || !date) {
-    throw {
-      status: 400,
-      message:
-        "paid_by, amount, description, split_type, and date are required",
-    };
-  }
-
-  if (
-    split_type !== "equal" &&
-    split_type !== "exact" &&
-    split_type !== "percentage"
-  ) {
-    throw {
-      status: 400,
-      message: "split_type must be 'equal', 'exact', or 'percentage'",
-    };
-  }
-
   const group = await Groups.findByPk(groupId, {
     include: {
       model: User,
@@ -67,9 +48,6 @@ async function createExpenseForGroup(groupId, expenseData) {
   const parsedDate = validateAndParseDate(date);
 
   const totalAmount = Math.round(Number(amount) * 100);
-  if (totalAmount <= 0) {
-    throw { status: 400, message: "Amount must be greater than 0" };
-  }
 
   let splitsData;
 
@@ -81,13 +59,6 @@ async function createExpenseForGroup(groupId, expenseData) {
       amountOwed: (sharedAmount[index] / 100).toFixed(2),
     }));
   } else if (split_type === "exact") {
-    if (!splits || typeof splits !== "object") {
-      throw {
-        status: 400,
-        message: "splits object is required for exact split type",
-      };
-    }
-
     const userIds = users.map((user) => user.id);
     const splitUserIds = Object.keys(splits).map((id) => Number(id));
 
@@ -112,7 +83,7 @@ async function createExpenseForGroup(groupId, expenseData) {
       0,
     );
 
-    if (Math.abs(splitsTotal - Number(amount)) > 0.01) {
+    if (Math.round(splitsTotal * 100) !== Math.round(Number(amount) * 100)) {
       throw {
         status: 400,
         message: `Split amounts sum to ${splitsTotal}, but total amount is ${amount}`,
@@ -125,13 +96,6 @@ async function createExpenseForGroup(groupId, expenseData) {
       amountOwed: Number(splits[userId]).toFixed(2),
     }));
   } else if (split_type === "percentage") {
-    if (!splits || typeof splits !== "object") {
-      throw {
-        status: 400,
-        message: "splits object is required for percentage split type",
-      };
-    }
-
     const userIds = users.map((user) => user.id);
     const splitUserIds = Object.keys(splits).map((id) => Number(id));
 
@@ -156,7 +120,7 @@ async function createExpenseForGroup(groupId, expenseData) {
       0,
     );
 
-    if (Math.abs(percentagesTotal - 100) > 0.01) {
+    if (Math.round(percentagesTotal * 100) !== 10000) {
       throw {
         status: 400,
         message: `Percentages sum to ${percentagesTotal}, but must sum to exactly 100`,

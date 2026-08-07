@@ -50,10 +50,6 @@ async function getGroup(groupId) {
 }
 
 async function createGroup(userId, { name, description }) {
-  if (!name || name.trim() === "") {
-    throw { status: 400, message: "Group name is required." };
-  }
-
   const transaction = await sequelize.transaction();
 
   try {

@@ -6,6 +6,8 @@ const {
   requireGroupMembership,
   requireExpenseGroupMembership,
 } = require("../middleware/groupMembership.middleware");
+const { validate } = require("../middleware/validate.middleware");
+const { createExpenseSchema } = require("../validators/expense.validators");
 
 router.get(
   "/",
@@ -17,6 +19,7 @@ router.post(
   "/",
   authenticate,
   requireGroupMembership,
+  validate(createExpenseSchema),
   expenseController.createExpense,
 );
 router.delete(

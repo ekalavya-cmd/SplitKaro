@@ -6,6 +6,8 @@ const {
   requireGroupMembership,
   requireSettlementGroupMembership,
 } = require("../middleware/groupMembership.middleware");
+const { validate } = require("../middleware/validate.middleware");
+const { recordSettlementSchema } = require("../validators/settlement.validators");
 
 router.delete(
   "/settlements/:id",
@@ -29,6 +31,7 @@ router.post(
   "/:id/settlements",
   authenticate,
   requireGroupMembership,
+  validate(recordSettlementSchema),
   settlementController.recordSettlement,
 );
 router.get(

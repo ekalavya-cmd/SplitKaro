@@ -5,6 +5,8 @@ const { authenticate } = require("../middleware/auth.middleware");
 const {
   requireGroupMembership,
 } = require("../middleware/groupMembership.middleware");
+const { validate } = require("../middleware/validate.middleware");
+const { createGroupSchema } = require("../validators/group.validators");
 
 const inviteRouter = require("./invite.routes");
 const settlementRouter = require("./settlement.routes");
@@ -12,7 +14,12 @@ const expenseRouter = require("./expense.routes");
 
 // 1. Static and flat routes / mounts
 router.get("/", authenticate, groupController.fetchGroups);
-router.post("/", authenticate, groupController.createGroup);
+router.post(
+  "/",
+  authenticate,
+  validate(createGroupSchema),
+  groupController.createGroup,
+);
 router.use("/invite", inviteRouter);
 
 // 2. Mixin routes (must precede the generic /:id catch-all)
