@@ -1,12 +1,6 @@
 const crypto = require("crypto");
 const logger = require("../config/logger.config");
-const {
-  Groups,
-  GroupMember,
-  User,
-  sequelize,
-} = require("../models");
-
+const { Groups, GroupMember, User, sequelize } = require("../models");
 
 async function getGroups(userId) {
   return await Groups.findAll({
@@ -48,7 +42,9 @@ async function getGroup(groupId) {
     })),
   };
 
-  logger.debug(`Fetched group id ${groupId} with ${result.members.length} members`);
+  logger.debug(
+    `Fetched group id ${groupId} with ${result.members.length} members`,
+  );
 
   return result;
 }
@@ -70,7 +66,7 @@ async function createGroup(userId, { name, description }) {
         createdBy: userId,
         inviteToken,
       },
-      { transaction }
+      { transaction },
     );
 
     await GroupMember.create(
@@ -78,7 +74,7 @@ async function createGroup(userId, { name, description }) {
         userId,
         groupId: group.id,
       },
-      { transaction }
+      { transaction },
     );
 
     await transaction.commit();
@@ -91,7 +87,6 @@ async function createGroup(userId, { name, description }) {
     throw error;
   }
 }
-
 
 module.exports = {
   getGroups,

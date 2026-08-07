@@ -61,13 +61,19 @@ function validateLoginInput({ email, password }) {
 // ─── error handler helper ────────────────────────────────────────────────────
 
 function handleServiceError(err, res, context) {
-  if (err && typeof err.status === "number" && typeof err.message === "string") {
+  if (
+    err &&
+    typeof err.status === "number" &&
+    typeof err.message === "string"
+  ) {
     // Expected service error (validation / auth failure)
     return res.status(err.status).json({ message: err.message });
   }
   // Unexpected error — log full details server-side, never leak them to client
   logger.error(`${context}: unexpected error`, err);
-  return res.status(500).json({ message: "Something went wrong. Please try again." });
+  return res
+    .status(500)
+    .json({ message: "Something went wrong. Please try again." });
 }
 
 // ─── controllers ─────────────────────────────────────────────────────────────
@@ -84,11 +90,13 @@ async function register(req, res) {
   try {
     const { user, accessToken, refreshToken } = await authService.registerUser(
       { name: name.trim(), email: email.trim().toLowerCase(), password },
-      deviceInfo
+      deviceInfo,
     );
 
     res.cookie("refreshToken", refreshToken, refreshCookieOptions());
-    return res.status(201).json({ message: "Registration successful.", user, accessToken });
+    return res
+      .status(201)
+      .json({ message: "Registration successful.", user, accessToken });
   } catch (err) {
     return handleServiceError(err, res, "register");
   }
@@ -106,11 +114,13 @@ async function login(req, res) {
   try {
     const { user, accessToken, refreshToken } = await authService.loginUser(
       { email: email.trim().toLowerCase(), password },
-      deviceInfo
+      deviceInfo,
     );
 
     res.cookie("refreshToken", refreshToken, refreshCookieOptions());
-    return res.status(200).json({ message: "Login successful.", user, accessToken });
+    return res
+      .status(200)
+      .json({ message: "Login successful.", user, accessToken });
   } catch (err) {
     return handleServiceError(err, res, "login");
   }
@@ -129,7 +139,11 @@ async function refresh(req, res) {
   const firstDot = composite.indexOf(".");
   if (firstDot === -1) {
     res.clearCookie("refreshToken");
-    return res.status(401).json({ message: "Invalid or expired refresh token. Please log in again." });
+    return res
+      .status(401)
+      .json({
+        message: "Invalid or expired refresh token. Please log in again.",
+      });
   }
 
   const userId = parseInt(composite.substring(0, firstDot), 10);
@@ -137,7 +151,11 @@ async function refresh(req, res) {
 
   if (!userId || isNaN(userId)) {
     res.clearCookie("refreshToken");
-    return res.status(401).json({ message: "Invalid or expired refresh token. Please log in again." });
+    return res
+      .status(401)
+      .json({
+        message: "Invalid or expired refresh token. Please log in again.",
+      });
   }
 
   try {
@@ -146,12 +164,19 @@ async function refresh(req, res) {
 
     if (!result) {
       res.clearCookie("refreshToken");
-      return res.status(401).json({ message: "Invalid or expired refresh token. Please log in again." });
+      return res
+        .status(401)
+        .json({
+          message: "Invalid or expired refresh token. Please log in again.",
+        });
     }
 
     // Issue brand-new token pair (the old refresh token was already deleted by verifyRefreshToken)
     const newAccessToken = tokenService.generateAccessToken(userId);
-    const newRefreshToken = await tokenService.generateRefreshToken(userId, deviceInfo);
+    const newRefreshToken = await tokenService.generateRefreshToken(
+      userId,
+      deviceInfo,
+    );
 
     res.cookie("refreshToken", newRefreshToken, refreshCookieOptions());
     return res.status(200).json({ accessToken: newAccessToken });

@@ -45,7 +45,9 @@ async function createGroup(req, res) {
     }
 
     logger.error("Error creating group:", err);
-    res.status(500).json({ message: "Something went wrong. Please try again." });
+    res
+      .status(500)
+      .json({ message: "Something went wrong. Please try again." });
   }
 }
 

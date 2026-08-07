@@ -1,31 +1,107 @@
 import React, { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { useGroupQuery } from "../queries/useGroupsQueries";
 import { useCreateExpense } from "../mutations/useExpenseMutations";
 import { Skeleton } from "./Skeleton";
 import { Modal } from "./Modal";
 
-const clearInputs = {
-  paid_by: "",
-  amount: "",
-  description: "",
-  split_type: "equal",
-  date: new Date().toISOString().split("T")[0],
-  splits: {},
-};
+// ---------------------------------------------------------------------------
+// Schema — mirrors backend expense.service.js tolerances exactly:
+//   Exact:      Math.abs(splitsTotal - amount) > 0.01
+//   Percentage: Math.abs(percentagesTotal - 100) > 0.01
+// ---------------------------------------------------------------------------
+const expenseSchema = z
+  .object({
+    description: z.string().min(1, "Description is required"),
+    amount: z.coerce
+      .number({ invalid_type_error: "Amount is required" })
+      .positive("Amount must be greater than 0"),
+    paid_by: z.string().min(1, "Payer is required"),
+    split_type: z.enum(["equal", "exact", "percentage"]),
+    date: z.string().min(1, "Date is required"),
+    // splits is managed via setValue; Zod validates the computed totals
+    splits: z.record(z.string(), z.number()).optional().default({}),
+  })
+  .superRefine((data, ctx) => {
+    const splits = data.splits ?? {};
+    const splitValues = Object.values(splits);
 
+    if (data.split_type === "exact") {
+      const sum = splitValues.reduce((acc, v) => acc + (Number(v) || 0), 0);
+      if (Math.abs(sum - data.amount) > 0.01) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["splits"],
+          message: `Split amounts must sum to ₹${data.amount.toFixed(2)} (currently ₹${sum.toFixed(2)})`,
+        });
+      }
+    }
+
+    if (data.split_type === "percentage") {
+      const sum = splitValues.reduce((acc, v) => acc + (Number(v) || 0), 0);
+      if (Math.abs(sum - 100) > 0.01) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["splits"],
+          message: `Percentages must sum to 100% (currently ${sum.toFixed(2)}%)`,
+        });
+      }
+    }
+  });
+
+// ---------------------------------------------------------------------------
+// Style helpers
+// ---------------------------------------------------------------------------
+const fieldBorder = (hasError) =>
+  hasError ? "border-error" : "border-outline-variant";
+
+const baseInputClass =
+  "h-10 w-full rounded-lg border bg-surface-container-lowest px-4 font-body-md text-body-md text-on-surface transition-shadow focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none";
+
+const fieldErrorClass = "mt-1 font-label-sm text-label-sm text-error";
+
+// ---------------------------------------------------------------------------
+// Component
+// ---------------------------------------------------------------------------
 export const AddExpenseModal = ({ isOpen, onClose, groupId }) => {
-  const [inputs, setInputs] = useState(clearInputs);
+  // Tab-memory: keep per-tab split values independent of RHF
   const [exactSplits, setExactSplits] = useState({});
   const [percentageSplits, setPercentageSplits] = useState({});
+  const [serverError, setServerError] = useState(null);
 
-  // Adjust state during render based on prop changes (React recommended pattern)
+  const {
+    register,
+    handleSubmit,
+    reset,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(expenseSchema),
+    defaultValues: {
+      description: "",
+      amount: "",
+      paid_by: "",
+      split_type: "equal",
+      date: new Date().toISOString().split("T")[0],
+      splits: {},
+    },
+  });
+
+  const splitType = watch("split_type");
+  const amount = watch("amount");
+
+  // Reset on close (render-phase pattern to avoid setState-in-effect lint)
   const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
   if (isOpen !== prevIsOpen) {
     setPrevIsOpen(isOpen);
     if (!isOpen) {
-      setInputs(clearInputs);
+      reset();
       setExactSplits({});
       setPercentageSplits({});
+      setServerError(null);
     }
   }
 
@@ -34,38 +110,57 @@ export const AddExpenseModal = ({ isOpen, onClose, groupId }) => {
 
   const createExpenseMutation = useCreateExpense({
     onSuccess: () => {
-      setInputs(clearInputs);
+      reset();
+      setExactSplits({});
+      setPercentageSplits({});
+      setServerError(null);
       onClose();
+    },
+    onError: (error) => {
+      setServerError(error.message || "Failed to add expense. Please try again.");
     },
   });
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setInputs((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSplitChange = (memberId, value) => {
+  // Handle split input change — updates tab-memory AND syncs value into RHF
+  const handleSplitChange = (memberId, value, currentSplitType) => {
     const numValue = Number(value) || 0;
 
-    setInputs((prev) => ({
-      ...prev,
-      splits: {
-        ...prev.splits,
-        [memberId]: numValue,
-      },
-    }));
-
-    if (inputs.split_type === "exact") {
-      setExactSplits((prev) => ({ ...prev, [memberId]: numValue }));
-    } else if (inputs.split_type === "percentage") {
-      setPercentageSplits((prev) => ({ ...prev, [memberId]: numValue }));
+    if (currentSplitType === "exact") {
+      setExactSplits((prev) => {
+        const next = { ...prev, [memberId]: numValue };
+        setValue("splits", next, { shouldValidate: false });
+        return next;
+      });
+    } else if (currentSplitType === "percentage") {
+      setPercentageSplits((prev) => {
+        const next = { ...prev, [memberId]: numValue };
+        setValue("splits", next, { shouldValidate: false });
+        return next;
+      });
     }
   };
 
-  const handleFormSubmit = (e) => {
-    e.preventDefault();
-    createExpenseMutation.mutate({ groupId, inputs });
+  // Switch tab — restore stored values for the target tab
+  const handleTabSwitch = (type) => {
+    let restoredSplits = {};
+    if (type === "exact") restoredSplits = exactSplits;
+    if (type === "percentage") restoredSplits = percentageSplits;
+    setValue("split_type", type, { shouldValidate: false });
+    setValue("splits", restoredSplits, { shouldValidate: false });
   };
+
+  const onSubmit = (data) => {
+    setServerError(null);
+    createExpenseMutation.mutate({ groupId, inputs: data });
+  };
+
+  // Split values to display for the active tab
+  const currentSplits =
+    splitType === "exact"
+      ? exactSplits
+      : splitType === "percentage"
+        ? percentageSplits
+        : {};
 
   const footer = (
     <>
@@ -88,17 +183,20 @@ export const AddExpenseModal = ({ isOpen, onClose, groupId }) => {
   );
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title="Add Expense"
-      footer={footer}
-    >
+    <Modal isOpen={isOpen} onClose={onClose} title="Add Expense" footer={footer}>
       <form
         id="add-expense-form"
-        onSubmit={handleFormSubmit}
+        onSubmit={handleSubmit(onSubmit)}
         className="flex flex-col gap-5"
       >
+        {/* Backend error banner */}
+        {serverError && (
+          <div className="rounded-lg border border-error/30 bg-error-container px-4 py-3">
+            <p className="font-label-sm text-label-sm text-error">{serverError}</p>
+          </div>
+        )}
+
+        {/* Description */}
         <div className="flex flex-col">
           <label
             htmlFor="description"
@@ -109,15 +207,16 @@ export const AddExpenseModal = ({ isOpen, onClose, groupId }) => {
           <input
             type="text"
             id="description"
-            name="description"
             placeholder="Enter description"
-            value={inputs.description}
-            onChange={handleInputChange}
-            required
-            className="h-10 w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 font-body-md text-body-md text-on-surface transition-shadow focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
+            {...register("description")}
+            className={`${baseInputClass} ${fieldBorder(!!errors.description)}`}
           />
+          {errors.description && (
+            <p className={fieldErrorClass}>{errors.description.message}</p>
+          )}
         </div>
 
+        {/* Amount + Paid By */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div className="flex flex-col">
             <label
@@ -133,15 +232,15 @@ export const AddExpenseModal = ({ isOpen, onClose, groupId }) => {
               <input
                 type="number"
                 id="amount"
-                name="amount"
                 placeholder="0.00"
                 step="0.01"
-                value={inputs.amount}
-                onChange={handleInputChange}
-                required
-                className="h-10 w-full rounded-lg border border-outline-variant bg-surface-container-lowest pr-4 pl-8 font-body-md text-body-md text-on-surface transition-shadow focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
+                {...register("amount")}
+                className={`h-10 w-full rounded-lg border ${fieldBorder(!!errors.amount)} bg-surface-container-lowest pr-4 pl-8 font-body-md text-body-md text-on-surface transition-shadow focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none`}
               />
             </div>
+            {errors.amount && (
+              <p className={fieldErrorClass}>{errors.amount.message}</p>
+            )}
           </div>
 
           <div className="flex flex-col">
@@ -153,11 +252,8 @@ export const AddExpenseModal = ({ isOpen, onClose, groupId }) => {
             </label>
             <select
               id="paid_by"
-              name="paid_by"
-              value={inputs.paid_by}
-              onChange={handleInputChange}
-              required
-              className="h-10 w-full cursor-pointer rounded-lg border border-outline-variant bg-surface-container-lowest px-4 font-body-md text-body-md text-on-surface transition-shadow focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
+              {...register("paid_by")}
+              className={`h-10 w-full cursor-pointer rounded-lg border ${fieldBorder(!!errors.paid_by)} bg-surface-container-lowest px-4 font-body-md text-body-md text-on-surface transition-shadow focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none`}
             >
               <option value="" disabled>
                 Select Payer
@@ -178,9 +274,13 @@ export const AddExpenseModal = ({ isOpen, onClose, groupId }) => {
                 </option>
               )}
             </select>
+            {errors.paid_by && (
+              <p className={fieldErrorClass}>{errors.paid_by.message}</p>
+            )}
           </div>
         </div>
 
+        {/* Date */}
         <div className="flex flex-col">
           <label
             htmlFor="date"
@@ -191,14 +291,15 @@ export const AddExpenseModal = ({ isOpen, onClose, groupId }) => {
           <input
             type="date"
             id="date"
-            name="date"
-            value={inputs.date}
-            onChange={handleInputChange}
-            required
-            className="h-10 w-full cursor-pointer rounded-lg border border-outline-variant bg-surface-container-lowest px-4 font-body-md text-body-md text-on-surface transition-shadow focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
+            {...register("date")}
+            className={`${baseInputClass} cursor-pointer ${fieldBorder(!!errors.date)}`}
           />
+          {errors.date && (
+            <p className={fieldErrorClass}>{errors.date.message}</p>
+          )}
         </div>
 
+        {/* Split Options */}
         <div className="flex flex-col">
           <label className="mb-2 font-label-sm text-label-sm tracking-wider text-on-surface-variant uppercase">
             Split Options
@@ -208,16 +309,9 @@ export const AddExpenseModal = ({ isOpen, onClose, groupId }) => {
               <button
                 key={type}
                 type="button"
-                onClick={() =>
-                  setInputs((prev) => {
-                    let newSplits = {};
-                    if (type === "exact") newSplits = exactSplits;
-                    if (type === "percentage") newSplits = percentageSplits;
-                    return { ...prev, split_type: type, splits: newSplits };
-                  })
-                }
+                onClick={() => handleTabSwitch(type)}
                 className={`px-4 py-2 font-label-sm tracking-wider uppercase transition-colors ${
-                  inputs.split_type === type
+                  splitType === type
                     ? "border-b-2 border-primary font-bold text-primary"
                     : "text-on-surface-variant hover:text-on-surface"
                 }`}
@@ -228,7 +322,8 @@ export const AddExpenseModal = ({ isOpen, onClose, groupId }) => {
           </div>
 
           <div className="flex flex-col gap-4 rounded-lg border border-outline-variant bg-surface-container-low p-4">
-            {inputs.split_type === "exact" && (
+            {/* ── Exact ── */}
+            {splitType === "exact" && (
               <div className="flex flex-col gap-4">
                 <p className="font-label-sm text-label-sm text-on-surface-variant">
                   Enter the exact amount each person owes:
@@ -259,10 +354,9 @@ export const AddExpenseModal = ({ isOpen, onClose, groupId }) => {
                           <input
                             type="number"
                             id={`split-${member.id}`}
-                            name={`split-${member.id}`}
-                            value={inputs.splits[member.id] || ""}
+                            value={currentSplits[member.id] ?? ""}
                             onChange={(e) =>
-                              handleSplitChange(member.id, e.target.value)
+                              handleSplitChange(member.id, e.target.value, "exact")
                             }
                             placeholder="0.00"
                             step="0.01"
@@ -277,23 +371,25 @@ export const AddExpenseModal = ({ isOpen, onClose, groupId }) => {
                     No members available.
                   </p>
                 )}
-                {inputs.splits && Object.keys(inputs.splits).length > 0 && (
+                {Object.keys(currentSplits).length > 0 && (
                   <div className="mt-2 flex items-center justify-between border-t border-outline-variant pt-4 font-label-sm text-label-sm font-bold text-on-surface">
-                    <span className="tracking-wider uppercase">
-                      Total Allocated
-                    </span>
+                    <span className="tracking-wider uppercase">Total Allocated</span>
                     <span className="font-mono-data text-body-lg text-secondary">
                       ₹{" "}
-                      {Object.values(inputs.splits)
+                      {Object.values(currentSplits)
                         .reduce((sum, val) => sum + (Number(val) || 0), 0)
                         .toFixed(2)}
                     </span>
                   </div>
                 )}
+                {errors.splits && (
+                  <p className={fieldErrorClass}>{errors.splits.message}</p>
+                )}
               </div>
             )}
 
-            {inputs.split_type === "percentage" && (
+            {/* ── Percentage ── */}
+            {splitType === "percentage" && (
               <div className="flex flex-col gap-4">
                 <p className="font-label-sm text-label-sm text-on-surface-variant">
                   Enter the percentage each person owes (must sum to 100%):
@@ -321,10 +417,9 @@ export const AddExpenseModal = ({ isOpen, onClose, groupId }) => {
                           <input
                             type="number"
                             id={`split-${member.id}`}
-                            name={`split-${member.id}`}
-                            value={inputs.splits[member.id] || ""}
+                            value={currentSplits[member.id] ?? ""}
                             onChange={(e) =>
-                              handleSplitChange(member.id, e.target.value)
+                              handleSplitChange(member.id, e.target.value, "percentage")
                             }
                             placeholder="0"
                             min="0"
@@ -344,23 +439,25 @@ export const AddExpenseModal = ({ isOpen, onClose, groupId }) => {
                     No members available.
                   </p>
                 )}
-                {inputs.splits && Object.keys(inputs.splits).length > 0 && (
+                {Object.keys(currentSplits).length > 0 && (
                   <div className="mt-2 flex items-center justify-between border-t border-outline-variant pt-4 font-label-sm text-label-sm font-bold text-on-surface">
-                    <span className="tracking-wider uppercase">
-                      Total Percentage
-                    </span>
+                    <span className="tracking-wider uppercase">Total Percentage</span>
                     <span className="font-mono-data text-body-lg text-secondary">
-                      {Object.values(inputs.splits)
+                      {Object.values(currentSplits)
                         .reduce((sum, val) => sum + (Number(val) || 0), 0)
                         .toFixed(2)}{" "}
                       %
                     </span>
                   </div>
                 )}
+                {errors.splits && (
+                  <p className={fieldErrorClass}>{errors.splits.message}</p>
+                )}
               </div>
             )}
 
-            {inputs.split_type === "equal" && (
+            {/* ── Equal (read-only) ── */}
+            {splitType === "equal" && (
               <div className="flex flex-col gap-4">
                 <p className="font-label-sm text-label-sm text-on-surface-variant">
                   Equal split amounts (auto-calculated):
@@ -374,10 +471,8 @@ export const AddExpenseModal = ({ isOpen, onClose, groupId }) => {
                 ) : group && group.members && group.members.length > 0 ? (
                   <div className="flex flex-col gap-3">
                     {group.members.map((member) => {
-                      const equalAmount = inputs.amount
-                        ? (
-                            parseFloat(inputs.amount) / group.members.length
-                          ).toFixed(2)
+                      const equalAmount = amount
+                        ? (parseFloat(amount) / group.members.length).toFixed(2)
                         : "0.00";
                       return (
                         <div
@@ -397,7 +492,6 @@ export const AddExpenseModal = ({ isOpen, onClose, groupId }) => {
                             <input
                               type="number"
                               id={`split-${member.id}`}
-                              name={`split-${member.id}`}
                               value={equalAmount}
                               readOnly
                               className="h-10 w-32 cursor-not-allowed rounded-lg border border-outline-variant bg-surface-container-lowest pr-4 pl-8 text-right font-body-md text-body-md text-on-surface-variant focus:outline-none"

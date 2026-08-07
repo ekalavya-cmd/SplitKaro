@@ -91,9 +91,7 @@ async function createExpenseForGroup(groupId, expenseData) {
     const userIds = users.map((user) => user.id);
     const splitUserIds = Object.keys(splits).map((id) => Number(id));
 
-    const invalidUserIds = splitUserIds.filter(
-      (id) => !userIds.includes(id),
-    );
+    const invalidUserIds = splitUserIds.filter((id) => !userIds.includes(id));
     if (invalidUserIds.length > 0) {
       throw {
         status: 400,
@@ -101,9 +99,7 @@ async function createExpenseForGroup(groupId, expenseData) {
       };
     }
 
-    const missingUserIds = userIds.filter(
-      (id) => !splitUserIds.includes(id),
-    );
+    const missingUserIds = userIds.filter((id) => !splitUserIds.includes(id));
     if (missingUserIds.length > 0) {
       throw {
         status: 400,
@@ -139,9 +135,7 @@ async function createExpenseForGroup(groupId, expenseData) {
     const userIds = users.map((user) => user.id);
     const splitUserIds = Object.keys(splits).map((id) => Number(id));
 
-    const invalidUserIds = splitUserIds.filter(
-      (id) => !userIds.includes(id),
-    );
+    const invalidUserIds = splitUserIds.filter((id) => !userIds.includes(id));
     if (invalidUserIds.length > 0) {
       throw {
         status: 400,
@@ -149,9 +143,7 @@ async function createExpenseForGroup(groupId, expenseData) {
       };
     }
 
-    const missingUserIds = userIds.filter(
-      (id) => !splitUserIds.includes(id),
-    );
+    const missingUserIds = userIds.filter((id) => !splitUserIds.includes(id));
     if (missingUserIds.length > 0) {
       throw {
         status: 400,

@@ -66,7 +66,7 @@ module.exports = {
     });
 
     await queryInterface.sequelize.query(
-      "ALTER TABLE expenses ADD CONSTRAINT check_expense_amount CHECK (amount > 0);"
+      "ALTER TABLE expenses ADD CONSTRAINT check_expense_amount CHECK (amount > 0);",
     );
   },
 

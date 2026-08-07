@@ -2,7 +2,9 @@ const express = require("express");
 const router = express.Router();
 const groupController = require("../controllers/group.controller");
 const { authenticate } = require("../middleware/auth.middleware");
-const { requireGroupMembership } = require("../middleware/groupMembership.middleware");
+const {
+  requireGroupMembership,
+} = require("../middleware/groupMembership.middleware");
 
 const inviteRouter = require("./invite.routes");
 const settlementRouter = require("./settlement.routes");
@@ -20,6 +22,11 @@ router.use("/", settlementRouter); // Defines DELETE /settlements/:id, GET /:id/
 router.use("/:id/expenses", expenseRouter);
 
 // 4. Catch-all generic group routes (MUST GO LAST)
-router.get("/:id", authenticate, requireGroupMembership, groupController.fetchGroup);
+router.get(
+  "/:id",
+  authenticate,
+  requireGroupMembership,
+  groupController.fetchGroup,
+);
 
 module.exports = router;

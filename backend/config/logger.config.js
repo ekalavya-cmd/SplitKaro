@@ -16,10 +16,7 @@ const logger = winston.createLogger({
   ),
   transports: [
     new winston.transports.Console({
-      format: combine(
-        colorize(),
-        logFormat
-      ),
+      format: combine(colorize(), logFormat),
     }),
     new winston.transports.DailyRotateFile({
       filename: path.join(__dirname, "../logs/error-%DATE%.log"),

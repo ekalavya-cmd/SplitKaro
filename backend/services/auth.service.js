@@ -2,7 +2,10 @@
 
 const bcrypt = require("bcrypt");
 const { User } = require("../models");
-const { generateAccessToken, generateRefreshToken } = require("./token.service");
+const {
+  generateAccessToken,
+  generateRefreshToken,
+} = require("./token.service");
 const logger = require("../config/logger.config");
 
 // Cost factor of 12 rather than the bcrypt default of 10.
@@ -49,7 +52,10 @@ async function registerUser({ name, email, password }, deviceInfo = "unknown") {
   // Check for duplicate email before doing any hashing work
   const existing = await User.findOne({ where: { email } });
   if (existing) {
-    throw { status: 409, message: "An account with this email already exists." };
+    throw {
+      status: 409,
+      message: "An account with this email already exists.",
+    };
   }
 
   const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);

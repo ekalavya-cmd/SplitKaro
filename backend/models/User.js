@@ -63,12 +63,12 @@ module.exports = (sequelize, DataTypes) => {
         mustHaveAuthMethod() {
           if (this.passwordHash === null && this.googleId === null) {
             throw new Error(
-              "A user must have at least one authentication method (password_hash or google_id)."
+              "A user must have at least one authentication method (password_hash or google_id).",
             );
           }
         },
       },
-    }
+    },
   );
 
   User.associate = (models) => {

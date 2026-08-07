@@ -13,23 +13,30 @@ async function getGroupByInviteToken(req, res) {
       return res.status(err.status).json({ message: err.message });
     }
     logger.error("Error fetching group by invite token:", err);
-    res.status(500).json({ message: "Something went wrong. Please try again." });
+    res
+      .status(500)
+      .json({ message: "Something went wrong. Please try again." });
   }
 }
 
 async function joinGroupViaInvite(req, res) {
   try {
-    const result = await joinGroupViaInviteService(req.userId, req.params.token);
+    const result = await joinGroupViaInviteService(
+      req.userId,
+      req.params.token,
+    );
     res.status(200).json({
       message: "Successfully joined the group",
-      group: result
+      group: result,
     });
   } catch (err) {
     if (err && err.status && err.message) {
       return res.status(err.status).json({ message: err.message });
     }
     logger.error("Error joining group via invite token:", err);
-    res.status(500).json({ message: "Something went wrong. Please try again." });
+    res
+      .status(500)
+      .json({ message: "Something went wrong. Please try again." });
   }
 }
 

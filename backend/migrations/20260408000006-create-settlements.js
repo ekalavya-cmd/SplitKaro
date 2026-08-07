@@ -65,11 +65,11 @@ module.exports = {
     });
 
     await queryInterface.sequelize.query(
-      "ALTER TABLE settlements ADD CONSTRAINT check_settlement_amount CHECK (amount > 0);"
+      "ALTER TABLE settlements ADD CONSTRAINT check_settlement_amount CHECK (amount > 0);",
     );
 
     await queryInterface.sequelize.query(
-      "ALTER TABLE settlements ADD CONSTRAINT check_settlement_self_pay CHECK (paid_by <> paid_to);"
+      "ALTER TABLE settlements ADD CONSTRAINT check_settlement_self_pay CHECK (paid_by <> paid_to);",
     );
   },
 

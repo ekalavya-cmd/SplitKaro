@@ -19,7 +19,6 @@ export const useCreateExpense = (options = {}) => {
     },
     onError: (error, variables, context) => {
       console.error("Error creating expense:", error);
-      alert("Failed to add expense. Please try again.");
       
       if (options.onError) {
         options.onError(error, variables, context);

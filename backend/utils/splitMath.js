@@ -1,6 +1,6 @@
 /**
  * Distributes a penny remainder across an array of integer-cent amounts.
- * Rule: Extra cents (positive or negative) are distributed one-by-one to the 
+ * Rule: Extra cents (positive or negative) are distributed one-by-one to the
  * first N members in array order.
  */
 function distributeRemainder(amounts, remainder) {
@@ -20,7 +20,7 @@ function distributeRemainder(amounts, remainder) {
 function splitAmount(totalAmount, membersCount) {
   const baseShare = Math.floor(totalAmount / membersCount);
   const remainder = totalAmount - baseShare * membersCount;
-  
+
   const baseAmounts = Array(membersCount).fill(baseShare);
   return distributeRemainder(baseAmounts, remainder);
 }

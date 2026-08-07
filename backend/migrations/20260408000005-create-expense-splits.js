@@ -58,7 +58,7 @@ module.exports = {
     });
 
     await queryInterface.sequelize.query(
-      "ALTER TABLE expense_splits ADD CONSTRAINT check_split_amount_owed CHECK (amount_owed >= 0);"
+      "ALTER TABLE expense_splits ADD CONSTRAINT check_split_amount_owed CHECK (amount_owed >= 0);",
     );
   },
 

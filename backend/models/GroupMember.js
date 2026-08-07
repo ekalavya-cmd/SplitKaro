@@ -45,7 +45,7 @@ module.exports = (sequelize, DataTypes) => {
       tableName: "group_members",
       timestamps: true,
       underscored: true,
-    }
+    },
   );
 
   GroupMember.associate = (models) => {

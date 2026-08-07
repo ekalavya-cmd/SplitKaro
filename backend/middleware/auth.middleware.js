@@ -26,7 +26,7 @@ function authenticate(req, res, next) {
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     logger.debug(
-      `authenticate: missing or malformed Authorization header — ${req.method} ${req.path}`
+      `authenticate: missing or malformed Authorization header — ${req.method} ${req.path}`,
     );
     return res.status(401).json({ message: "Access token required" });
   }
@@ -45,13 +45,13 @@ function authenticate(req, res, next) {
     // token, wrong secret) are hard failures that require re-authentication.
     if (err.name === "TokenExpiredError") {
       logger.warn(
-        `authenticate: access token expired — ${req.method} ${req.path}`
+        `authenticate: access token expired — ${req.method} ${req.path}`,
       );
       return res.status(401).json({ message: "Access token expired" });
     }
 
     logger.warn(
-      `authenticate: invalid access token (${err.name}) — ${req.method} ${req.path}`
+      `authenticate: invalid access token (${err.name}) — ${req.method} ${req.path}`,
     );
     return res.status(401).json({ message: "Invalid access token" });
   }

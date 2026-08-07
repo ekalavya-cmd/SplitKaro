@@ -66,7 +66,10 @@ function verifyAccessToken(token) {
 async function generateRefreshToken(userId, deviceInfo = "unknown") {
   const tokenId = crypto.randomUUID();
   const rawToken = crypto.randomBytes(40).toString("hex");
-  const hashedToken = crypto.createHash("sha256").update(rawToken).digest("hex");
+  const hashedToken = crypto
+    .createHash("sha256")
+    .update(rawToken)
+    .digest("hex");
 
   const redisKey = `${REFRESH_TOKEN_PREFIX}:${userId}:${tokenId}`;
   const payload = JSON.stringify({
@@ -77,7 +80,9 @@ async function generateRefreshToken(userId, deviceInfo = "unknown") {
 
   await redisClient.set(redisKey, payload, { EX: REFRESH_TOKEN_TTL_SECONDS });
 
-  logger.debug(`Refresh token issued for userId=${userId}, device="${deviceInfo}"`);
+  logger.debug(
+    `Refresh token issued for userId=${userId}, device="${deviceInfo}"`,
+  );
 
   // Composite format: userId lets the refresh endpoint find the right Redis
   // key; tokenId identifies the specific token; rawToken is what the client
@@ -107,14 +112,18 @@ async function verifyRefreshToken(userId, clientToken) {
   // Split into tokenId and rawToken — if either part is missing, bail early
   const dotIndex = clientToken ? clientToken.indexOf(".") : -1;
   if (dotIndex === -1) {
-    logger.warn(`verifyRefreshToken: malformed clientToken for userId=${userId}`);
+    logger.warn(
+      `verifyRefreshToken: malformed clientToken for userId=${userId}`,
+    );
     return null;
   }
   const tokenId = clientToken.substring(0, dotIndex);
   const rawToken = clientToken.substring(dotIndex + 1);
 
   if (!tokenId || !rawToken) {
-    logger.warn(`verifyRefreshToken: empty tokenId or rawToken for userId=${userId}`);
+    logger.warn(
+      `verifyRefreshToken: empty tokenId or rawToken for userId=${userId}`,
+    );
     return null;
   }
 
@@ -123,7 +132,7 @@ async function verifyRefreshToken(userId, clientToken) {
 
   if (!stored) {
     logger.warn(
-      `verifyRefreshToken: key not found in Redis for userId=${userId}, tokenId=${tokenId} — token may be expired, already rotated, or invalid`
+      `verifyRefreshToken: key not found in Redis for userId=${userId}, tokenId=${tokenId} — token may be expired, already rotated, or invalid`,
     );
     return null;
   }
@@ -132,7 +141,10 @@ async function verifyRefreshToken(userId, clientToken) {
 
   // Hash the incoming raw token and compare via constant-time comparison
   // to prevent timing attacks that could leak token validity information
-  const incomingHash = crypto.createHash("sha256").update(rawToken).digest("hex");
+  const incomingHash = crypto
+    .createHash("sha256")
+    .update(rawToken)
+    .digest("hex");
 
   const storedBuf = Buffer.from(hashedToken, "hex");
   const incomingBuf = Buffer.from(incomingHash, "hex");
@@ -141,7 +153,7 @@ async function verifyRefreshToken(userId, clientToken) {
   // definitely different tokens (e.g., corrupted input), so bail without throwing
   if (storedBuf.length !== incomingBuf.length) {
     logger.warn(
-      `verifyRefreshToken: hash length mismatch for userId=${userId}, tokenId=${tokenId}`
+      `verifyRefreshToken: hash length mismatch for userId=${userId}, tokenId=${tokenId}`,
     );
     return null;
   }
@@ -153,14 +165,16 @@ async function verifyRefreshToken(userId, clientToken) {
     // invalidate the key (aggressive invalidation). Any mismatch forces re-login.
     await redisClient.del(redisKey);
     logger.warn(
-      `verifyRefreshToken: hash mismatch for userId=${userId}, tokenId=${tokenId} — possible token reuse/theft attempt. Key deleted; re-authentication required.`
+      `verifyRefreshToken: hash mismatch for userId=${userId}, tokenId=${tokenId} — possible token reuse/theft attempt. Key deleted; re-authentication required.`,
     );
     return null;
   }
 
   // Rotate: delete the key immediately so this token can never be used again
   await redisClient.del(redisKey);
-  logger.debug(`Refresh token rotated for userId=${userId}, tokenId=${tokenId}`);
+  logger.debug(
+    `Refresh token rotated for userId=${userId}, tokenId=${tokenId}`,
+  );
 
   return tokenId;
 }
@@ -180,7 +194,10 @@ async function revokeAllUserTokens(userId) {
   // SCAN iterates in cursor-based batches; it is non-blocking unlike KEYS.
   // Each yielded item is an ARRAY of key strings (one batch), not a single key,
   // so we spread each batch into keysToDelete rather than pushing the array itself.
-  for await (const batch of redisClient.scanIterator({ MATCH: pattern, COUNT: 100 })) {
+  for await (const batch of redisClient.scanIterator({
+    MATCH: pattern,
+    COUNT: 100,
+  })) {
     keysToDelete.push(...batch);
   }
 
@@ -191,7 +208,7 @@ async function revokeAllUserTokens(userId) {
   }
 
   logger.info(
-    `revokeAllUserTokens: revoked ${keysToDelete.length} refresh token(s) for userId=${userId}`
+    `revokeAllUserTokens: revoked ${keysToDelete.length} refresh token(s) for userId=${userId}`,
   );
 }
 

@@ -118,7 +118,9 @@ async function calculateGroupBalances(groupId) {
     };
   }
 
-  logger.debug(`Calculated balances for group id ${groupId} with ${result.length} members`);
+  logger.debug(
+    `Calculated balances for group id ${groupId} with ${result.length} members`,
+  );
 
   return result;
 }
@@ -252,12 +254,8 @@ async function recordSettlementForGroup(groupId, settlementData) {
   const parsedDate = validateAndParseDate(date);
 
   const balances = await calculateGroupBalances(groupId);
-  const payerBalance = balances.find(
-    (balance) => balance.user_id === payerId,
-  );
-  const payeeBalance = balances.find(
-    (balance) => balance.user_id === payeeId,
-  );
+  const payerBalance = balances.find((balance) => balance.user_id === payerId);
+  const payeeBalance = balances.find((balance) => balance.user_id === payeeId);
 
   if (!payerBalance || !payeeBalance) {
     throw { status: 500, message: "Error calculating balances" };
@@ -285,7 +283,7 @@ async function recordSettlementForGroup(groupId, settlementData) {
   if (parsedAmount / 100 > maxAmount) {
     throw {
       status: 400,
-      message: `Amount cannot exceed ${maxAmount.toFixed(2)} (what ${payerBalance.name} owes ${payeeBalance.name})`,
+      message: `Amount cannot exceed ₹${maxAmount.toFixed(2)} (what ${payerBalance.name} owes ${payeeBalance.name})`,
     };
   }
 
@@ -324,7 +322,9 @@ async function getSettlementsForGroup(groupId) {
     order: [["id", "ASC"]],
   });
 
-  logger.debug(`Fetched ${settlements.length} settlements for group id ${groupId}`);
+  logger.debug(
+    `Fetched ${settlements.length} settlements for group id ${groupId}`,
+  );
 
   return settlements.map((settlement) => ({
     id: settlement.id,

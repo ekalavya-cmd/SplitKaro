@@ -16,8 +16,8 @@ async function checkMembership(userId, groupId) {
   const member = await GroupMember.findOne({
     where: {
       userId,
-      groupId
-    }
+      groupId,
+    },
   });
 
   if (!member) {
@@ -33,7 +33,9 @@ async function requireGroupMembership(req, res, next) {
 
   try {
     await checkMembership(userId, groupId);
-    logger.debug(`requireGroupMembership: User ${userId} is a member of group ${groupId}`);
+    logger.debug(
+      `requireGroupMembership: User ${userId} is a member of group ${groupId}`,
+    );
     next();
   } catch (err) {
     if (err.status && err.message) {
@@ -41,7 +43,9 @@ async function requireGroupMembership(req, res, next) {
       return res.status(err.status).json({ message: err.message });
     }
     logger.error("requireGroupMembership: Unexpected error:", err);
-    return res.status(500).json({ message: "Something went wrong. Please try again." });
+    return res
+      .status(500)
+      .json({ message: "Something went wrong. Please try again." });
   }
 }
 
@@ -55,16 +59,24 @@ async function requireExpenseGroupMembership(req, res, next) {
 
     const expense = await Expenses.findByPk(expenseId);
     if (!expense) {
-      logger.debug(`requireExpenseGroupMembership: Expense ${expenseId} not found`);
+      logger.debug(
+        `requireExpenseGroupMembership: Expense ${expenseId} not found`,
+      );
       return res.status(404).json({ message: "Expense not found" });
     }
 
     if (expense.groupId !== Number(groupId)) {
-      logger.debug(`requireExpenseGroupMembership: Expense ${expenseId} not in group ${groupId}`);
-      return res.status(404).json({ message: "Expense not found in this group." });
+      logger.debug(
+        `requireExpenseGroupMembership: Expense ${expenseId} not in group ${groupId}`,
+      );
+      return res
+        .status(404)
+        .json({ message: "Expense not found in this group." });
     }
 
-    logger.debug(`requireExpenseGroupMembership: User ${userId} is a member of group ${groupId} for expense ${expenseId}`);
+    logger.debug(
+      `requireExpenseGroupMembership: User ${userId} is a member of group ${groupId} for expense ${expenseId}`,
+    );
     next();
   } catch (err) {
     if (err.status && err.message) {
@@ -72,7 +84,9 @@ async function requireExpenseGroupMembership(req, res, next) {
       return res.status(err.status).json({ message: err.message });
     }
     logger.error("requireExpenseGroupMembership: Unexpected error:", err);
-    return res.status(500).json({ message: "Something went wrong. Please try again." });
+    return res
+      .status(500)
+      .json({ message: "Something went wrong. Please try again." });
   }
 }
 
@@ -83,12 +97,16 @@ async function requireSettlementGroupMembership(req, res, next) {
   try {
     const settlement = await Settlements.findByPk(settlementId);
     if (!settlement) {
-      logger.debug(`requireSettlementGroupMembership: Settlement ${settlementId} not found`);
+      logger.debug(
+        `requireSettlementGroupMembership: Settlement ${settlementId} not found`,
+      );
       return res.status(404).json({ message: "Settlement not found" });
     }
 
     await checkMembership(userId, settlement.groupId);
-    logger.debug(`requireSettlementGroupMembership: User ${userId} is a member of group ${settlement.groupId} for settlement ${settlementId}`);
+    logger.debug(
+      `requireSettlementGroupMembership: User ${userId} is a member of group ${settlement.groupId} for settlement ${settlementId}`,
+    );
     next();
   } catch (err) {
     if (err.status && err.message) {
@@ -96,12 +114,14 @@ async function requireSettlementGroupMembership(req, res, next) {
       return res.status(err.status).json({ message: err.message });
     }
     logger.error("requireSettlementGroupMembership: Unexpected error:", err);
-    return res.status(500).json({ message: "Something went wrong. Please try again." });
+    return res
+      .status(500)
+      .json({ message: "Something went wrong. Please try again." });
   }
 }
 
 module.exports = {
   requireGroupMembership,
   requireExpenseGroupMembership,
-  requireSettlementGroupMembership
+  requireSettlementGroupMembership,
 };
