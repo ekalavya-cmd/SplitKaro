@@ -105,22 +105,22 @@ The following features are **fully implemented** in the current version:
 
 ### Backend
 
-| Technology                    | Version | Purpose                                    |
-| ----------------------------- | ------- | ------------------------------------------ |
-| **Node.js**                   | —       | Runtime environment                        |
-| **Express.js**                | v5.x    | Web framework (REST API)                   |
-| **Sequelize**                 | v6.x    | ORM for database interaction               |
-| **MySQL2**                    | v3.x    | MySQL database driver                      |
-| **Zod**                       | v3.x    | Strict schema validation for all API inputs|
-| **Redis (node-redis)**        | v6.x    | Refresh token storage (rotating tokens)    |
-| **jsonwebtoken**              | v9.x    | JWT access token signing and verification  |
-| **bcrypt**                    | v5.x    | Password hashing (cost factor 12)          |
-| **cookie-parser**             | v1.x    | httpOnly cookie parsing for refresh tokens |
-| **Winston**                   | v3.x    | Centralized structured logging             |
-| **winston-daily-rotate-file** | v5.x    | Rolling log file transport                 |
-| **dotenv**                    | v17.x   | Environment variable management            |
-| **cors**                      | v2.x    | Cross-origin request handling              |
-| **nodemon**                   | v3.x    | Development auto-reload                    |
+| Technology                    | Version | Purpose                                     |
+| ----------------------------- | ------- | ------------------------------------------- |
+| **Node.js**                   | —       | Runtime environment                         |
+| **Express.js**                | v5.x    | Web framework (REST API)                    |
+| **Sequelize**                 | v6.x    | ORM for database interaction                |
+| **MySQL2**                    | v3.x    | MySQL database driver                       |
+| **Zod**                       | v3.x    | Strict schema validation for all API inputs |
+| **Redis (node-redis)**        | v6.x    | Refresh token storage (rotating tokens)     |
+| **jsonwebtoken**              | v9.x    | JWT access token signing and verification   |
+| **bcrypt**                    | v5.x    | Password hashing (cost factor 12)           |
+| **cookie-parser**             | v1.x    | httpOnly cookie parsing for refresh tokens  |
+| **Winston**                   | v3.x    | Centralized structured logging              |
+| **winston-daily-rotate-file** | v5.x    | Rolling log file transport                  |
+| **dotenv**                    | v17.x   | Environment variable management             |
+| **cors**                      | v2.x    | Cross-origin request handling               |
+| **nodemon**                   | v3.x    | Development auto-reload                     |
 
 ### Frontend
 
