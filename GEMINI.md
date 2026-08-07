@@ -13,7 +13,8 @@ SplitKaro is a group bill-splitting web app (Splitwise-style): users create grou
 **Backend**
 
 - Module system: CommonJS (`require` / `module.exports`)
-- Layer order: `routes/` → `controllers/` → `services/` → `models/` — business logic lives only in services
+- Layer order: `routes/` → `validators/` → `controllers/` → `services/` → `models/` — business logic lives only in services
+- All routes must be protected by strict Zod schema validation middleware before reaching the controller
 - Services throw plain error objects `{ status, message }` on validation failures; controllers catch and forward them
 - Multi-table writes always use a Sequelize transaction with explicit rollback
 - Money: work in integer cents internally (`Math.round(amount * 100)`); store as `DECIMAL(10,2)`; distribute penny remainders sequentially

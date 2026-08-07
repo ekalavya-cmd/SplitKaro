@@ -34,6 +34,7 @@ SplitKaro is a bill-splitting web application that lets users create groups, add
 │                                                                │
 │  Middleware                                                    │
 │   auth.middleware.js — verifies JWT, attaches req.userId       │
+│   validate.middleware.js — executes Zod schemas on requests    │
 │                                                                │
 │  Controllers — validate HTTP input, call service, respond      │
 │                                                                │
@@ -210,6 +211,10 @@ The Express server explicitly allows only the Vite dev-server origin. This is ha
 
 Backend uses `dotenv`; frontend uses Vite's `import.meta.env`. Both `.env` files are present in the repo (not gitignored at this time).
 
+### Backend Zod Validation Middleware
+
+A robust validation layer built with Zod ensures all incoming requests conform to strict schemas before reaching the controllers. The `validate.middleware.js` intercepts requests and returns a standardised 400 Bad Request with specific error messages for missing or invalid fields.
+
 ---
 
 ## 5. Known Gaps / TODOs
@@ -217,7 +222,6 @@ Backend uses `dotenv`; frontend uses Vite's `import.meta.env`. Both `.env` files
 | Area                               | Issue                                                                                                                                                                                                                                  |
 | ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **CORS origin hard-coded**         | `origin: "http://localhost:5173"` in `server.js` will break any non-local deployment without a code change. Should be driven from an environment variable.                                                                             |
-| **No input validation middleware** | Validation logic is spread across auth controller (HTTP boundary) and service layer (business rules). There is no schema-validation library (e.g., Zod, Joi, express-validator) applied consistently across group/expense controllers. |
 
 | **No frontend error boundaries** | React error boundaries are not implemented. An uncaught render error will crash the entire SPA. |
 | **Config only has development environment** | `config/config.js` defines only a `development` block. There is no `production` or `test` configuration. |

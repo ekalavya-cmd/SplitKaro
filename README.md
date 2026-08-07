@@ -111,6 +111,7 @@ The following features are **fully implemented** in the current version:
 | **Express.js**                | v5.x    | Web framework (REST API)                   |
 | **Sequelize**                 | v6.x    | ORM for database interaction               |
 | **MySQL2**                    | v3.x    | MySQL database driver                      |
+| **Zod**                       | v3.x    | Strict schema validation for all API inputs|
 | **Redis (node-redis)**        | v6.x    | Refresh token storage (rotating tokens)    |
 | **jsonwebtoken**              | v9.x    | JWT access token signing and verification  |
 | **bcrypt**                    | v5.x    | Password hashing (cost factor 12)          |

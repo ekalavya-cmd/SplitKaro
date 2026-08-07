@@ -206,6 +206,7 @@
 
 | Feature                   | Status | Notes                                                         |
 | ------------------------- | ------ | ------------------------------------------------------------- |
+| Backend input validation  | ✅     | Full Zod schema validation applied via Express middleware     |
 | Automated tests           | ⏳     | Zero test files exist in either workspace                     |
 | Rate limiting             | ⏳     | No middleware on any endpoint                                 |
 | API versioning            | ⏳     | All routes are un-versioned (`/api/...`)                      |

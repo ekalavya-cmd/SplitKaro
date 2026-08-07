@@ -36,7 +36,7 @@ The frontend axios instance sets this header globally.
 
 ### Standard error shape
 
-The backend always responds with, and the frontend axios interceptor correctly reads:
+All requests are strictly validated using Zod schemas via a centralized Express middleware. The backend always responds with, and the frontend axios interceptor correctly reads:
 
 ```json
 { "message": "Human-readable error description" }
