@@ -29,7 +29,6 @@ export const useCreateExpense = (options = {}) => {
         options.onError(error, variables, context);
       }
     },
-    ...options,
   });
 };
 
@@ -63,6 +62,5 @@ export const useDeleteExpense = (options = {}) => {
         options.onError(error, variables, context);
       }
     },
-    ...options,
   });
 };

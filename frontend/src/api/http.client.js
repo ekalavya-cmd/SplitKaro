@@ -13,9 +13,9 @@ const httpClient = axios.create({
 httpClient.interceptors.request.use(
   async (config) => {
     // TEMPORARY DEV-ONLY ARTIFICIAL DELAY — for visually testing loading-state UI. REMOVE before considering this done — do not let this ship.
-    if (import.meta.env.DEV) {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-    }
+    // if (import.meta.env.DEV) {
+    //   await new Promise((resolve) => setTimeout(resolve, 1500));
+    // }
 
     const token = getAccessToken();
     if (token) {

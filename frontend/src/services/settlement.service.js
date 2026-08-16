@@ -43,9 +43,11 @@ export const createSettlement = async (groupId, settlementData) => {
   }
 };
 
-export const deleteSettlement = async (settlementId) => {
+export const deleteSettlement = async (settlementId, groupId) => {
   try {
-    const response = await api.delete(`/groups/settlements/${settlementId}`);
+    const response = await api.delete(
+      `/groups/${groupId}/settlements/${settlementId}`,
+    );
     return response.data;
   } catch (error) {
     console.error("Error deleting settlement:", error);

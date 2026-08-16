@@ -22,7 +22,9 @@ export const getExpenses = async (groupId) => {
 
 export const deleteExpense = async (groupId, expenseId) => {
   try {
-    const response = await api.delete(`/groups/${groupId}/expenses/${expenseId}`);
+    const response = await api.delete(
+      `/groups/${groupId}/expenses/${expenseId}`,
+    );
     return response.data;
   } catch (error) {
     console.error("Error deleting expense:", error);

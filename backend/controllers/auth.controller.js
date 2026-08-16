@@ -20,7 +20,6 @@ function refreshCookieOptions() {
   };
 }
 
-
 // ─── error handler helper ────────────────────────────────────────────────────
 
 function handleServiceError(err, res, context) {
@@ -45,7 +44,6 @@ async function register(req, res) {
   const { name, email, password } = req.body;
   const deviceInfo = req.headers["user-agent"] || "unknown";
 
-
   try {
     const { user, accessToken, refreshToken } = await authService.registerUser(
       { name: name.trim(), email: email.trim().toLowerCase(), password },
@@ -64,7 +62,6 @@ async function register(req, res) {
 async function login(req, res) {
   const { email, password } = req.body;
   const deviceInfo = req.headers["user-agent"] || "unknown";
-
 
   try {
     const { user, accessToken, refreshToken } = await authService.loginUser(
@@ -94,11 +91,9 @@ async function refresh(req, res) {
   const firstDot = composite.indexOf(".");
   if (firstDot === -1) {
     res.clearCookie("refreshToken");
-    return res
-      .status(401)
-      .json({
-        message: "Invalid or expired refresh token. Please log in again.",
-      });
+    return res.status(401).json({
+      message: "Invalid or expired refresh token. Please log in again.",
+    });
   }
 
   const userId = parseInt(composite.substring(0, firstDot), 10);
@@ -106,11 +101,9 @@ async function refresh(req, res) {
 
   if (!userId || isNaN(userId)) {
     res.clearCookie("refreshToken");
-    return res
-      .status(401)
-      .json({
-        message: "Invalid or expired refresh token. Please log in again.",
-      });
+    return res.status(401).json({
+      message: "Invalid or expired refresh token. Please log in again.",
+    });
   }
 
   try {
@@ -119,11 +112,9 @@ async function refresh(req, res) {
 
     if (!result) {
       res.clearCookie("refreshToken");
-      return res
-        .status(401)
-        .json({
-          message: "Invalid or expired refresh token. Please log in again.",
-        });
+      return res.status(401).json({
+        message: "Invalid or expired refresh token. Please log in again.",
+      });
     }
 
     // Issue brand-new token pair (the old refresh token was already deleted by verifyRefreshToken)

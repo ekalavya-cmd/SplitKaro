@@ -1,5 +1,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createSettlement, deleteSettlement } from "../services/settlement.service";
+import {
+  createSettlement,
+  deleteSettlement,
+} from "../services/settlement.service";
 import { queryKeys } from "../queries/queryKeys";
 import { useToast } from "../context/useToast";
 
@@ -8,15 +11,22 @@ export const useCreateSettlement = (options = {}) => {
   const { showToast } = useToast();
 
   return useMutation({
-    mutationFn: ({ groupId, payload, inputs }) => createSettlement(groupId, payload || inputs),
+    mutationFn: ({ groupId, payload, inputs }) =>
+      createSettlement(groupId, payload || inputs),
     onSuccess: (data, variables, context) => {
       showToast({
         type: "success",
         message: data?.message ?? "Settlement recorded successfully",
       });
-      queryClient.invalidateQueries({ queryKey: queryKeys.balances.list(variables.groupId) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.settlements.list(variables.groupId) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.settlements.suggest(variables.groupId) });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.balances.list(variables.groupId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.settlements.list(variables.groupId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.settlements.suggest(variables.groupId),
+      });
 
       if (options.onSuccess) {
         options.onSuccess(data, variables, context);
@@ -27,7 +37,6 @@ export const useCreateSettlement = (options = {}) => {
         options.onError(error, variables, context);
       }
     },
-    ...options,
   });
 };
 
@@ -36,15 +45,22 @@ export const useDeleteSettlement = (options = {}) => {
   const { showToast } = useToast();
 
   return useMutation({
-    mutationFn: ({ groupId, settlementId }) => deleteSettlement(settlementId),
+    mutationFn: ({ groupId, settlementId }) =>
+      deleteSettlement(settlementId, groupId),
     onSuccess: (data, variables, context) => {
       showToast({
         type: "success",
         message: data?.message ?? "Settlement deleted successfully",
       });
-      queryClient.invalidateQueries({ queryKey: queryKeys.balances.list(variables.groupId) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.settlements.list(variables.groupId) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.settlements.suggest(variables.groupId) });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.balances.list(variables.groupId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.settlements.list(variables.groupId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.settlements.suggest(variables.groupId),
+      });
 
       if (options.onSuccess) {
         options.onSuccess(data, variables, context);
@@ -61,6 +77,5 @@ export const useDeleteSettlement = (options = {}) => {
         options.onError(error, variables, context);
       }
     },
-    ...options,
   });
 };
