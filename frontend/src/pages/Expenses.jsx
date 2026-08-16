@@ -192,9 +192,13 @@ const Expenses = () => {
     deleteExpenseMutation.mutate({ groupId: selectedGroupId, expenseId });
   };
 
-  if (isError) {
-    return (
-      <div className="flex min-h-[50vh] w-full flex-col items-center justify-center p-6">
+  const hasData =
+    groupQuery.data !== undefined && expensesQuery.data !== undefined;
+  const showSkeleton = isDataLoading || (isError && !hasData);
+
+  return (
+    <div className="flex flex-col gap-8">
+      {isError && (
         <ErrorBlock
           error={{
             message:
@@ -205,12 +209,7 @@ const Expenses = () => {
           }}
           refetch={refetchAll}
         />
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex flex-col gap-8">
+      )}
       <div className="flex flex-col gap-4">
         {/* Static page heading */}
         <div>
@@ -253,7 +252,7 @@ const Expenses = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-outline-variant">
-                {isDataLoading ? (
+                {showSkeleton ? (
                   Array.from({ length: 1 }).map((_, i) => (
                     <tr key={i} className="h-row-height-compact">
                       <td className="px-4 py-8">
@@ -458,7 +457,7 @@ const Expenses = () => {
           </div>
 
           {/* Pagination bar — only rendered when there are enough results to paginate */}
-          {!isDataLoading && totalExpenses > EXPENSES_PER_PAGE && (
+          {!showSkeleton && totalExpenses > EXPENSES_PER_PAGE && (
             <Pagination
               safePage={safePage}
               totalPages={totalPages}

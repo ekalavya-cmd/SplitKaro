@@ -14,6 +14,7 @@ import { SpendByMemberChart } from "../components/analytics/SpendByMemberChart";
 import { SplitTypeChart } from "../components/analytics/SplitTypeChart";
 import { SpendingTimeChart } from "../components/analytics/SpendingTimeChart";
 import { RecordSettlementModal } from "../components/RecordSettlementModal";
+// import { useToast } from "../context/useToast";
 
 const RECENT_EXPENSES_COUNT = 5;
 
@@ -22,6 +23,7 @@ const Dashboard = () => {
   const [expandedExpenseIds, setExpandedExpenseIds] = useState({});
   const [isSettlementModalOpen, setIsSettlementModalOpen] = useState(false);
   const [settlementModalData, setSettlementModalData] = useState(null);
+  // const { showToast } = useToast();
 
   const groupQuery = useGroupQuery(selectedGroupId);
   const group = groupQuery.data;
@@ -41,6 +43,13 @@ const Dashboard = () => {
     balancesQuery,
     suggestionsQuery,
   ]);
+
+  const hasData =
+    groupQuery.data !== undefined &&
+    expensesQuery.data !== undefined &&
+    balancesQuery.data !== undefined &&
+    suggestionsQuery.data !== undefined;
+  const showSkeleton = isDataLoading || (isError && !hasData);
 
   const toggleExpenseExpand = (id) => {
     setExpandedExpenseIds((prev) => ({
@@ -66,9 +75,9 @@ const Dashboard = () => {
     }
   };
 
-  if (isError) {
-    return (
-      <div className="flex min-h-[50vh] w-full flex-col items-center justify-center p-6">
+  return (
+    <div className="flex flex-col gap-8">
+      {isError && (
         <ErrorBlock
           error={{
             message:
@@ -79,19 +88,14 @@ const Dashboard = () => {
           }}
           refetch={refetchAll}
         />
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex flex-col gap-8">
+      )}
       <div className="grid grid-cols-1 gap-gutter lg:grid-cols-3">
         {/* Balances */}
         <div className="flex flex-col gap-4 lg:col-span-2">
           <h2 className="font-headline-md text-headline-md text-on-surface">
             Overview
           </h2>
-          {isDataLoading ? (
+          {showSkeleton ? (
             <div className="grid grid-cols-1 gap-gutter sm:grid-cols-3">
               {[1, 2, 3].map((i) => (
                 <div
@@ -180,7 +184,7 @@ const Dashboard = () => {
         {/* Simplified Settlements */}
         <SimplifiedSettlements
           suggestions={suggestions}
-          isLoading={isDataLoading}
+          isLoading={showSkeleton}
           onSettle={(from, to, amount) => {
             setSettlementModalData({
               paid_by: from.id,
@@ -197,10 +201,10 @@ const Dashboard = () => {
         <SpendByMemberChart
           expenses={expenses}
           members={group?.members || []}
-          isLoading={isDataLoading}
+          isLoading={showSkeleton}
         />
-        <SplitTypeChart expenses={expenses} isLoading={isDataLoading} />
-        <SpendingTimeChart expenses={expenses} isLoading={isDataLoading} />
+        <SplitTypeChart expenses={expenses} isLoading={showSkeleton} />
+        <SpendingTimeChart expenses={expenses} isLoading={showSkeleton} />
       </div>
 
       <div className="flex flex-col gap-4">
@@ -231,7 +235,7 @@ const Dashboard = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-outline-variant">
-                {isDataLoading ? (
+                {showSkeleton ? (
                   Array.from({ length: 1 }).map((_, i) => (
                     <tr key={i} className="h-row-height-compact">
                       <td className="px-4 py-8">

@@ -44,13 +44,13 @@ const ToastItem = ({ toast, onDismiss }) => {
     <div
       role="alert"
       aria-live="assertive"
-      className={`flex w-80 items-start gap-3 rounded-lg border px-4 py-3 shadow-[0px_10px_15px_rgba(0,0,0,0.1)] transition-all duration-200 ${style.container} ${
+      className={`flex w-80 items-center gap-3 rounded-lg border px-4 py-3 shadow-[0px_10px_15px_rgba(0,0,0,0.1)] transition-all duration-200 pointer-events-auto ${style.container} ${
         visible ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
       }`}
     >
       {/* Status icon */}
       <span
-        className={`material-symbols-outlined mt-px shrink-0 text-[20px] ${style.icon}`}
+        className={`material-symbols-outlined shrink-0 text-[20px] ${style.icon}`}
       >
         {icon}
       </span>
@@ -64,7 +64,7 @@ const ToastItem = ({ toast, onDismiss }) => {
       <button
         onClick={handleDismiss}
         aria-label="Dismiss notification"
-        className={`-mr-1 -mt-0.5 rounded-DEFAULT p-1 transition-colors ${style.dismiss}`}
+        className={`-mr-1 rounded-DEFAULT p-1 transition-colors ${style.dismiss}`}
       >
         <span className="material-symbols-outlined text-[16px]">close</span>
       </button>
@@ -106,8 +106,9 @@ export const ToastProvider = ({ children }) => {
 
   // Clean up any outstanding timers on unmount
   useEffect(() => {
+    const activeTimers = timersRef.current;
     return () => {
-      Object.values(timersRef.current).forEach(clearTimeout);
+      Object.values(activeTimers).forEach(clearTimeout);
     };
   }, []);
 
@@ -115,17 +116,16 @@ export const ToastProvider = ({ children }) => {
     <ToastContext.Provider value={{ showToast, dismissToast }}>
       {children}
 
-      {/* Fixed toast container — bottom-right, newest on top (flex-col-reverse) */}
-      {toasts.length > 0 && (
-        <div
-          aria-label="Notifications"
-          className="fixed right-6 bottom-6 z-50 flex flex-col-reverse gap-3"
-        >
-          {toasts.map((toast) => (
-            <ToastItem key={toast.id} toast={toast} onDismiss={dismissToast} />
-          ))}
-        </div>
-      )}
+      {/* Fixed toast container — bottom-right, newest on top (flex-col-reverse). Always mounted for ErrorBlock portals. */}
+      <div
+        id="toast-stack-container"
+        aria-label="Notifications"
+        className="fixed right-6 bottom-6 z-50 flex flex-col-reverse gap-3 pointer-events-none"
+      >
+        {toasts.map((toast) => (
+          <ToastItem key={toast.id} toast={toast} onDismiss={dismissToast} />
+        ))}
+      </div>
     </ToastContext.Provider>
   );
 };
