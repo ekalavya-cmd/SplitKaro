@@ -83,7 +83,7 @@
 | ✅ Partial settlement                           | The backend accepts any amount up to but not exceeding `min(                                                                                                                                   | payer balance | , payee balance)` (R6b discovery: fixed to use User schema and verified working) |
 | ✅ Settlement history table                     | SettleUp page shows all recorded settlements for the selected group (date, payer, payee, amount) (R6b discovery: fixed to use User schema and verified working)                                |
 | ✅ Suggestions refresh after recording          | SettleUp re-fetches suggestions and settlements list immediately after a successful `createSettlement` call                                                                                    |
-| ✅ Form feedback via `alert()`                  | SettleUp shows `alert("Settlement recorded successfully!")` on success and `alert("Failed to record settlement...")` on error                                                                  |
+| ✅ Form feedback via Toasts                     | SettleUp and AddExpense show toast notifications (via ToastProvider) on success and error, displaying the backend-provided message                                                             |
 | ✅ Pre-fill settlement form from suggestion     | Dashboard "Settle" button passes payer, payee, and amount via `location.state` to pre-fill the form on SettleUp page                                                                           |
 
 ### Settlement History Filtering (client-side only)
@@ -128,10 +128,10 @@
 
 ### Feedback & UX
 
-| Feature             | Status | What exists                                                                                                                                                                                                                                                                 | What is missing |
-| ------------------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
-| Loading states      | ✅     | `useQuery` provides boolean `isLoading` states globally. Page-level skeleton loaders are synchronized with auth initialization (`isInitializing`) and network health (`hasConnectionError`), preventing UI flicker and ensuring smooth transitions from boot to data fetch. | None            |
-| Error display in UI | ✅     | AddExpense and SettleUp show `alert()` on mutation failure. Queries use a reusable `ErrorBlock`. App boot includes a global, non-blocking `ConnectionToast` with exponential backoff auto-retry for transient network errors.                                               | None            |
+| Feature             | Status | What exists                                                                                                                                                                                                                                                                        | What is missing |
+| ------------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| Loading states      | ✅     | `useQuery` provides boolean `isLoading` states globally. Page-level skeleton loaders are synchronized with auth initialization (`isInitializing`) and network health (`hasConnectionError`), preventing UI flicker and ensuring smooth transitions from boot to data fetch.        | None            |
+| Error display in UI | ✅     | Mutations use a Toast system (ToastProvider) for success/error messages instead of alert(). Queries and app boot use a consolidated PersistentErrorBanner, differentiating global connection errors (sticky banner) and scoped query failures (portal toast) with retry mechanics. | None            |
 
 ---
 
