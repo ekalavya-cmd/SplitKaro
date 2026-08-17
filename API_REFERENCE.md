@@ -119,6 +119,7 @@ Fetch a single group with its members.
 
 ```json
 {
+  "message": "Group fetched successfully",
   "id": 1,
   "name": "Trip to Bali Expenses",
   "description": "Group for managing expenses during our trip to Bali",
@@ -129,7 +130,7 @@ Fetch a single group with its members.
 }
 ```
 
-Members are ordered by `id ASC`.
+`message` is always present. Members are ordered by `id ASC`.
 
 **Error responses**
 
@@ -209,6 +210,7 @@ Retrieve basic group information to preview an invitation before joining. Does N
 
 ```json
 {
+  "message": "Group invite preview fetched successfully",
   "id": 3,
   "name": "Weekend Trip",
   "description": "Optional group description",
@@ -678,15 +680,16 @@ Delete a recorded settlement. Wrapped in a transaction.
 
 ## Flagged Inconsistencies (All Resolved)
 
-| #   | Issue                                                                   | Affected endpoints                    | Resolution                                                                                                                  |
-| --- | ----------------------------------------------------------------------- | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| 1   | `GET /groups` returns a bare array                                      | `GET /groups`                         | **Resolved**: Wrapped in `{ message, groups }` on the backend. Frontend service layer unwraps it to maintain compatibility. |
-| 2   | `GET /groups/:id/settlements/suggest` returns a bare array              | `GET /groups/:id/settlements/suggest` | **Resolved**: Wrapped in `{ message, suggestions }` on the backend. Frontend service layer unwraps it.                      |
-| 3   | Frontend error interceptor reads `data.error` instead of `data.message` | All endpoints                         | **Resolved**: Updated axios interceptor to read `data?.message`. Real backend error messages are now displayed.             |
-| 4   | DELETE endpoints return `500` instead of `404` for missing IDs          | Both DELETE endpoints                 | **Resolved**: Added null guards in service layers to throw a proper `404` response.                                         |
-| 5   | `POST /groups` validates in the controller instead of the service       | POST endpoints                        | **Resolved**: Field validation moved into the service layer, keeping error catching in the controller.                      |
-| 6   | Error string hard-codes `₹` symbol                                      | `POST /groups/:id/settlements`        | **Resolved**: Removed `₹` from the server-side error string.                                                                |
-| 7   | Routing ambiguity on `/api/groups/settlements/:id`                      | `DELETE /groups/settlements/:id`      | **Resolved**: Moved the DELETE route above the generic dynamic ID route in the backend router file.                         |
+| #   | Issue                                                                   | Affected endpoints                                                       | Resolution                                                                                                                                                            |
+| --- | ----------------------------------------------------------------------- | ------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | `GET /groups` returns a bare array                                      | `GET /groups`                                                            | **Resolved**: Wrapped in `{ message, groups }` on the backend. Frontend service layer unwraps it to maintain compatibility.                                           |
+| 2   | `GET /groups/:id/settlements/suggest` returns a bare array              | `GET /groups/:id/settlements/suggest`                                    | **Resolved**: Wrapped in `{ message, suggestions }` on the backend. Frontend service layer unwraps it.                                                                |
+| 3   | Frontend error interceptor reads `data.error` instead of `data.message` | All endpoints                                                            | **Resolved**: Updated axios interceptor to read `data?.message`. Real backend error messages are now displayed.                                                       |
+| 4   | DELETE endpoints return `500` instead of `404` for missing IDs          | Both DELETE endpoints                                                    | **Resolved**: Added null guards in service layers to throw a proper `404` response.                                                                                   |
+| 5   | `POST /groups` validates in the controller instead of the service       | POST endpoints                                                           | **Resolved**: Field validation moved into the service layer, keeping error catching in the controller.                                                                |
+| 6   | Error string hard-codes `₹` symbol                                      | `POST /groups/:id/settlements`                                           | **Resolved**: Removed `₹` from the server-side error string.                                                                                                          |
+| 7   | Routing ambiguity on `/api/groups/settlements/:id`                      | `DELETE /groups/settlements/:id`                                         | **Resolved**: Moved the DELETE route above the generic dynamic ID route in the backend router file.                                                                   |
+| 8   | Three endpoints returned bare objects without a `message` field         | `GET /groups/:id`, `GET /groups/invite/:token`, `POST /api/auth/refresh` | **Resolved**: Added `message` field to all three success responses, matching the project-wide convention. Changes are additive; frontend service layer is unaffected. |
 
 ---
 
@@ -799,7 +802,7 @@ The cookie value is a self-contained composite string `{userId}.{tokenId}.{rawTo
 **Response `200`**
 
 ```json
-{ "accessToken": "<new-jwt>" }
+{ "message": "Token refreshed successfully.", "accessToken": "<new-jwt>" }
 ```
 
 A new `refreshToken` cookie is also set (rotated).

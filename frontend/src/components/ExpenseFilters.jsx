@@ -53,7 +53,7 @@ export const ExpenseFilters = ({
           <div className="mx-2 hidden h-8 w-px bg-outline-variant sm:block"></div>
 
           <div className="flex shrink-0 items-center gap-4 pr-2">
-            <div className="flex items-center gap-2">
+            <div className="flex min-w-50 items-center gap-2">
               <label
                 htmlFor="splitType"
                 className="text-body-md whitespace-nowrap text-on-surface-variant"
@@ -65,16 +65,16 @@ export const ExpenseFilters = ({
                 id="splitType"
                 value={filterSplitType}
                 onChange={(e) => setFilterSplitType(e.target.value)}
-                className="cursor-pointer rounded-DEFAULT border border-outline-variant bg-surface-container-low px-2 py-1 font-body-md text-body-md font-bold text-on-surface focus:ring-2 focus:ring-primary/20 focus:outline-none"
+                className="w-full cursor-pointer truncate rounded-DEFAULT border border-outline-variant bg-surface-container-low px-2 py-1 font-body-md text-body-md font-bold text-on-surface focus:ring-2 focus:ring-primary/20 focus:outline-none"
               >
-                <option value="all">All</option>
+                <option value="all">All Types</option>
                 <option value="equal">Equal</option>
                 <option value="exact">Exact</option>
                 <option value="percentage">Percentage</option>
               </select>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex min-w-45 items-center gap-2">
               <label
                 htmlFor="paidBy"
                 className="text-body-md whitespace-nowrap text-on-surface-variant"
@@ -86,9 +86,9 @@ export const ExpenseFilters = ({
                 id="paidBy"
                 value={filterPaidBy}
                 onChange={(e) => setFilterPaidBy(e.target.value)}
-                className="max-w-30 cursor-pointer truncate rounded-DEFAULT border border-outline-variant bg-surface-container-low px-2 py-1 font-body-md text-body-md font-bold text-on-surface focus:ring-2 focus:ring-primary/20 focus:outline-none"
+                className="w-full cursor-pointer truncate rounded-DEFAULT border border-outline-variant bg-surface-container-low px-2 py-1 font-body-md text-body-md font-bold text-on-surface focus:ring-2 focus:ring-primary/20 focus:outline-none"
               >
-                <option value="all">All</option>
+                <option value="all">All Payers</option>
                 {isLoading ? (
                   <option disabled>Loading members...</option>
                 ) : isError ? (
@@ -137,7 +137,7 @@ export const ExpenseFilters = ({
               : "pointer-events-none max-h-0 opacity-0"
           }`}
         >
-          <div className="rounded-lg border border-outline-variant bg-surface-container-lowest p-6 shadow-sm">
+          <div className="rounded-lg border border-outline-variant bg-surface-container-lowest p-4 shadow-sm">
             <div className="flex w-full flex-wrap items-end gap-4">
               {/* Date range filters */}
               <div className="flex min-w-35 flex-1 flex-col">
@@ -255,8 +255,8 @@ export const ExpenseFilters = ({
               </div>
 
               {isAmountRangeInvalid && (
-                <div className="mt-2 w-full font-label-sm text-label-sm text-error">
-                  ⚠️ Min amount cannot exceed Max amount. Amount filter is
+                <div className="w-full font-label-sm text-label-sm text-error">
+                  Min amount cannot exceed Max amount. Amount filter is
                   currently ignored.
                 </div>
               )}

@@ -125,7 +125,12 @@ async function refresh(req, res) {
     );
 
     res.cookie("refreshToken", newRefreshToken, refreshCookieOptions());
-    return res.status(200).json({ accessToken: newAccessToken });
+    return res
+      .status(200)
+      .json({
+        message: "Token refreshed successfully.",
+        accessToken: newAccessToken,
+      });
   } catch (err) {
     return handleServiceError(err, res, "refresh");
   }

@@ -46,7 +46,7 @@ export const SimplifiedSettlements = ({
 
       {/* Loading skeleton — card-shaped placeholder */}
       {isLoading ? (
-        <div className="rounded-lg border border-outline-variant bg-surface-container-lowest p-4 shadow-sm">
+        <div className="rounded-lg border border-outline-variant bg-surface-container-lowest px-4 py-4.5 shadow-sm">
           <div className="flex items-start justify-between gap-4">
             <div className="flex flex-col gap-2">
               <Skeleton className="h-4 w-48" />
@@ -93,7 +93,7 @@ export const SimplifiedSettlements = ({
         </div>
       ) : (
         /* Empty state — bordered container for visual consistency with card style */
-        <div className="flex min-h-19 items-center justify-center rounded-lg border border-outline-variant bg-surface-container-lowest text-center shadow-sm">
+        <div className="flex min-h-19.5 items-center justify-center rounded-lg border border-outline-variant bg-surface-container-lowest text-center shadow-sm">
           <p className="font-body-md text-body-md text-on-surface-variant">
             All balances are settled!
           </p>

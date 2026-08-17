@@ -30,8 +30,8 @@ export const SettlementFilters = ({ filterProps, members = [] }) => {
     <div className="mb-6 flex flex-col gap-4">
       <form onSubmit={(e) => e.preventDefault()} className="flex flex-col">
         {/* Top row: Minimalist Filters Container */}
-        <div className="flex flex-wrap items-center justify-start gap-4 rounded-lg border border-outline-variant bg-surface-container-lowest p-2 shadow-sm">
-          <div className="flex items-center gap-2 pl-2">
+        <div className="flex flex-wrap items-center justify-start gap-4 rounded-lg border border-outline-variant bg-surface-container-lowest p-3 shadow-sm">
+          <div className="flex max-w-50 flex-1 items-center gap-2 pl-2">
             <label
               htmlFor="settlFilterPaidBy"
               className="text-body-md whitespace-nowrap text-on-surface-variant"
@@ -42,7 +42,7 @@ export const SettlementFilters = ({ filterProps, members = [] }) => {
               id="settlFilterPaidBy"
               value={filterPaidBy}
               onChange={(e) => setFilterPaidBy(e.target.value)}
-              className="max-w-37.5 cursor-pointer truncate rounded-DEFAULT border border-outline-variant bg-surface-container-low px-2 py-1 font-body-md text-body-md font-bold text-on-surface focus:ring-2 focus:ring-primary/20 focus:outline-none"
+              className="w-full cursor-pointer truncate rounded-DEFAULT border border-outline-variant bg-surface-container-low px-2 py-1 font-body-md text-body-md font-bold text-on-surface focus:ring-2 focus:ring-primary/20 focus:outline-none"
             >
               <option value="all">All Payers</option>
               {members.length > 0 ? (
@@ -57,7 +57,7 @@ export const SettlementFilters = ({ filterProps, members = [] }) => {
             </select>
           </div>
 
-          <div className="flex items-center gap-2 pr-2">
+          <div className="flex max-w-50 flex-1 items-center gap-2 pr-2">
             <label
               htmlFor="settlFilterPaidTo"
               className="text-body-md whitespace-nowrap text-on-surface-variant"
@@ -68,7 +68,7 @@ export const SettlementFilters = ({ filterProps, members = [] }) => {
               id="settlFilterPaidTo"
               value={filterPaidTo}
               onChange={(e) => setFilterPaidTo(e.target.value)}
-              className="max-w-37.5 cursor-pointer truncate rounded-DEFAULT border border-outline-variant bg-surface-container-low px-2 py-1 font-body-md text-body-md font-bold text-on-surface focus:ring-2 focus:ring-primary/20 focus:outline-none"
+              className="w-full cursor-pointer truncate rounded-DEFAULT border border-outline-variant bg-surface-container-low px-2 py-1 font-body-md text-body-md font-bold text-on-surface focus:ring-2 focus:ring-primary/20 focus:outline-none"
             >
               <option value="all">All Payees</option>
               {members.length > 0 ? (

@@ -7,7 +7,9 @@ const {
 async function getGroupByInviteToken(req, res) {
   try {
     const group = await getGroupByInviteTokenService(req.params.token);
-    res.status(200).json(group);
+    res
+      .status(200)
+      .json({ message: "Group invite preview fetched successfully", ...group });
   } catch (err) {
     if (err && err.status && err.message) {
       return res.status(err.status).json({ message: err.message });

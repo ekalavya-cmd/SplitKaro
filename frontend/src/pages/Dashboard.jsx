@@ -4,8 +4,8 @@ import { useGroupQuery } from "../queries/useGroupsQueries";
 import { useBalancesQuery } from "../queries/useBalancesQueries";
 import { useExpensesQuery } from "../queries/useExpensesQueries";
 import { useSettlementSuggestionsQuery } from "../queries/useSettlementsQueries";
-import { LoadingSpinner } from "../components/LoadingSpinner";
-import { ErrorBlock } from "../components/ErrorBlock";
+// import { LoadingSpinner } from "../components/LoadingSpinner";
+import { PersistentErrorBanner } from "../components/PersistentErrorBanner";
 import { Skeleton } from "../components/Skeleton";
 import { usePageLoadingState } from "../hooks/usePageLoadingState";
 import { formatDateForDisplay } from "../utils/dateFilters";
@@ -78,7 +78,7 @@ const Dashboard = () => {
   return (
     <div className="flex flex-col gap-8">
       {isError && (
-        <ErrorBlock
+        <PersistentErrorBanner
           error={{
             message:
               errors[0]?.message +
@@ -238,19 +238,19 @@ const Dashboard = () => {
                 {showSkeleton ? (
                   Array.from({ length: 1 }).map((_, i) => (
                     <tr key={i} className="h-row-height-compact">
-                      <td className="px-4 py-8">
+                      <td className="px-4 py-4.5">
                         <Skeleton className="h-4 w-12" />
                       </td>
-                      <td className="px-4 py-8">
+                      <td className="px-4 py-4.5">
                         <Skeleton className="h-4 w-32" />
                       </td>
-                      <td className="px-4 py-8">
+                      <td className="px-4 py-4.5">
                         <Skeleton className="h-4 w-24" />
                       </td>
-                      <td className="px-4 py-8 text-right">
+                      <td className="px-4 py-4.5 text-right">
                         <Skeleton className="ml-auto h-4 w-16" />
                       </td>
-                      <td className="px-4 py-8">
+                      <td className="px-4 py-4.5">
                         <Skeleton className="h-4 w-20" />
                       </td>
                     </tr>
@@ -262,13 +262,13 @@ const Dashboard = () => {
                         onClick={() => toggleExpenseExpand(expense.id)}
                         className="group h-row-height-compact cursor-pointer transition-colors select-none hover:bg-surface-container-low/50"
                       >
-                        <td className="px-4 py-2 font-mono-data text-sm whitespace-nowrap text-on-surface-variant">
+                        <td className="px-4 py-3 font-mono-data text-sm whitespace-nowrap text-on-surface-variant">
                           {formatDateForDisplay(expense.date)}
                         </td>
-                        <td className="px-4 py-2 font-body-md font-medium text-on-surface">
+                        <td className="px-4 py-3 font-body-md font-medium text-on-surface">
                           {expense.description}
                         </td>
-                        <td className="px-4 py-2">
+                        <td className="px-4 py-3">
                           <div className="flex items-center gap-2">
                             <div className="flex h-6 w-6 items-center justify-center rounded-full bg-secondary-container font-label-sm text-[10px] text-on-secondary-container">
                               {expense.payer.name.substring(0, 2).toUpperCase()}
@@ -278,10 +278,10 @@ const Dashboard = () => {
                             </span>
                           </div>
                         </td>
-                        <td className="px-4 py-2 text-right font-mono-data font-medium text-on-surface">
+                        <td className="px-4 py-3 text-right font-mono-data font-medium text-on-surface">
                           ₹{expense.amount}
                         </td>
-                        <td className="px-4 py-2">
+                        <td className="px-4 py-3">
                           <div className="bg-surface-variant inline-flex items-center gap-1.5 rounded-DEFAULT border border-outline-variant px-2 py-0.5 text-on-surface-variant">
                             <span
                               className={`h-2 w-2 rounded-full ${setSplitTypeColor(expense.splitType)}`}
@@ -305,7 +305,7 @@ const Dashboard = () => {
                         <tr className="bg-surface-container-low/30">
                           <td
                             colSpan="5"
-                            className="border-t border-outline-variant p-6"
+                            className="border-t border-outline-variant px-6 py-4"
                           >
                             <div className="mx-auto grid max-w-4xl grid-cols-1 gap-6 md:grid-cols-2">
                               {/* Summary left */}
@@ -397,11 +397,11 @@ const Dashboard = () => {
                   <tr>
                     <td
                       colSpan="5"
-                      className="h-20 px-4 text-center text-body-md text-on-surface-variant"
+                      className="h-13 px-4 text-center text-body-md text-on-surface-variant"
                     >
                       {selectedGroupId
-                        ? "No expenses for this group"
-                        : "Select a group to view expenses"}
+                        ? "No expenses added yet for this group."
+                        : "Select a group to view expenses."}
                     </td>
                   </tr>
                 )}

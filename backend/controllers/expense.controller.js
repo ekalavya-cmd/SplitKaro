@@ -54,6 +54,11 @@ async function removeExpense(req, res) {
     res.status(200).json({ message: "Expense deleted successfully" });
   } catch (err) {
     console.error("Error deleting expense:", err);
+
+    if (err && err.status && err.message) {
+      return res.status(err.status).json({ message: err.message });
+    }
+
     res.status(500).json({ message: "Internal Server Error" });
   }
 }

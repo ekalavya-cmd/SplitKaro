@@ -30,7 +30,7 @@ export const SpendByMemberChart = ({ expenses, members, isLoading }) => {
       <div className="flex flex-1 flex-col gap-3 overflow-y-auto pr-2">
         {isLoading ? (
           Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="flex flex-col gap-1">
+            <div key={i} className="flex flex-col gap-2">
               <div className="flex justify-between">
                 <Skeleton className="h-4 w-20" />
                 <Skeleton className="h-4 w-16" />

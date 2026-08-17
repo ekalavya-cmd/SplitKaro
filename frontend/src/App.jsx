@@ -4,12 +4,17 @@ import Dashboard from "./pages/Dashboard";
 import Expenses from "./pages/Expenses";
 import SettleUp from "./pages/SettleUp";
 import Error404 from "./pages/Error404";
-import { ConnectionToast } from "./components/ConnectionToast";
+import { PersistentErrorBanner } from "./components/PersistentErrorBanner";
+import { useAuth } from "./context/useAuth";
 
 function App() {
+  const { hasConnectionError, retryConnection } = useAuth();
+
   return (
     <>
-      <ConnectionToast />
+      {hasConnectionError && (
+        <PersistentErrorBanner variant="connection" refetch={retryConnection} />
+      )}
       <Routes>
         <Route element={<Layout />}>
           <Route path="/" element={<Dashboard />} />

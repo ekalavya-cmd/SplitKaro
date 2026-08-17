@@ -44,7 +44,7 @@ const ToastItem = ({ toast, onDismiss }) => {
     <div
       role="alert"
       aria-live="assertive"
-      className={`flex w-80 items-center gap-3 rounded-lg border px-4 py-3 shadow-[0px_10px_15px_rgba(0,0,0,0.1)] transition-all duration-200 pointer-events-auto ${style.container} ${
+      className={`pointer-events-auto flex w-80 items-center gap-3 rounded-lg border px-4 py-2 shadow-[0px_10px_15px_rgba(0,0,0,0.1)] transition-all duration-200 ${style.container} ${
         visible ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
       }`}
     >
@@ -120,7 +120,7 @@ export const ToastProvider = ({ children }) => {
       <div
         id="toast-stack-container"
         aria-label="Notifications"
-        className="fixed right-6 bottom-6 z-50 flex flex-col-reverse gap-3 pointer-events-none"
+        className="pointer-events-none fixed right-6 bottom-6 z-50 flex flex-col-reverse gap-3"
       >
         {toasts.map((toast) => (
           <ToastItem key={toast.id} toast={toast} onDismiss={dismissToast} />

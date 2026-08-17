@@ -10,7 +10,7 @@ import { useSettlementFilters } from "../hooks/useSettlementFilters";
 import { SettlementFilters } from "../components/SettlementFilters";
 import { SimplifiedSettlements } from "../components/SimplifiedSettlements";
 import { Pagination } from "../components/Pagination";
-import { ErrorBlock } from "../components/ErrorBlock";
+import { PersistentErrorBanner } from "../components/PersistentErrorBanner";
 import { Skeleton } from "../components/Skeleton";
 import { RecordSettlementModal } from "../components/RecordSettlementModal";
 import { usePageLoadingState } from "../hooks/usePageLoadingState";
@@ -162,7 +162,7 @@ const SettleUp = () => {
   return (
     <>
       {isError && (
-        <ErrorBlock
+        <PersistentErrorBanner
           error={{
             message:
               errors[0]?.message +
@@ -210,16 +210,16 @@ const SettleUp = () => {
                     {showSkeleton || settlementsQuery.isLoading ? (
                       Array.from({ length: 1 }).map((_, i) => (
                         <tr key={i} className="h-row-height-compact">
-                          <td className="px-4 py-8">
+                          <td className="py-3.8 px-4">
                             <Skeleton className="h-4 w-24" />
                           </td>
-                          <td className="px-4 py-8">
+                          <td className="py-3.8 px-4">
                             <Skeleton className="h-4 w-24" />
                           </td>
-                          <td className="px-4 py-8">
+                          <td className="py-3.8 px-4">
                             <Skeleton className="h-4 w-24" />
                           </td>
-                          <td className="px-4 py-8 text-right">
+                          <td className="py-3.8 px-4 text-right">
                             <Skeleton className="ml-auto h-4 w-16" />
                           </td>
                         </tr>
@@ -265,12 +265,12 @@ const SettleUp = () => {
                     ) : (
                       <tr>
                         <td
-                          className="h-20 px-4 text-center text-body-md text-on-surface-variant"
+                          className="h-10 px-4 text-center text-body-md text-on-surface-variant"
                           colSpan="4"
                         >
                           {settlementsData.settlements.length > 0
-                            ? "No settlements match the selected filters"
-                            : "No settlements found."}
+                            ? "No settlements match the selected filters."
+                            : "No settlements added yet for this group."}
                         </td>
                       </tr>
                     )}
