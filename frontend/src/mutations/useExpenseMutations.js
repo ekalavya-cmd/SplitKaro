@@ -27,6 +27,11 @@ export const useCreateExpense = (options = {}) => {
 
       if (options.onError) {
         options.onError(error, variables, context);
+      } else {
+        showToast({
+          type: "error",
+          message: error?.message ?? "Failed to add expense. Please try again.",
+        });
       }
     },
   });

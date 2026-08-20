@@ -35,6 +35,11 @@ export const useCreateSettlement = (options = {}) => {
     onError: (error, variables, context) => {
       if (options.onError) {
         options.onError(error, variables, context);
+      } else {
+        showToast({
+          type: "error",
+          message: error?.message ?? "Failed to record settlement. Please try again.",
+        });
       }
     },
   });

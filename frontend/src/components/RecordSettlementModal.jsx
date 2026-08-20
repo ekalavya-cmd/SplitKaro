@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Modal } from "./Modal";
@@ -46,11 +46,16 @@ export const RecordSettlementModal = ({
   initialData,
 }) => {
   const [serverError, setServerError] = useState(null);
+  // One-way latch: flips to true on first amount edit; resets only when modal reopens.
+  // Using a boolean (not a value comparison) so re-typing the original value doesn't
+  // restore the tag — it stays hidden once the user has touched the field.
+  const [amountTouched, setAmountTouched] = useState(false);
 
   const {
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(settlementSchema),
@@ -61,6 +66,9 @@ export const RecordSettlementModal = ({
       date: new Date().toISOString().split("T")[0],
     },
   });
+
+  // Subscribe to live amount value so we can compute the tag visibility.
+  const watchedAmount = useWatch({ control, name: "amount" });
 
   const groupQuery = useGroupQuery(groupId, { enabled: !!groupId && isOpen });
   const group = groupQuery.data;
@@ -86,6 +94,8 @@ export const RecordSettlementModal = ({
         });
       }
       setServerError(null);
+      // Reset the latch every time the modal opens so a fresh suggestion shows the tag.
+      setAmountTouched(false);
     } else {
       reset({
         paid_by: "",
@@ -96,6 +106,11 @@ export const RecordSettlementModal = ({
       setServerError(null);
     }
   }
+
+  // Show the "SUGGESTED" tag only when:
+  //   1. The modal was opened with a pre-filled suggestion (initialData present), AND
+  //   2. The user has not yet touched the amount field in this session.
+  const showSuggestedTag = !!initialData && !amountTouched;
 
   const createSettlementMutation = useCreateSettlement({
     onSuccess: () => {
@@ -116,6 +131,10 @@ export const RecordSettlementModal = ({
     setServerError(null);
     createSettlementMutation.mutate({ groupId, inputs: data });
   };
+
+  // Intercept the amount field's onChange to set the one-way touched latch,
+  // while still forwarding the event to react-hook-form's own handler.
+  const amountRegister = register("amount");
 
   const footer = (
     <>
@@ -232,12 +251,20 @@ export const RecordSettlementModal = ({
 
         {/* Amount */}
         <div className="flex flex-col">
-          <label
-            htmlFor="amount"
-            className="mb-2 font-label-sm text-label-sm tracking-wider text-on-surface-variant uppercase"
-          >
-            Amount
-          </label>
+          {/* Label row: "AMOUNT" on left, "SUGGESTED" pill on right (when applicable) */}
+          <div className="mb-2 flex items-center justify-between">
+            <label
+              htmlFor="amount"
+              className="font-label-sm text-label-sm tracking-wider text-on-surface-variant uppercase"
+            >
+              Amount
+            </label>
+            {showSuggestedTag && (
+              <span className="rounded-full bg-primary-fixed px-2 py-0.5 font-label-sm text-[10px] font-semibold tracking-wider text-on-primary-fixed uppercase">
+                Suggested
+              </span>
+            )}
+          </div>
           <div className="relative">
             <span className="absolute top-1/2 left-3 -translate-y-1/2 font-mono-data text-on-surface-variant">
               ₹
@@ -247,7 +274,11 @@ export const RecordSettlementModal = ({
               id="amount"
               placeholder="0.00"
               step="0.01"
-              {...register("amount")}
+              {...amountRegister}
+              onChange={(e) => {
+                amountRegister.onChange(e); // forward to RHF
+                setAmountTouched(true);     // one-way latch: hide the tag
+              }}
               className={`h-10 w-full rounded-lg border ${fieldBorder(!!errors.amount)} bg-surface-container-lowest pr-4 pl-8 font-body-md text-body-md text-on-surface transition-shadow focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none`}
             />
           </div>
