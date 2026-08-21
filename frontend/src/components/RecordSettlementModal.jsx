@@ -45,7 +45,6 @@ export const RecordSettlementModal = ({
   groupId,
   initialData,
 }) => {
-  const [serverError, setServerError] = useState(null);
 
   // Stores the original suggested amount captured when the modal opens.
   // State (not a ref) because it drives a conditional render — refs cannot
@@ -97,7 +96,6 @@ export const RecordSettlementModal = ({
         });
         setSuggestedAmount(null);
       }
-      setServerError(null);
     } else {
       reset({
         paid_by: "",
@@ -105,7 +103,6 @@ export const RecordSettlementModal = ({
         amount: "",
         date: new Date().toISOString().split("T")[0],
       });
-      setServerError(null);
     }
   }
 
@@ -122,20 +119,12 @@ export const RecordSettlementModal = ({
   const createSettlementMutation = useCreateSettlement({
     onSuccess: () => {
       reset();
-      setServerError(null);
       onClose();
-    },
-    onError: (error) => {
-      console.error("Error creating settlement:", error);
-      setServerError(
-        error.message || "Failed to record settlement. Please try again.",
-      );
     },
   });
 
   const onSubmit = (data) => {
     if (!groupId) return;
-    setServerError(null);
     createSettlementMutation.mutate({ groupId, inputs: data });
   };
 
@@ -171,14 +160,6 @@ export const RecordSettlementModal = ({
         onSubmit={handleSubmit(onSubmit)}
         className="flex flex-col gap-4"
       >
-        {/* Backend error banner */}
-        {serverError && (
-          <div className="rounded-lg border border-error/30 bg-error-container px-4 py-3">
-            <p className="font-label-sm text-label-sm text-error">
-              {serverError}
-            </p>
-          </div>
-        )}
 
         {/* Payer */}
         <div className="flex flex-col">

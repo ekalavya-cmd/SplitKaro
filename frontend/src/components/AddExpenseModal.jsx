@@ -69,7 +69,6 @@ export const AddExpenseModal = ({ isOpen, onClose, groupId }) => {
   // Tab-memory: keep per-tab split values independent of RHF
   const [exactSplits, setExactSplits] = useState({});
   const [percentageSplits, setPercentageSplits] = useState({});
-  const [serverError, setServerError] = useState(null);
 
   const {
     register,
@@ -101,7 +100,6 @@ export const AddExpenseModal = ({ isOpen, onClose, groupId }) => {
       reset();
       setExactSplits({});
       setPercentageSplits({});
-      setServerError(null);
     }
   }
 
@@ -113,11 +111,7 @@ export const AddExpenseModal = ({ isOpen, onClose, groupId }) => {
       reset();
       setExactSplits({});
       setPercentageSplits({});
-      setServerError(null);
       onClose();
-    },
-    onError: (error) => {
-      setServerError(error.message || "Failed to add expense. Please try again.");
     },
   });
 
@@ -150,7 +144,6 @@ export const AddExpenseModal = ({ isOpen, onClose, groupId }) => {
   };
 
   const onSubmit = (data) => {
-    setServerError(null);
     createExpenseMutation.mutate({ groupId, inputs: data });
   };
 
@@ -189,13 +182,6 @@ export const AddExpenseModal = ({ isOpen, onClose, groupId }) => {
         onSubmit={handleSubmit(onSubmit)}
         className="flex flex-col gap-5"
       >
-        {/* Backend error banner */}
-        {serverError && (
-          <div className="rounded-lg border border-error/30 bg-error-container px-4 py-3">
-            <p className="font-label-sm text-label-sm text-error">{serverError}</p>
-          </div>
-        )}
-
         {/* Description */}
         <div className="flex flex-col">
           <label
