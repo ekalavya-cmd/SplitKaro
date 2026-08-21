@@ -11,8 +11,8 @@ import {
 // Using DESIGN.md chart palette tokens
 const COLORS = {
   equal: "#3525cd", // primary
-  exact: "#a44100", // tertiary-container
-  percentage: "#89f5e7", // secondary-fixed
+  exact: "#006a61", // secondary
+  percentage: "#6bd8cb", // secondary-fixed
 };
 
 import { Skeleton } from "../Skeleton";
@@ -92,7 +92,7 @@ export const SplitTypeChart = ({ expenses, isLoading }) => {
                 verticalAlign="bottom"
                 height={36}
                 iconType="circle"
-                wrapperStyle={{ paddingTop: "15px" }}
+                wrapperStyle={{ paddingTop: "10px" }}
                 formatter={(value) => (
                   <span style={{ color: "#191c1d" }}>{value}</span>
                 )}

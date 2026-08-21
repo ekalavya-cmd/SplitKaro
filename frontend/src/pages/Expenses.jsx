@@ -180,7 +180,7 @@ const Expenses = () => {
       case "equal":
         return "bg-primary";
       case "exact":
-        return "bg-tertiary-container";
+        return "bg-secondary";
       case "percentage":
         return "bg-secondary-fixed-dim";
       default:
