@@ -251,20 +251,12 @@ export const RecordSettlementModal = ({
 
         {/* Amount */}
         <div className="flex flex-col">
-          {/* Label row: "AMOUNT" on left, "SUGGESTED" pill on right (when applicable) */}
-          <div className="mb-2 flex items-center justify-between">
-            <label
-              htmlFor="amount"
-              className="font-label-sm text-label-sm tracking-wider text-on-surface-variant uppercase"
-            >
-              Amount
-            </label>
-            {showSuggestedTag && (
-              <span className="rounded-full bg-primary-fixed px-2 py-0.5 font-label-sm text-[10px] font-semibold tracking-wider text-on-primary-fixed uppercase">
-                Suggested
-              </span>
-            )}
-          </div>
+          <label
+            htmlFor="amount"
+            className="mb-2 font-label-sm text-label-sm tracking-wider text-on-surface-variant uppercase"
+          >
+            Amount
+          </label>
           <div className="relative">
             <span className="absolute top-1/2 left-3 -translate-y-1/2 font-mono-data text-on-surface-variant">
               ₹
@@ -279,13 +271,19 @@ export const RecordSettlementModal = ({
                 amountRegister.onChange(e); // forward to RHF
                 setAmountTouched(true);     // one-way latch: hide the tag
               }}
-              className={`h-10 w-full rounded-lg border ${fieldBorder(!!errors.amount)} bg-surface-container-lowest pr-4 pl-8 font-body-md text-body-md text-on-surface transition-shadow focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none`}
+              className={`h-10 w-full rounded-lg border ${fieldBorder(!!errors.amount)} bg-surface-container-lowest pl-8 font-body-md text-body-md text-on-surface transition-shadow focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none ${showSuggestedTag ? "pr-24" : "pr-4"}`}
             />
+            {showSuggestedTag && (
+              <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 rounded-full bg-primary-fixed px-2 py-0.5 font-label-sm text-[10px] font-semibold tracking-wider text-on-primary-fixed uppercase">
+                Suggested
+              </span>
+            )}
           </div>
           {errors.amount && (
             <p className={fieldErrorClass}>{errors.amount.message}</p>
           )}
         </div>
+
 
         {/* Date */}
         <div className="flex flex-col">
