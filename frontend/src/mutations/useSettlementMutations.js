@@ -33,6 +33,7 @@ export const useCreateSettlement = (options = {}) => {
       }
     },
     onError: (error, variables, context) => {
+      console.error("Error creating settlement:", error);
       if (options.onError) {
         options.onError(error, variables, context);
       } else {
