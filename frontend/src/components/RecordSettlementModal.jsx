@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -48,8 +48,9 @@ export const RecordSettlementModal = ({
   const [serverError, setServerError] = useState(null);
 
   // Stores the original suggested amount captured when the modal opens.
-  // A ref (not state) so updates don't trigger re-renders.
-  const suggestedAmountRef = useRef(null);
+  // State (not a ref) because it drives a conditional render — refs cannot
+  // be read during render (react-hooks/refs rule).
+  const [suggestedAmount, setSuggestedAmount] = useState(null);
 
   const {
     register,
@@ -85,8 +86,8 @@ export const RecordSettlementModal = ({
           amount: initialData.amount ?? "",
           date: new Date().toISOString().split("T")[0],
         });
-        // Capture the suggested amount once so we can compare against it live.
-        suggestedAmountRef.current = initialData.amount ?? null;
+        // Capture the suggested amount so we can compare against it live.
+        setSuggestedAmount(initialData.amount ?? null);
       } else {
         reset({
           paid_by: "",
@@ -94,7 +95,7 @@ export const RecordSettlementModal = ({
           amount: "",
           date: new Date().toISOString().split("T")[0],
         });
-        suggestedAmountRef.current = null;
+        setSuggestedAmount(null);
       }
       setServerError(null);
     } else {
@@ -115,8 +116,8 @@ export const RecordSettlementModal = ({
   // handling both typed input and the number spinner's native string formats.
   const showSuggestedTag =
     !!initialData &&
-    suggestedAmountRef.current !== null &&
-    Number(watchedAmount) === Number(suggestedAmountRef.current);
+    suggestedAmount !== null &&
+    Number(watchedAmount) === Number(suggestedAmount);
 
   const createSettlementMutation = useCreateSettlement({
     onSuccess: () => {
