@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -46,10 +46,10 @@ export const RecordSettlementModal = ({
   initialData,
 }) => {
   const [serverError, setServerError] = useState(null);
-  // One-way latch: flips to true on first amount edit; resets only when modal reopens.
-  // Using a boolean (not a value comparison) so re-typing the original value doesn't
-  // restore the tag — it stays hidden once the user has touched the field.
-  const [amountTouched, setAmountTouched] = useState(false);
+
+  // Stores the original suggested amount captured when the modal opens.
+  // A ref (not state) so updates don't trigger re-renders.
+  const suggestedAmountRef = useRef(null);
 
   const {
     register,
@@ -67,7 +67,7 @@ export const RecordSettlementModal = ({
     },
   });
 
-  // Subscribe to live amount value so we can compute the tag visibility.
+  // Subscribe to the live amount value for the tag visibility comparison.
   const watchedAmount = useWatch({ control, name: "amount" });
 
   const groupQuery = useGroupQuery(groupId, { enabled: !!groupId && isOpen });
@@ -85,6 +85,8 @@ export const RecordSettlementModal = ({
           amount: initialData.amount ?? "",
           date: new Date().toISOString().split("T")[0],
         });
+        // Capture the suggested amount once so we can compare against it live.
+        suggestedAmountRef.current = initialData.amount ?? null;
       } else {
         reset({
           paid_by: "",
@@ -92,10 +94,9 @@ export const RecordSettlementModal = ({
           amount: "",
           date: new Date().toISOString().split("T")[0],
         });
+        suggestedAmountRef.current = null;
       }
       setServerError(null);
-      // Reset the latch every time the modal opens so a fresh suggestion shows the tag.
-      setAmountTouched(false);
     } else {
       reset({
         paid_by: "",
@@ -107,10 +108,15 @@ export const RecordSettlementModal = ({
     }
   }
 
-  // Show the "SUGGESTED" tag only when:
+  // Show the "SUGGESTED" tag when:
   //   1. The modal was opened with a pre-filled suggestion (initialData present), AND
-  //   2. The user has not yet touched the amount field in this session.
-  const showSuggestedTag = !!initialData && !amountTouched;
+  //   2. The field's current numeric value exactly matches the original suggestion.
+  // Uses Number() comparison so "1560.20" and "1560.2" are treated as equal,
+  // handling both typed input and the number spinner's native string formats.
+  const showSuggestedTag =
+    !!initialData &&
+    suggestedAmountRef.current !== null &&
+    Number(watchedAmount) === Number(suggestedAmountRef.current);
 
   const createSettlementMutation = useCreateSettlement({
     onSuccess: () => {
@@ -121,7 +127,7 @@ export const RecordSettlementModal = ({
     onError: (error) => {
       console.error("Error creating settlement:", error);
       setServerError(
-        error.message || "Failed to record settlement. Please try again."
+        error.message || "Failed to record settlement. Please try again.",
       );
     },
   });
@@ -131,10 +137,6 @@ export const RecordSettlementModal = ({
     setServerError(null);
     createSettlementMutation.mutate({ groupId, inputs: data });
   };
-
-  // Intercept the amount field's onChange to set the one-way touched latch,
-  // while still forwarding the event to react-hook-form's own handler.
-  const amountRegister = register("amount");
 
   const footer = (
     <>
@@ -171,7 +173,9 @@ export const RecordSettlementModal = ({
         {/* Backend error banner */}
         {serverError && (
           <div className="rounded-lg border border-error/30 bg-error-container px-4 py-3">
-            <p className="font-label-sm text-label-sm text-error">{serverError}</p>
+            <p className="font-label-sm text-label-sm text-error">
+              {serverError}
+            </p>
           </div>
         )}
 
@@ -251,12 +255,20 @@ export const RecordSettlementModal = ({
 
         {/* Amount */}
         <div className="flex flex-col">
-          <label
-            htmlFor="amount"
-            className="mb-2 font-label-sm text-label-sm tracking-wider text-on-surface-variant uppercase"
-          >
-            Amount
-          </label>
+          {/* Label row: "AMOUNT" on left, "SUGGESTED" pill on right when value matches suggestion */}
+          <div className="mb-2 flex items-center justify-between">
+            <label
+              htmlFor="amount"
+              className="font-label-sm text-label-sm tracking-wider text-on-surface-variant uppercase"
+            >
+              Amount
+            </label>
+            {showSuggestedTag && (
+              <span className="rounded-full bg-primary-fixed px-2 py-0.5 font-label-sm text-[10px] font-semibold tracking-wider text-on-primary-fixed uppercase">
+                Suggested
+              </span>
+            )}
+          </div>
           <div className="relative">
             <span className="absolute top-1/2 left-3 -translate-y-1/2 font-mono-data text-on-surface-variant">
               ₹
@@ -266,24 +278,14 @@ export const RecordSettlementModal = ({
               id="amount"
               placeholder="0.00"
               step="0.01"
-              {...amountRegister}
-              onChange={(e) => {
-                amountRegister.onChange(e); // forward to RHF
-                setAmountTouched(true);     // one-way latch: hide the tag
-              }}
-              className={`h-10 w-full rounded-lg border ${fieldBorder(!!errors.amount)} bg-surface-container-lowest pl-8 font-body-md text-body-md text-on-surface transition-shadow focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none ${showSuggestedTag ? "pr-24" : "pr-4"}`}
+              {...register("amount")}
+              className={`h-10 w-full rounded-lg border ${fieldBorder(!!errors.amount)} bg-surface-container-lowest pr-4 pl-8 font-body-md text-body-md text-on-surface transition-shadow focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none`}
             />
-            {showSuggestedTag && (
-              <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 rounded-full bg-primary-fixed px-2 py-0.5 font-label-sm text-[10px] font-semibold tracking-wider text-on-primary-fixed uppercase">
-                Suggested
-              </span>
-            )}
           </div>
           {errors.amount && (
             <p className={fieldErrorClass}>{errors.amount.message}</p>
           )}
         </div>
-
 
         {/* Date */}
         <div className="flex flex-col">
