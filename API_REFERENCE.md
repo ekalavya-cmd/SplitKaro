@@ -394,7 +394,7 @@ Values are the amount (for `exact`) or the percentage (for `percentage`).
 | `400`  | `{ "message": "splits object is required for exact split type" }`                  | `splits` missing for `exact`                      |
 | `400`  | `{ "message": "splits object is required for percentage split type" }`             | `splits` missing for `percentage`                 |
 | `400`  | `{ "message": "Invalid member IDs in splits: ..." }`                               | A key in `splits` does not match any group member |
-| `400`  | `{ "message": "Missing splits for member IDs: ..." }`                              | A group member is absent from `splits`            |
+| `400`  | `{ "message": "Missing splits for: <name>, <name>" }`                              | A group member is absent from `splits`            |
 | `400`  | `{ "message": "Split amounts sum to X, but total amount is Y" }`                   | `exact` splits don't sum to `amount`              |
 | `400`  | `{ "message": "Percentages sum to X, but must sum to exactly 100" }`               | `percentage` splits don't sum to 100              |
 | `403`  | `{ "message": "You are not a member of this group." }`                             | Authenticated user is not a member of this group  |
