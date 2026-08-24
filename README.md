@@ -594,6 +594,14 @@ Copy `backend/.env.example` to `backend/.env` and fill in the values.
 
 ---
 
+## Contributing 🤝
+
+We welcome contributions! To keep our commit history clean and readable, SplitKaro enforces the **Conventional Commits** standard using Husky and Commitlint.
+
+Please read our [Contributing Guidelines](CONTRIBUTING.md) to understand the required commit message format and how to submit your changes.
+
+---
+
 ## Roadmap 🗺️
 
 > Features planned for upcoming development.
