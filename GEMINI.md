@@ -4,7 +4,7 @@
 
 ## 1. Project Context
 
-SplitKaro is a group bill-splitting web app (Splitwise-style): users create groups, log shared expenses across three split modes (equal / exact / percentage), track per-member balances, and record debt settlements. Stack: **React 18 + Vite + Tailwind CSS v4** (frontend, ES modules, `src/`) talking to an **Express 5 + Sequelize 6 + MySQL** REST API (backend, CommonJS, port 3000). No authentication exists yet.
+SplitKaro is a group bill-splitting web app (Splitwise-style): users create groups, log shared expenses across three split modes (equal / exact / percentage), track per-member balances, and record debt settlements. Stack: **React 18 + Vite + Tailwind CSS v4** (frontend, ES modules, `src/`) talking to an **Express 5 + Sequelize 6 + MySQL** REST API (backend, CommonJS, port 3000).
 
 ---
 
@@ -23,8 +23,8 @@ SplitKaro is a group bill-splitting web app (Splitwise-style): users create grou
 **Frontend**
 
 - Module system: ES modules (`import` / `export`)
-- All API calls go through `src/api/splitKaroAPI.js` (axios instance) → `src/services/splitKaroService.js` (one function per endpoint) → page component
-- State: Page-local UI state uses `useState`. Global auth uses `AuthContext`. API caching/fetching uses `TanStack Query` (currently migrating). No Redux/Zustand.
+- All API calls go through `src/api/http.client.js` (axios instance) → `src/services/*.service.js` (one file per entity) → page component
+- State: Page-local UI state uses `useState`. Global auth uses `AuthContext`. API caching/fetching uses `TanStack Query` (fully migrated). No Redux/Zustand.
 - Styling: Tailwind CSS utility classes only; no inline styles, no CSS modules
 
 ---
@@ -34,7 +34,6 @@ SplitKaro is a group bill-splitting web app (Splitwise-style): users create grou
 - **Never change the DB schema** (models, migrations, column types, FKs) without explicitly flagging the change and getting approval first
 - **Keep response shapes consistent** with `API_REFERENCE.md` — do not silently add or rename fields
 - **Ask before adding any new `npm` dependency** to either workspace
-- **Do not introduce authentication silently** — auth is a planned but unstarted feature that will touch every layer
 - **Do not add endpoints** without a corresponding entry in `API_REFERENCE.md`
 - **Use `<Link>` from `react-router-dom`**, not `<a href>`, for internal navigation
 - Error responses must always be `{ "message": "..." }` (not `{ "error": "..." }`)
