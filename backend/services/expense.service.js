@@ -73,11 +73,11 @@ async function createExpenseForGroup(groupId, expenseData) {
     const missingUserIds = userIds.filter((id) => !splitUserIds.includes(id));
     if (missingUserIds.length > 0) {
       const missingNames = missingUserIds.map(
-        (id) => users.find((u) => u.id === id)?.name ?? String(id)
+        (id) => users.find((u) => u.id === id)?.name ?? String(id),
       );
       throw {
         status: 400,
-        message: `Missing splits for: ${missingNames.join(", ")}`,
+        message: `Missing splits for members: ${missingNames.join(", ")}`,
       };
     }
 
@@ -113,7 +113,7 @@ async function createExpenseForGroup(groupId, expenseData) {
     const missingUserIds = userIds.filter((id) => !splitUserIds.includes(id));
     if (missingUserIds.length > 0) {
       const missingNames = missingUserIds.map(
-        (id) => users.find((u) => u.id === id)?.name ?? String(id)
+        (id) => users.find((u) => u.id === id)?.name ?? String(id),
       );
       throw {
         status: 400,
