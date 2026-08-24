@@ -15,6 +15,7 @@ type(scope): description
 ```
 
 ### 1. Type (Required)
+
 The `type` must be one of the following:
 
 - **feat**: A new feature
@@ -27,10 +28,13 @@ The `type` must be one of the following:
 - **perf**: A code change that improves performance
 
 ### 2. Scope (Optional)
+
 The `scope` should be the name of the npm package or module that is affected (e.g. `ui`, `api`, `db`, `auth`, `expenses`, `settlements`, `groups`). It is flexible but should accurately reflect the area of the codebase being modified.
 
 ### 3. Description (Required)
+
 The `description` contains a succinct description of the change:
+
 - Use the imperative, present tense: "change" not "changed" nor "changes"
 - Don't capitalize the first letter
 - No dot (.) at the end
