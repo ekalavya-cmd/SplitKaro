@@ -19,6 +19,13 @@ const createExpenseSchema = z
       return; // Stop further validation if fields are missing
     }
 
+    if (data.description && String(data.description).length > 255) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Description must be 255 characters or less",
+      });
+    }
+
     // 2. Enum check for split_type
     if (
       data.split_type !== "equal" &&

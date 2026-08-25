@@ -31,9 +31,19 @@ httpClient.interceptors.response.use(
   (error) => {
     if (error.response) {
       const { status, data } = error.response;
+      let errorMessage = data?.message || "Something went wrong";
+
+      if (
+        typeof errorMessage === "string" &&
+        errorMessage.startsWith("Balance calculation error:")
+      ) {
+        errorMessage =
+          "Something went wrong while calculating balances. Please refresh and try again.";
+      }
+
       return Promise.reject({
         status,
-        message: data?.message || "Something went wrong",
+        message: errorMessage,
       });
     }
 

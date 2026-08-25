@@ -14,7 +14,7 @@ import { Modal } from "./Modal";
 // ---------------------------------------------------------------------------
 const expenseSchema = z
   .object({
-    description: z.string().min(1, "Description is required"),
+    description: z.string().min(1, "Description is required").max(255, "Description must be 255 characters or less"),
     amount: z.coerce
       .number({ invalid_type_error: "Amount is required" })
       .positive("Amount must be greater than 0"),
@@ -91,6 +91,7 @@ export const AddExpenseModal = ({ isOpen, onClose, groupId }) => {
 
   const splitType = useWatch({ control, name: "split_type" });
   const amount = useWatch({ control, name: "amount" });
+  const descriptionValue = useWatch({ control, name: "description" });
 
   // Reset on close (render-phase pattern to avoid setState-in-effect lint)
   const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
@@ -184,12 +185,25 @@ export const AddExpenseModal = ({ isOpen, onClose, groupId }) => {
       >
         {/* Description */}
         <div className="flex flex-col">
-          <label
-            htmlFor="description"
-            className="mb-2 font-label-sm text-label-sm tracking-wider text-on-surface-variant uppercase"
-          >
-            Description
-          </label>
+          <div className="mb-2 flex items-center justify-between">
+            <label
+              htmlFor="description"
+              className="font-label-sm text-label-sm tracking-wider text-on-surface-variant uppercase"
+            >
+              Description
+            </label>
+            {descriptionValue?.length > 200 && (
+              <span
+                className={`font-label-sm text-[10px] font-semibold tracking-wider uppercase ${
+                  descriptionValue.length > 255
+                    ? "text-error"
+                    : "text-on-surface-variant"
+                }`}
+              >
+                {descriptionValue.length} / 255
+              </span>
+            )}
+          </div>
           <input
             type="text"
             id="description"
