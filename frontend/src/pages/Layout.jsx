@@ -3,11 +3,19 @@ import { Link, Outlet, useLocation } from "react-router-dom";
 import { useAllGroupsQuery } from "../queries/useGroupsQueries";
 import { useAuth } from "../context/useAuth";
 import { AddExpenseModal } from "../components/AddExpenseModal";
+import { RecordSettlementModal } from "../components/RecordSettlementModal";
 
 const Layout = () => {
   const [selectedGroupId, setSelectedGroupId] = useState("");
   const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false);
+  const [isSettlementModalOpen, setIsSettlementModalOpen] = useState(false);
+  const [settlementModalData, setSettlementModalData] = useState(null);
   const location = useLocation();
+
+  const openSettlementModal = (initialData = null) => {
+    setSettlementModalData(initialData);
+    setIsSettlementModalOpen(true);
+  };
 
   const { isAuthenticated, isInitializing, hasConnectionError, logout } =
     useAuth();
@@ -179,8 +187,12 @@ const Layout = () => {
 
             <div className="mx-1 h-6 w-px bg-outline-variant"></div>
 
-            <button className="h-9 rounded-DEFAULT border border-primary bg-transparent px-4 font-label-sm text-label-sm font-semibold tracking-wide text-primary transition-all hover:bg-primary/5 hover:shadow-md">
-              Groups
+            <button
+              onClick={() => openSettlementModal()}
+              disabled={!selectedGroupId}
+              className="h-9 rounded-DEFAULT border border-primary bg-transparent px-4 font-label-sm text-label-sm font-semibold tracking-wide text-primary transition-all hover:bg-primary/5 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Settle
             </button>
 
             <button
@@ -212,6 +224,7 @@ const Layout = () => {
                 isInitializing,
                 hasConnectionError,
                 groupsIsLoading: isLoading,
+                openSettlementModal,
               }}
             />
           </div>
@@ -222,6 +235,15 @@ const Layout = () => {
         isOpen={isAddExpenseOpen}
         onClose={() => setIsAddExpenseOpen(false)}
         groupId={selectedGroupId}
+      />
+      <RecordSettlementModal
+        isOpen={isSettlementModalOpen}
+        onClose={() => {
+          setIsSettlementModalOpen(false);
+          setSettlementModalData(null);
+        }}
+        groupId={selectedGroupId}
+        initialData={settlementModalData}
       />
     </div>
   );

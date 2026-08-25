@@ -13,16 +13,13 @@ import { SimplifiedSettlements } from "../components/SimplifiedSettlements";
 import { SpendByMemberChart } from "../components/analytics/SpendByMemberChart";
 import { SplitTypeChart } from "../components/analytics/SplitTypeChart";
 import { SpendingTimeChart } from "../components/analytics/SpendingTimeChart";
-import { RecordSettlementModal } from "../components/RecordSettlementModal";
 // import { useToast } from "../context/useToast";
 
 const RECENT_EXPENSES_COUNT = 5;
 
 const Dashboard = () => {
-  const { selectedGroupId } = useOutletContext();
+  const { selectedGroupId, openSettlementModal } = useOutletContext();
   const [expandedExpenseIds, setExpandedExpenseIds] = useState({});
-  const [isSettlementModalOpen, setIsSettlementModalOpen] = useState(false);
-  const [settlementModalData, setSettlementModalData] = useState(null);
   // const { showToast } = useToast();
 
   const groupQuery = useGroupQuery(selectedGroupId);
@@ -191,12 +188,11 @@ const Dashboard = () => {
               : "All balances are settled!"
           }
           onSettle={(from, to, amount) => {
-            setSettlementModalData({
+            openSettlementModal({
               paid_by: from.id,
               paid_to: to.id,
               amount: amount.toFixed(2),
             });
-            setIsSettlementModalOpen(true);
           }}
         />
       </div>
@@ -416,15 +412,6 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <RecordSettlementModal
-        isOpen={isSettlementModalOpen}
-        onClose={() => {
-          setIsSettlementModalOpen(false);
-          setSettlementModalData(null);
-        }}
-        groupId={selectedGroupId}
-        initialData={settlementModalData}
-      />
     </div>
   );
 };

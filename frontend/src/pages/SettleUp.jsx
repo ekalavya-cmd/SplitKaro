@@ -12,7 +12,6 @@ import { SimplifiedSettlements } from "../components/SimplifiedSettlements";
 import { Pagination } from "../components/Pagination";
 import { PersistentErrorBanner } from "../components/PersistentErrorBanner";
 import { Skeleton } from "../components/Skeleton";
-import { RecordSettlementModal } from "../components/RecordSettlementModal";
 import { usePageLoadingState } from "../hooks/usePageLoadingState";
 import { usePagination } from "../hooks/usePagination";
 import {
@@ -23,11 +22,8 @@ import {
 const SETTLEMENTS_PER_PAGE = 10;
 
 const SettleUp = () => {
-  const { selectedGroupId } = useOutletContext();
+  const { selectedGroupId, openSettlementModal } = useOutletContext();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [isSettlementModalOpen, setIsSettlementModalOpen] = useState(false);
-  const [settlementModalData, setSettlementModalData] = useState(null);
-
   // Derive initial filter values from URL params.
   // useState only reads these on the first render; re-renders ignore them.
   const urlPreset = searchParams.get("preset") || "all";
@@ -304,12 +300,11 @@ const SettleUp = () => {
             suggestions={suggestions}
             isLoading={!!selectedGroupId && (showSkeleton || suggestionsQuery.isLoading)}
             onSettle={(from, to, amount) => {
-              setSettlementModalData({
+              openSettlementModal({
                 paid_by: from.id,
                 paid_to: to.id,
                 amount: amount.toFixed(2),
               });
-              setIsSettlementModalOpen(true);
             }}
             showRecalculate={true}
             isFetching={suggestionsQuery.isFetching}
@@ -326,15 +321,6 @@ const SettleUp = () => {
           />
         </div>
 
-        <RecordSettlementModal
-          isOpen={isSettlementModalOpen}
-          onClose={() => {
-            setIsSettlementModalOpen(false);
-            setSettlementModalData(null);
-          }}
-          groupId={selectedGroupId}
-          initialData={settlementModalData}
-        />
       </div>
     </>
   );
