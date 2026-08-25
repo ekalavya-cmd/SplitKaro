@@ -20,6 +20,8 @@ export const SimplifiedSettlements = ({
   onSettle,
   showRecalculate = false,
   isFetching = false,
+  disableRecalculate = false,
+  emptyStateMessage = "All balances are settled!",
   onRecalculate = () => {},
 }) => {
   return (
@@ -33,7 +35,7 @@ export const SimplifiedSettlements = ({
           <button
             type="button"
             onClick={onRecalculate}
-            disabled={isFetching}
+            disabled={isFetching || disableRecalculate}
             className="flex cursor-pointer items-center gap-1 font-label-sm text-label-sm text-primary transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-40"
           >
             <span className="material-symbols-outlined text-[16px]">
@@ -95,7 +97,7 @@ export const SimplifiedSettlements = ({
         /* Empty state — bordered container for visual consistency with card style */
         <div className="flex min-h-19.5 items-center justify-center rounded-lg border border-outline-variant bg-surface-container-lowest text-center shadow-sm">
           <p className="font-body-md text-body-md text-on-surface-variant">
-            All balances are settled!
+            {emptyStateMessage}
           </p>
         </div>
       )}

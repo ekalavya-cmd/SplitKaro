@@ -140,6 +140,14 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  useEffect(() => {
+    const handleForceLogout = () => {
+      logout().catch(() => {});
+    };
+    window.addEventListener("auth:forceLogout", handleForceLogout);
+    return () => window.removeEventListener("auth:forceLogout", handleForceLogout);
+  }, []);
+
   return (
     <AuthContext.Provider
       value={{

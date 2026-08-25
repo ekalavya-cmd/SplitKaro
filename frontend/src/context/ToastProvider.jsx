@@ -93,11 +93,20 @@ export const ToastProvider = ({ children }) => {
   const showToast = useCallback(
     ({ type, message }) => {
       const id = `toast-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-      setToasts((prev) => [...prev, { id, type, message }]);
+      
+      setToasts((prev) => {
+        // Deduplicate: if a toast with this exact message and type is already visible, ignore
+        if (prev.some((t) => t.message === message && t.type === type)) {
+          return prev;
+        }
 
-      timersRef.current[id] = setTimeout(() => {
-        dismissToast(id);
-      }, AUTO_DISMISS_MS);
+        // Only set the timer if we actually add the toast
+        timersRef.current[id] = setTimeout(() => {
+          dismissToast(id);
+        }, AUTO_DISMISS_MS);
+        
+        return [...prev, { id, type, message }];
+      });
 
       return id;
     },
@@ -111,6 +120,15 @@ export const ToastProvider = ({ children }) => {
       Object.values(activeTimers).forEach(clearTimeout);
     };
   }, []);
+
+  // Listen for global toast events (e.g. from QueryCache outside of React)
+  useEffect(() => {
+    const handleGlobalError = (event) => {
+      showToast({ type: "error", message: event.detail.message });
+    };
+    window.addEventListener("toast:error", handleGlobalError);
+    return () => window.removeEventListener("toast:error", handleGlobalError);
+  }, [showToast]);
 
   return (
     <ToastContext.Provider value={{ showToast, dismissToast }}>

@@ -49,7 +49,7 @@ const Dashboard = () => {
     expensesQuery.data !== undefined &&
     balancesQuery.data !== undefined &&
     suggestionsQuery.data !== undefined;
-  const showSkeleton = isDataLoading || (isError && !hasData);
+  const showSkeleton = !!selectedGroupId && (isDataLoading || (isError && !hasData));
 
   const toggleExpenseExpand = (id) => {
     setExpandedExpenseIds((prev) => ({
@@ -185,6 +185,11 @@ const Dashboard = () => {
         <SimplifiedSettlements
           suggestions={suggestions}
           isLoading={showSkeleton}
+          emptyStateMessage={
+            !selectedGroupId
+              ? "Select a group to view balances."
+              : "All balances are settled!"
+          }
           onSettle={(from, to, amount) => {
             setSettlementModalData({
               paid_by: from.id,

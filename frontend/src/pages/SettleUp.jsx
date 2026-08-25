@@ -157,7 +157,7 @@ const SettleUp = () => {
     groupQuery.data !== undefined &&
     suggestionsQuery.data !== undefined &&
     settlementsQuery.data !== undefined;
-  const showSkeleton = isDataLoading || (isError && !hasData);
+  const showSkeleton = !!selectedGroupId && (isDataLoading || (isError && !hasData));
 
   return (
     <>
@@ -268,9 +268,11 @@ const SettleUp = () => {
                           className="h-10 px-4 text-center text-body-md text-on-surface-variant"
                           colSpan="4"
                         >
-                          {settlementsData.settlements.length > 0
-                            ? "No settlements match the selected filters."
-                            : "No settlements added yet for this group."}
+                          {!selectedGroupId
+                            ? "Select a group to view settlements."
+                            : settlementsData.settlements.length > 0
+                              ? "No settlements match the selected filters."
+                              : "No settlements added yet for this group."}
                         </td>
                       </tr>
                     )}
@@ -300,7 +302,7 @@ const SettleUp = () => {
         <div className="flex flex-col gap-8 lg:col-span-1">
           <SimplifiedSettlements
             suggestions={suggestions}
-            isLoading={showSkeleton || suggestionsQuery.isLoading}
+            isLoading={!!selectedGroupId && (showSkeleton || suggestionsQuery.isLoading)}
             onSettle={(from, to, amount) => {
               setSettlementModalData({
                 paid_by: from.id,
@@ -311,7 +313,16 @@ const SettleUp = () => {
             }}
             showRecalculate={true}
             isFetching={suggestionsQuery.isFetching}
-            onRecalculate={() => suggestionsQuery.refetch()}
+            disableRecalculate={!selectedGroupId}
+            emptyStateMessage={
+              !selectedGroupId
+                ? "Select a group to view balances."
+                : "All balances are settled!"
+            }
+            onRecalculate={() => {
+              if (!selectedGroupId) return;
+              suggestionsQuery.refetch();
+            }}
           />
         </div>
 
