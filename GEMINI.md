@@ -24,7 +24,7 @@ SplitKaro is a group bill-splitting web app (Splitwise-style): users create grou
 
 - Module system: ES modules (`import` / `export`)
 - All API calls go through `src/api/http.client.js` (axios instance) → `src/services/*.service.js` (one file per entity) → page component
-- State: Page-local UI state uses `useState`. Global auth uses `AuthContext`. API caching/fetching uses `TanStack Query` (fully migrated). No Redux/Zustand.
+- State: Page-local UI state uses `useState`. API caching/fetching uses `TanStack Query` (fully migrated). Global client state (auth, toasts) is being migrated from React Context to **Zustand** — new global state should use Zustand going forward; avoid Redux.
 - Styling: Tailwind CSS utility classes only; no inline styles, no CSS modules
 
 ---
