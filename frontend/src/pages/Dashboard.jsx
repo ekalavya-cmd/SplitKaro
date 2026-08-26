@@ -5,7 +5,7 @@ import { useBalancesQuery } from "../queries/useBalancesQueries";
 import { useExpensesQuery } from "../queries/useExpensesQueries";
 import { useSettlementSuggestionsQuery } from "../queries/useSettlementsQueries";
 // import { LoadingSpinner } from "../components/LoadingSpinner";
-import { PersistentErrorBanner } from "../components/PersistentErrorBanner";
+// Removed PersistentErrorBanner in favor of inline retry state
 import { Skeleton } from "../components/Skeleton";
 import { usePageLoadingState } from "../hooks/usePageLoadingState";
 import { formatDateForDisplay } from "../utils/dateFilters";
@@ -75,16 +75,19 @@ const Dashboard = () => {
   return (
     <div className="flex flex-col gap-8">
       {isError && (
-        <PersistentErrorBanner
-          error={{
-            message:
-              errors[0]?.message +
-              (errors.length > 1
-                ? ` (and ${errors.length - 1} other error${errors.length > 2 ? "s" : ""})`
-                : ""),
-          }}
-          refetch={refetchAll}
-        />
+        <div className="flex min-h-24 items-center justify-center rounded-lg border border-outline-variant bg-surface-container-lowest p-4 text-center shadow-sm">
+          <div className="flex flex-col items-center justify-center gap-2">
+            <p className="font-body-md text-body-md text-on-surface-variant">
+              Couldn't load overview data.
+            </p>
+            <button
+              onClick={refetchAll}
+              className="font-label-sm text-label-sm font-semibold underline underline-offset-2 hover:text-primary"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
       )}
       <div className="grid grid-cols-1 gap-gutter lg:grid-cols-3">
         {/* Balances */}

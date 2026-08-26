@@ -10,7 +10,7 @@ import { useSettlementFilters } from "../hooks/useSettlementFilters";
 import { SettlementFilters } from "../components/SettlementFilters";
 import { SimplifiedSettlements } from "../components/SimplifiedSettlements";
 import { Pagination } from "../components/Pagination";
-import { PersistentErrorBanner } from "../components/PersistentErrorBanner";
+// Removed PersistentErrorBanner in favor of inline retry state
 import { Skeleton } from "../components/Skeleton";
 import { usePageLoadingState } from "../hooks/usePageLoadingState";
 import { usePagination } from "../hooks/usePagination";
@@ -158,16 +158,19 @@ const SettleUp = () => {
   return (
     <>
       {isError && (
-        <PersistentErrorBanner
-          error={{
-            message:
-              errors[0]?.message +
-              (errors.length > 1
-                ? ` (and ${errors.length - 1} other error${errors.length > 2 ? "s" : ""})`
-                : ""),
-          }}
-          refetch={refetchAll}
-        />
+        <div className="flex min-h-24 items-center justify-center rounded-lg border border-outline-variant bg-surface-container-lowest p-4 text-center shadow-sm">
+          <div className="flex flex-col items-center justify-center gap-2">
+            <p className="font-body-md text-body-md text-on-surface-variant">
+              Couldn't load settlements.
+            </p>
+            <button
+              onClick={refetchAll}
+              className="font-label-sm text-label-sm font-semibold underline underline-offset-2 hover:text-primary"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
       )}
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
         {/* Left column: heading + Simplified Settlements + Settlements History */}

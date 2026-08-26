@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { useAllGroupsQuery } from "../queries/useGroupsQueries";
 import { useAuth } from "../context/useAuth";
+import { useToast } from "../context/useToast";
 import { AddExpenseModal } from "../components/AddExpenseModal";
 import { RecordSettlementModal } from "../components/RecordSettlementModal";
 
@@ -19,6 +20,7 @@ const Layout = () => {
 
   const { isAuthenticated, isInitializing, hasConnectionError, logout } =
     useAuth();
+  const { showToast } = useToast();
 
   const {
     data: groups = [],
@@ -106,6 +108,10 @@ const Layout = () => {
                       await logout();
                     } catch (error) {
                       console.error("Logout failed in UI:", error);
+                      showToast({
+                        type: "error",
+                        message: "Failed to log out. Please try again.",
+                      });
                     }
                   }}
                   className="flex items-center gap-3 rounded-DEFAULT px-4 py-2 text-left text-on-surface-variant transition-colors hover:bg-surface-container-low hover:text-on-surface"
@@ -190,7 +196,7 @@ const Layout = () => {
             <button
               onClick={() => openSettlementModal()}
               disabled={!selectedGroupId}
-              className="h-9 rounded-DEFAULT border border-primary bg-transparent px-4 font-label-sm text-label-sm font-semibold tracking-wide text-primary transition-all hover:bg-primary/5 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50"
+              className="font-label-md text-label-md h-9 rounded-DEFAULT border border-primary bg-transparent px-4 py-2 font-semibold tracking-wide text-primary transition-all hover:bg-primary/5 hover:shadow-md disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:shadow-none"
             >
               Settle
             </button>
@@ -198,7 +204,7 @@ const Layout = () => {
             <button
               onClick={() => setIsAddExpenseOpen(true)}
               disabled={!selectedGroupId}
-              className="flex h-9 items-center justify-center gap-2 rounded-DEFAULT bg-primary px-4 font-label-sm text-label-sm font-semibold tracking-wide text-on-primary transition-all hover:bg-primary/90 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex h-9 items-center justify-center gap-2 rounded-DEFAULT bg-primary px-4 font-label-sm text-label-sm font-semibold tracking-wide text-on-primary transition-all hover:bg-primary/90 hover:shadow-md disabled:opacity-50 disabled:hover:bg-primary disabled:hover:text-on-primary disabled:hover:shadow-none"
             >
               <span className="material-symbols-outlined text-[18px]">add</span>{" "}
               Add Expense
