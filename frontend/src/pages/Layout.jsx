@@ -106,6 +106,10 @@ const Layout = () => {
                     e.preventDefault();
                     try {
                       await logout();
+                      showToast({
+                        type: "success",
+                        message: "Logged out successfully.",
+                      });
                     } catch (error) {
                       console.error("Logout failed in UI:", error);
                       showToast({
