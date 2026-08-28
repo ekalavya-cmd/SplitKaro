@@ -26,11 +26,6 @@ const httpClient = axios.create({
 
 httpClient.interceptors.request.use(
   async (config) => {
-    // TEMPORARY DEV-ONLY ARTIFICIAL DELAY — for visually testing loading-state UI. REMOVE before considering this done — do not let this ship.
-    // if (import.meta.env.DEV) {
-    //   await new Promise((resolve) => setTimeout(resolve, 1500));
-    // }
-
     const token = getAccessToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -78,14 +73,14 @@ httpClient.interceptors.response.use(
             {
               baseURL: import.meta.env.VITE_API_URL,
               withCredentials: true,
-            }
+            },
           );
 
           const newAccessToken = res.data.accessToken;
           setAccessToken(newAccessToken);
 
           originalRequest.headers["Authorization"] = "Bearer " + newAccessToken;
-          
+
           processQueue(null, newAccessToken);
           isRefreshing = false;
 

@@ -6,7 +6,6 @@ import { useDeleteExpense } from "../mutations/useExpenseMutations";
 import { useExpenseFilters } from "../hooks/useExpenseFilters";
 import { ExpenseFilters } from "../components/ExpenseFilters";
 import { Pagination } from "../components/Pagination";
-// Removed PersistentErrorBanner in favor of inline retry state
 import { Skeleton } from "../components/Skeleton";
 import { usePageLoadingState } from "../hooks/usePageLoadingState";
 import { usePagination } from "../hooks/usePagination";

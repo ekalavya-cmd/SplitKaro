@@ -13,7 +13,7 @@ function App() {
   return (
     <>
       {hasConnectionError && (
-        <PersistentErrorBanner variant="connection" refetch={retryConnection} />
+        <PersistentErrorBanner refetch={retryConnection} />
       )}
       <Routes>
         <Route element={<Layout />}>

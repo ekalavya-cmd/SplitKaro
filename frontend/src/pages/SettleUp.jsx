@@ -10,7 +10,6 @@ import { useSettlementFilters } from "../hooks/useSettlementFilters";
 import { SettlementFilters } from "../components/SettlementFilters";
 import { SimplifiedSettlements } from "../components/SimplifiedSettlements";
 import { Pagination } from "../components/Pagination";
-// Removed PersistentErrorBanner in favor of inline retry state
 import { Skeleton } from "../components/Skeleton";
 import { usePageLoadingState } from "../hooks/usePageLoadingState";
 import { usePagination } from "../hooks/usePagination";
@@ -153,7 +152,8 @@ const SettleUp = () => {
     groupQuery.data !== undefined &&
     suggestionsQuery.data !== undefined &&
     settlementsQuery.data !== undefined;
-  const showSkeleton = !!selectedGroupId && (isDataLoading || (isError && !hasData));
+  const showSkeleton =
+    !!selectedGroupId && (isDataLoading || (isError && !hasData));
 
   return (
     <>
@@ -301,7 +301,9 @@ const SettleUp = () => {
         <div className="flex flex-col gap-8 lg:col-span-1">
           <SimplifiedSettlements
             suggestions={suggestions}
-            isLoading={!!selectedGroupId && (showSkeleton || suggestionsQuery.isLoading)}
+            isLoading={
+              !!selectedGroupId && (showSkeleton || suggestionsQuery.isLoading)
+            }
             onSettle={(from, to, amount) => {
               openSettlementModal({
                 paid_by: from.id,
@@ -323,7 +325,6 @@ const SettleUp = () => {
             }}
           />
         </div>
-
       </div>
     </>
   );

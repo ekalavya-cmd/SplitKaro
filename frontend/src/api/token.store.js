@@ -11,9 +11,3 @@ export const clearAccessToken = () => {
   token = null;
 };
 
-// DEV ONLY
-if (import.meta.env.DEV) {
-  window.corruptAccessToken = () => {
-    token = "invalid";
-  };
-}

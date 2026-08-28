@@ -4,8 +4,6 @@ import { useGroupQuery } from "../queries/useGroupsQueries";
 import { useBalancesQuery } from "../queries/useBalancesQueries";
 import { useExpensesQuery } from "../queries/useExpensesQueries";
 import { useSettlementSuggestionsQuery } from "../queries/useSettlementsQueries";
-// import { LoadingSpinner } from "../components/LoadingSpinner";
-// Removed PersistentErrorBanner in favor of inline retry state
 import { Skeleton } from "../components/Skeleton";
 import { usePageLoadingState } from "../hooks/usePageLoadingState";
 import { formatDateForDisplay } from "../utils/dateFilters";
@@ -13,14 +11,12 @@ import { SimplifiedSettlements } from "../components/SimplifiedSettlements";
 import { SpendByMemberChart } from "../components/analytics/SpendByMemberChart";
 import { SplitTypeChart } from "../components/analytics/SplitTypeChart";
 import { SpendingTimeChart } from "../components/analytics/SpendingTimeChart";
-// import { useToast } from "../context/useToast";
 
 const RECENT_EXPENSES_COUNT = 5;
 
 const Dashboard = () => {
   const { selectedGroupId, openSettlementModal } = useOutletContext();
   const [expandedExpenseIds, setExpandedExpenseIds] = useState({});
-  // const { showToast } = useToast();
 
   const groupQuery = useGroupQuery(selectedGroupId);
   const group = groupQuery.data;
@@ -46,7 +42,8 @@ const Dashboard = () => {
     expensesQuery.data !== undefined &&
     balancesQuery.data !== undefined &&
     suggestionsQuery.data !== undefined;
-  const showSkeleton = !!selectedGroupId && (isDataLoading || (isError && !hasData));
+  const showSkeleton =
+    !!selectedGroupId && (isDataLoading || (isError && !hasData));
 
   const toggleExpenseExpand = (id) => {
     setExpandedExpenseIds((prev) => ({
@@ -414,7 +411,6 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
-
     </div>
   );
 };
