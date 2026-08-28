@@ -1,8 +1,12 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
-import { QueryClient, QueryClientProvider, QueryCache } from "@tanstack/react-query";
-import { AuthProvider, DevAuthBridge } from "./context/AuthContext";
+import {
+  QueryClient,
+  QueryClientProvider,
+  QueryCache,
+} from "@tanstack/react-query";
+import { AuthProvider } from "./context/AuthContext";
 import { ToastProvider } from "./context/ToastProvider";
 import "./index.css";
 import App from "./App.jsx";
@@ -14,7 +18,11 @@ const queryClient = new QueryClient({
         // Bail out early for non-recoverable client/auth errors.
         // Interceptor-level retries (e.g., 401 refresh) are completely
         // decoupled from this React Query logic and happen before this.
-        if (error.status === 401 || error.status === 403 || error.status === 404) {
+        if (
+          error.status === 401 ||
+          error.status === 403 ||
+          error.status === 404
+        ) {
           return false;
         }
         return failureCount < 3;
@@ -25,21 +33,11 @@ const queryClient = new QueryClient({
     onError: (error) => {
       const message = error?.message || "Something went wrong";
       window.dispatchEvent(
-        new CustomEvent("toast:error", { detail: { message } })
+        new CustomEvent("toast:error", { detail: { message } }),
       );
     },
   }),
 });
-
-// TEMPORARY DEV-ONLY BRIDGE — remove once real login/register UI exists (tracked in FEATURES.md's Frontend auth UI item).
-if (import.meta.env.DEV) {
-  import("./services/auth.service").then((authService) => {
-    window.authService = authService;
-  });
-  import("./api/token.store").then((tokenStore) => {
-    window.tokenStore = tokenStore;
-  });
-}
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -47,7 +45,6 @@ createRoot(document.getElementById("root")).render(
       <BrowserRouter>
         <AuthProvider>
           <ToastProvider>
-            <DevAuthBridge />
             <App />
           </ToastProvider>
         </AuthProvider>

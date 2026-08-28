@@ -153,13 +153,13 @@
 
 ### Authentication & Identity
 
-| Feature                               | Status | Notes                                                                                                                                                                  |
-| ------------------------------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| User registration / login             | 🚧     | Backend complete: `POST /api/auth/register`, `POST /api/auth/login` with bcrypt + JWT access tokens + Redis-backed rotating refresh tokens. Frontend UI not yet built. |
-| Token refresh / session management    | 🚧     | Backend complete: `POST /api/auth/refresh`, `POST /api/auth/logout`, `POST /api/auth/logout-all`. Frontend interceptor not yet wired.                                  |
-| Per-user view of splits across groups | ⏳     | Group membership now uses platform `users` via `group_members` join table; cross-group identity exists at DB level but no UI yet                                       |
-| Protected routes (frontend)           | ⏳     | Auth middleware (`authenticate`) exists on backend; frontend pages are still publicly accessible                                                                       |
-| Google OAuth                          | ⏳     | Schema ready (`google_id` column on users); implementation deferred to step 5f                                                                                         |
+| Feature                               | Status | Notes                                                                                                                                                                                                    |
+| ------------------------------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| User registration / login             | ✅     | Backend complete: `POST /api/auth/register`, `POST /api/auth/login` with bcrypt + JWT access tokens + Redis-backed rotating refresh tokens. Frontend UI completed (Prompt #11). Dev-only bridge removed. |
+| Token refresh / session management    | 🚧     | Backend complete: `POST /api/auth/refresh`, `POST /api/auth/logout`, `POST /api/auth/logout-all`. Frontend interceptor not yet wired.                                                                    |
+| Per-user view of splits across groups | ⏳     | Group membership now uses platform `users` via `group_members` join table; cross-group identity exists at DB level but no UI yet                                                                         |
+| Protected routes (frontend)           | ⏳     | Auth middleware (`authenticate`) exists on backend; frontend pages are still publicly accessible                                                                                                         |
+| Google OAuth                          | ⏳     | Schema ready (`google_id` column on users); implementation deferred to step 5f                                                                                                                           |
 
 ### Group Management
 

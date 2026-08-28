@@ -184,21 +184,3 @@ export const AuthProvider = ({ children }) => {
     </AuthContext.Provider>
   );
 };
-
-// TEMPORARY DEV-ONLY BRIDGE — remove once real login/register UI exists
-export const DevAuthBridge = () => {
-  const auth = useAuth();
-
-  useEffect(() => {
-    if (import.meta.env.DEV) {
-      window.authContext = auth;
-    }
-    return () => {
-      if (import.meta.env.DEV) {
-        delete window.authContext;
-      }
-    };
-  }, [auth]);
-
-  return null;
-};
