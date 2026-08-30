@@ -14,7 +14,10 @@ import { Modal } from "./Modal";
 // ---------------------------------------------------------------------------
 const expenseSchema = z
   .object({
-    description: z.string().min(1, "Description is required").max(255, "Description must be 255 characters or less"),
+    description: z
+      .string()
+      .min(1, "Description is required")
+      .max(255, "Description must be 255 characters or less"),
     amount: z.coerce
       .number({ invalid_type_error: "Amount is required" })
       .positive("Amount must be greater than 0"),
@@ -161,7 +164,7 @@ export const AddExpenseModal = ({ isOpen, onClose, groupId }) => {
       <button
         type="button"
         onClick={onClose}
-        className="font-label-sm text-label-sm font-semibold tracking-wide text-on-surface-variant hover:text-on-surface"
+        className="hover:bg-surface-variant/50 rounded-lg px-5 py-2.5 font-body-md text-body-md font-semibold text-on-surface-variant transition-colors hover:text-on-surface disabled:opacity-50"
       >
         Cancel
       </button>
@@ -169,7 +172,7 @@ export const AddExpenseModal = ({ isOpen, onClose, groupId }) => {
         type="submit"
         form="add-expense-form"
         disabled={createExpenseMutation.isPending}
-        className="flex h-10 items-center justify-center gap-2 rounded-DEFAULT bg-primary px-4 font-label-sm text-label-sm font-semibold tracking-wide text-on-primary transition-all hover:bg-primary/90 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50"
+        className="rounded-lg bg-primary px-5 py-2.5 font-body-md text-body-md font-semibold text-on-primary shadow-sm transition-all outline-none hover:bg-primary/90 focus:ring-2 focus:ring-primary/40 disabled:opacity-50"
       >
         {createExpenseMutation.isPending ? "Saving..." : "Save Expense"}
       </button>
@@ -177,7 +180,12 @@ export const AddExpenseModal = ({ isOpen, onClose, groupId }) => {
   );
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Add Expense" footer={footer}>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Add Expense"
+      footer={footer}
+    >
       <form
         id="add-expense-form"
         onSubmit={handleSubmit(onSubmit)}
@@ -356,7 +364,11 @@ export const AddExpenseModal = ({ isOpen, onClose, groupId }) => {
                             id={`split-${member.id}`}
                             value={currentSplits[member.id] ?? ""}
                             onChange={(e) =>
-                              handleSplitChange(member.id, e.target.value, "exact")
+                              handleSplitChange(
+                                member.id,
+                                e.target.value,
+                                "exact",
+                              )
                             }
                             placeholder="0.00"
                             step="0.01"
@@ -373,7 +385,9 @@ export const AddExpenseModal = ({ isOpen, onClose, groupId }) => {
                 )}
                 {Object.keys(currentSplits).length > 0 && (
                   <div className="mt-2 flex items-center justify-between border-t border-outline-variant pt-4 font-label-sm text-label-sm font-bold text-on-surface">
-                    <span className="tracking-wider uppercase">Total Allocated</span>
+                    <span className="tracking-wider uppercase">
+                      Total Allocated
+                    </span>
                     <span className="font-mono-data text-body-lg text-secondary">
                       ₹{" "}
                       {Object.values(currentSplits)
@@ -419,7 +433,11 @@ export const AddExpenseModal = ({ isOpen, onClose, groupId }) => {
                             id={`split-${member.id}`}
                             value={currentSplits[member.id] ?? ""}
                             onChange={(e) =>
-                              handleSplitChange(member.id, e.target.value, "percentage")
+                              handleSplitChange(
+                                member.id,
+                                e.target.value,
+                                "percentage",
+                              )
                             }
                             placeholder="0"
                             min="0"
@@ -441,7 +459,9 @@ export const AddExpenseModal = ({ isOpen, onClose, groupId }) => {
                 )}
                 {Object.keys(currentSplits).length > 0 && (
                   <div className="mt-2 flex items-center justify-between border-t border-outline-variant pt-4 font-label-sm text-label-sm font-bold text-on-surface">
-                    <span className="tracking-wider uppercase">Total Percentage</span>
+                    <span className="tracking-wider uppercase">
+                      Total Percentage
+                    </span>
                     <span className="font-mono-data text-body-lg text-secondary">
                       {Object.values(currentSplits)
                         .reduce((sum, val) => sum + (Number(val) || 0), 0)

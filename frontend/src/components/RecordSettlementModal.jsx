@@ -45,7 +45,6 @@ export const RecordSettlementModal = ({
   groupId,
   initialData,
 }) => {
-
   // Stores the original suggested amount captured when the modal opens.
   // State (not a ref) because it drives a conditional render — refs cannot
   // be read during render (react-hooks/refs rule).
@@ -133,7 +132,7 @@ export const RecordSettlementModal = ({
       <button
         type="button"
         onClick={onClose}
-        className="font-label-sm text-label-sm font-semibold tracking-wide text-on-surface-variant hover:text-on-surface"
+        className="hover:bg-surface-variant/50 rounded-lg px-5 py-2.5 font-body-md text-body-md font-semibold text-on-surface-variant transition-colors hover:text-on-surface disabled:opacity-50"
       >
         Cancel
       </button>
@@ -141,7 +140,7 @@ export const RecordSettlementModal = ({
         type="submit"
         form="record-settlement-form"
         disabled={createSettlementMutation.isPending}
-        className="flex h-10 items-center justify-center gap-2 rounded-DEFAULT bg-primary px-4 font-label-sm text-label-sm font-semibold tracking-wide text-on-primary transition-all hover:bg-primary/90 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50"
+        className="rounded-lg bg-primary px-5 py-2.5 font-body-md text-body-md font-semibold text-on-primary shadow-sm transition-all outline-none hover:bg-primary/90 focus:ring-2 focus:ring-primary/40 disabled:opacity-50"
       >
         {createSettlementMutation.isPending ? "Recording..." : "Record Payment"}
       </button>
@@ -160,7 +159,6 @@ export const RecordSettlementModal = ({
         onSubmit={handleSubmit(onSubmit)}
         className="flex flex-col gap-4"
       >
-
         {/* Payer */}
         <div className="flex flex-col">
           <label

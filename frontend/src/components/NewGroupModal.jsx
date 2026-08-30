@@ -155,7 +155,6 @@ export const NewGroupModal = ({ isOpen, onClose }) => {
           <button
             type="button"
             onClick={handleClose}
-            disabled={isLoading}
             className="hover:bg-surface-variant/50 rounded-lg px-5 py-2.5 font-body-md text-body-md font-semibold text-on-surface-variant transition-colors hover:text-on-surface disabled:opacity-50"
           >
             Cancel

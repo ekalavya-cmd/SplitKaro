@@ -72,9 +72,9 @@ const Layout = () => {
         <div className="mb-6 px-4">
           <button
             onClick={() => setIsNewGroupModalOpen(true)}
-            className="flex h-10 w-full items-center justify-center gap-2 rounded-DEFAULT border border-primary bg-transparent font-label-sm text-label-sm font-semibold tracking-wider text-primary transition-all hover:bg-primary/5 hover:shadow-md"
+            className="font-label-md text-label-md flex h-9 w-full cursor-pointer items-center justify-center gap-1.5 rounded-DEFAULT border border-primary bg-transparent px-4 py-2 font-semibold tracking-wide text-primary transition-all hover:bg-primary/5 hover:shadow-md disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:shadow-none"
           >
-            <span className="material-symbols-outlined text-[18px]">add</span>{" "}
+            <span className="material-symbols-outlined text-[22px]!">add</span>{" "}
             New Group
           </button>
         </div>
@@ -123,7 +123,7 @@ const Layout = () => {
                       });
                     }
                   }}
-                  className="flex items-center gap-3 rounded-DEFAULT px-4 py-2 text-left text-on-surface-variant transition-colors hover:bg-surface-container-low hover:text-on-surface"
+                  className="flex cursor-pointer items-center gap-3 rounded-DEFAULT px-4 py-2 text-left text-on-surface-variant transition-colors hover:bg-surface-container-low hover:text-on-surface"
                 >
                   <span className="material-symbols-outlined text-[20px]">
                     {link.icon}
@@ -205,7 +205,7 @@ const Layout = () => {
             <button
               onClick={() => openSettlementModal()}
               disabled={!selectedGroupId}
-              className="font-label-md text-label-md h-9 rounded-DEFAULT border border-primary bg-transparent px-4 py-2 font-semibold tracking-wide text-primary transition-all hover:bg-primary/5 hover:shadow-md disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:shadow-none"
+              className="font-label-md text-label-md h-9 cursor-pointer rounded-DEFAULT border border-primary bg-transparent px-4 py-2 font-semibold tracking-wide text-primary transition-all hover:bg-primary/5 hover:shadow-md disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:shadow-none"
             >
               Settle
             </button>
@@ -213,9 +213,11 @@ const Layout = () => {
             <button
               onClick={() => setIsAddExpenseOpen(true)}
               disabled={!selectedGroupId}
-              className="flex h-9 items-center justify-center gap-2 rounded-DEFAULT bg-primary px-4 font-label-sm text-label-sm font-semibold tracking-wide text-on-primary transition-all hover:bg-primary/90 hover:shadow-md disabled:opacity-50 disabled:hover:bg-primary disabled:hover:text-on-primary disabled:hover:shadow-none"
+              className="font-label-md text-label-md flex h-9 cursor-pointer items-center justify-center gap-1.5 rounded-DEFAULT bg-primary px-4 py-2 font-semibold tracking-wide text-on-primary transition-all hover:bg-primary/90 hover:shadow-md disabled:opacity-50 disabled:hover:bg-primary disabled:hover:text-on-primary disabled:hover:shadow-none"
             >
-              <span className="material-symbols-outlined text-[18px]">add</span>{" "}
+              <span className="material-symbols-outlined text-[22px]!">
+                add
+              </span>{" "}
               Add Expense
             </button>
 
