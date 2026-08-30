@@ -1,0 +1,232 @@
+<!doctype html>
+
+<html class="h-full" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>SplitKaro - Create New Group</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800;900&amp;family=Geist+Mono:wght@500&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary-fixed": "#e2dfff",
+              "on-tertiary": "#ffffff",
+              "surface-variant": "#e1e3e4",
+              "on-primary-container": "#dad7ff",
+              "secondary-container": "#86f2e4",
+              "on-secondary-fixed": "#00201d",
+              "inverse-on-surface": "#f0f1f2",
+              "tertiary-container": "#a44100",
+              "secondary-fixed-dim": "#6bd8cb",
+              "tertiary-fixed": "#ffdbcc",
+              "on-error-container": "#93000a",
+              "outline-variant": "#c7c4d8",
+              "on-tertiary-container": "#ffd2be",
+              "surface-dim": "#d9dadb",
+              "on-surface-variant": "#464555",
+              tertiary: "#7e3000",
+              "surface-tint": "#4d44e3",
+              "on-error": "#ffffff",
+              "on-primary": "#ffffff",
+              outline: "#777587",
+              "on-background": "#191c1d",
+              "surface-container": "#edeeef",
+              "on-secondary": "#ffffff",
+              "on-secondary-fixed-variant": "#005049",
+              "on-tertiary-fixed-variant": "#7b2f00",
+              "primary-container": "#4f46e5",
+              "inverse-surface": "#2e3132",
+              "on-secondary-container": "#006f66",
+              error: "#ba1a1a",
+              "surface-container-low": "#f3f4f5",
+              background: "#f8f9fa",
+              "surface-container-highest": "#e1e3e4",
+              "surface-bright": "#f8f9fa",
+              "error-container": "#ffdad6",
+              "tertiary-fixed-dim": "#ffb695",
+              secondary: "#006a61",
+              surface: "#f8f9fa",
+              "secondary-fixed": "#89f5e7",
+              primary: "#3525cd",
+              "surface-container-lowest": "#ffffff",
+              "on-primary-fixed-variant": "#3323cc",
+              "primary-fixed-dim": "#c3c0ff",
+              "on-surface": "#191c1d",
+              "on-primary-fixed": "#0f0069",
+              "on-tertiary-fixed": "#351000",
+              "surface-container-high": "#e7e8e9",
+              "inverse-primary": "#c3c0ff",
+            },
+            borderRadius: {
+              DEFAULT: "0.125rem",
+              lg: "0.25rem",
+              xl: "0.5rem",
+              full: "0.75rem",
+            },
+            spacing: {
+              "container-padding": "24px",
+              unit: "4px",
+              "row-height-standard": "56px",
+              gutter: "16px",
+              "row-height-compact": "40px",
+            },
+            fontFamily: {
+              "body-lg": ["Geist"],
+              "body-md": ["Geist"],
+              "mono-data": ["Geist Mono"],
+              "headline-lg": ["Geist"],
+              "headline-md": ["Geist"],
+              "label-sm": ["Geist"],
+            },
+            fontSize: {
+              "body-lg": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+              "body-md": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+              "mono-data": ["14px", { lineHeight: "20px", fontWeight: "500" }],
+              "headline-lg": [
+                "24px",
+                {
+                  lineHeight: "32px",
+                  letterSpacing: "-0.02em",
+                  fontWeight: "600",
+                },
+              ],
+              "headline-md": [
+                "20px",
+                {
+                  lineHeight: "28px",
+                  letterSpacing: "-0.01em",
+                  fontWeight: "600",
+                },
+              ],
+              "label-sm": ["12px", { lineHeight: "16px", fontWeight: "600" }],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings:
+          "FILL" 0,
+          "wght" 400,
+          "GRAD" 0,
+          "opsz" 24;
+      }
+      .material-symbols-outlined.filled {
+        font-variation-settings: "FILL" 1;
+      }
+    </style>
+  </head>
+  <body
+    class="bg-background font-body-md text-on-background h-full w-full overflow-hidden relative"
+  >
+    <!-- Background Image / Dashboard Context -->
+    <div
+      class="absolute inset-0 w-full h-full bg-cover bg-center blur-sm opacity-60"
+      data-alt="A modern minimalist financial dashboard interface shown out of focus. The blurred UI features a clean white layout with soft, high-key lighting, subtle indigo accents, and organized data tables. The aesthetic conveys a sleek, trustworthy, and precise fintech environment in light mode."
+      style="
+        background-image: url(&quot;https://lh3.googleusercontent.com/aida-public/AB6AXuBUn7W2ap7jCbEyVbHI0HsKtA5J5RES0GZ4LmNIv2qulB5z6VXzdPRagmwqAY9voJAxSu9oKk_yLwPRzdpBS9MtrCQ8JotlxCpYIlBiBWpL2AhLsMC-kAQa1PCLVGkiX2HLln8hBf34DiRyPDWZF6Q_lwLTWwOD402o4qX-VVQFpkhqsCOSHZlvsYMNT5rBR__HoFhbltOWmqjjYYIeNAgbVH_ZVfzmCdPfEA58c4gUGHzYe1UqGDAeeA&quot;);
+      "
+    >
+      <!-- Overlay to ensure the modal pops -->
+      <div class="absolute inset-0 bg-white/40 mix-blend-overlay"></div>
+    </div>
+    <!-- Modal Backdrop -->
+    <div
+      class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+    >
+      <!-- Modal Container -->
+      <div
+        class="bg-surface-container-lowest w-full max-w-125 rounded-xl shadow-[0px_10px_15px_rgba(0,0,0,0.1)] border border-outline-variant flex flex-col"
+      >
+        <!-- Header -->
+        <div
+          class="flex items-center justify-between px-container-padding py-4 border-b border-outline-variant"
+        >
+          <h2 class="font-headline-md text-headline-md text-on-surface m-0">
+            Create New Group
+          </h2>
+          <button
+            aria-label="Close"
+            class="text-on-surface-variant hover:text-on-surface transition-colors flex items-center justify-center rounded-full p-1 hover:bg-surface-container-low"
+          >
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+        <!-- Form Body -->
+        <form class="p-container-padding flex flex-col gap-6">
+          <!-- Group Name Input -->
+          <div class="flex flex-col gap-2">
+            <label
+              class="font-label-sm text-label-sm text-on-surface-variant tracking-widest uppercase"
+              for="group-name"
+              >Group Name</label
+            >
+            <input
+              class="w-full px-4 py-3 rounded-lg border border-outline-variant focus:border-primary focus:ring-2 focus:ring-primary/20 bg-surface-container-lowest text-on-surface placeholder:text-outline outline-none transition-all font-body-md text-body-md"
+              id="group-name"
+              name="group-name"
+              placeholder="e.g. Goa Trip, Apartment 4B"
+              type="text"
+            />
+          </div>
+          <!-- Description Input -->
+          <div class="flex flex-col gap-2">
+            <div class="flex justify-between items-center">
+              <label
+                class="font-label-sm text-label-sm text-on-surface-variant tracking-widest uppercase"
+                for="group-description"
+                >Description
+                <span
+                  class="font-normal lowercase tracking-normal text-on-surface-variant/80 ml-1"
+                  >(Optional)</span
+                ></label
+              >
+            </div>
+            <textarea
+              class="w-full px-4 py-3 rounded-lg border border-outline-variant focus:border-primary focus:ring-2 focus:ring-primary/20 bg-surface-container-lowest text-on-surface placeholder:text-outline outline-none transition-all font-body-md text-body-md resize-none"
+              id="group-description"
+              name="group-description"
+              placeholder="What's this group for?"
+              rows="3"
+            ></textarea>
+          </div>
+        </form>
+        <!-- Footer -->
+        <div
+          class="px-container-padding py-4 bg-surface-container-low rounded-b-xl flex justify-end items-center gap-3 border-t border-outline-variant"
+        >
+          <button
+            class="px-5 py-2.5 rounded-lg font-body-md text-body-md font-semibold text-on-surface-variant hover:text-on-surface hover:bg-surface-variant/50 transition-colors"
+            type="button"
+          >
+            Cancel
+          </button>
+          <button
+            class="px-5 py-2.5 rounded-lg font-body-md text-body-md font-semibold bg-primary text-on-primary hover:bg-primary/90 shadow-sm transition-all focus:ring-2 focus:ring-primary/40 outline-none"
+            type="submit"
+          >
+            Create Group
+          </button>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

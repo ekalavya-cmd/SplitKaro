@@ -23,7 +23,7 @@ export const getGroup = async (groupId) => {
 export const createGroup = async (groupData) => {
   try {
     const response = await api.post("/groups", groupData);
-    return response.data;
+    return response.data.group;
   } catch (error) {
     console.error("Error creating group:", error);
     throw error;

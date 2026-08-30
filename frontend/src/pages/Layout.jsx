@@ -5,11 +5,13 @@ import { useAuth } from "../context/useAuth";
 import { useToast } from "../context/useToast";
 import { AddExpenseModal } from "../components/AddExpenseModal";
 import { RecordSettlementModal } from "../components/RecordSettlementModal";
+import { NewGroupModal } from "../components/NewGroupModal";
 
 const Layout = () => {
   const [selectedGroupId, setSelectedGroupId] = useState("");
   const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false);
   const [isSettlementModalOpen, setIsSettlementModalOpen] = useState(false);
+  const [isNewGroupModalOpen, setIsNewGroupModalOpen] = useState(false);
   const [settlementModalData, setSettlementModalData] = useState(null);
   const location = useLocation();
 
@@ -68,7 +70,10 @@ const Layout = () => {
         </div>
 
         <div className="mb-6 px-4">
-          <button className="flex h-10 w-full items-center justify-center gap-2 rounded-DEFAULT border border-primary bg-transparent font-label-sm text-label-sm font-semibold tracking-wider text-primary transition-all hover:bg-primary/5 hover:shadow-md">
+          <button
+            onClick={() => setIsNewGroupModalOpen(true)}
+            className="flex h-10 w-full items-center justify-center gap-2 rounded-DEFAULT border border-primary bg-transparent font-label-sm text-label-sm font-semibold tracking-wider text-primary transition-all hover:bg-primary/5 hover:shadow-md"
+          >
             <span className="material-symbols-outlined text-[18px]">add</span>{" "}
             New Group
           </button>
@@ -254,6 +259,10 @@ const Layout = () => {
         }}
         groupId={selectedGroupId}
         initialData={settlementModalData}
+      />
+      <NewGroupModal
+        isOpen={isNewGroupModalOpen}
+        onClose={() => setIsNewGroupModalOpen(false)}
       />
     </div>
   );

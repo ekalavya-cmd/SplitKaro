@@ -1,0 +1,263 @@
+<!doctype html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>SplitKaro - Group Created</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;family=Geist+Mono:wght@400;500&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary-fixed": "#e2dfff",
+              "on-tertiary": "#ffffff",
+              "surface-variant": "#e1e3e4",
+              "on-primary-container": "#dad7ff",
+              "secondary-container": "#86f2e4",
+              "on-secondary-fixed": "#00201d",
+              "inverse-on-surface": "#f0f1f2",
+              "tertiary-container": "#a44100",
+              "secondary-fixed-dim": "#6bd8cb",
+              "tertiary-fixed": "#ffdbcc",
+              "on-error-container": "#93000a",
+              "outline-variant": "#c7c4d8",
+              "on-tertiary-container": "#ffd2be",
+              "surface-dim": "#d9dadb",
+              "on-surface-variant": "#464555",
+              tertiary: "#7e3000",
+              "surface-tint": "#4d44e3",
+              "on-error": "#ffffff",
+              "on-primary": "#ffffff",
+              outline: "#777587",
+              "on-background": "#191c1d",
+              "surface-container": "#edeeef",
+              "on-secondary": "#ffffff",
+              "on-secondary-fixed-variant": "#005049",
+              "on-tertiary-fixed-variant": "#7b2f00",
+              "primary-container": "#4f46e5",
+              "inverse-surface": "#2e3132",
+              "on-secondary-container": "#006f66",
+              error: "#ba1a1a",
+              "surface-container-low": "#f3f4f5",
+              background: "#f8f9fa",
+              "surface-container-highest": "#e1e3e4",
+              "surface-bright": "#f8f9fa",
+              "error-container": "#ffdad6",
+              "tertiary-fixed-dim": "#ffb695",
+              secondary: "#006a61",
+              surface: "#f8f9fa",
+              "secondary-fixed": "#89f5e7",
+              primary: "#3525cd",
+              "surface-container-lowest": "#ffffff",
+              "on-primary-fixed-variant": "#3323cc",
+              "primary-fixed-dim": "#c3c0ff",
+              "on-surface": "#191c1d",
+              "on-primary-fixed": "#0f0069",
+              "on-tertiary-fixed": "#351000",
+              "surface-container-high": "#e7e8e9",
+              "inverse-primary": "#c3c0ff",
+            },
+            borderRadius: {
+              DEFAULT: "0.125rem",
+              lg: "0.25rem",
+              xl: "0.5rem",
+              full: "0.75rem",
+            },
+            spacing: {
+              "container-padding": "24px",
+              unit: "4px",
+              "row-height-standard": "56px",
+              gutter: "16px",
+              "row-height-compact": "40px",
+            },
+            fontFamily: {
+              "body-lg": ["Geist"],
+              "body-md": ["Geist"],
+              "mono-data": ["Geist Mono"],
+              "headline-lg": ["Geist"],
+              "headline-md": ["Geist"],
+              "label-sm": ["Geist"],
+            },
+            fontSize: {
+              "body-lg": [
+                "16px",
+                {
+                  lineHeight: "24px",
+                  fontWeight: "400",
+                },
+              ],
+              "body-md": [
+                "14px",
+                {
+                  lineHeight: "20px",
+                  fontWeight: "400",
+                },
+              ],
+              "mono-data": [
+                "14px",
+                {
+                  lineHeight: "20px",
+                  fontWeight: "500",
+                },
+              ],
+              "headline-lg": [
+                "24px",
+                {
+                  lineHeight: "32px",
+                  letterSpacing: "-0.02em",
+                  fontWeight: "600",
+                },
+              ],
+              "headline-md": [
+                "20px",
+                {
+                  lineHeight: "28px",
+                  letterSpacing: "-0.01em",
+                  fontWeight: "600",
+                },
+              ],
+              "label-sm": [
+                "12px",
+                {
+                  lineHeight: "16px",
+                  fontWeight: "600",
+                },
+              ],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      body {
+        font-family: "Geist", sans-serif;
+      }
+    </style>
+  </head>
+  <body
+    class="bg-background w-full min-h-screen relative overflow-hidden font-body-md text-on-surface"
+  >
+    <!-- Background Content (Blurred Dashboard Mock) -->
+    <div class="absolute inset-0 filter blur-sm opacity-50 z-0 bg-surface">
+      <!-- Header Mock -->
+      <header
+        class="h-14 border-b border-outline-variant bg-surface flex items-center justify-between px-container-padding"
+      >
+        <div class="font-headline-md font-bold text-primary">SplitKaro</div>
+      </header>
+      <div class="flex h-[calc(100vh-56px)]">
+        <!-- Sidebar Mock -->
+        <div
+          class="w-60 border-r border-outline-variant p-container-padding hidden md:block"
+        >
+          <div class="h-8 bg-surface-variant rounded mb-4 w-3/4"></div>
+          <div class="h-8 bg-surface-variant rounded mb-4 w-full"></div>
+          <div class="h-8 bg-surface-variant rounded mb-4 w-5/6"></div>
+        </div>
+        <!-- Main Content Mock -->
+        <div class="flex-1 p-container-padding">
+          <div
+            class="h-32 bg-surface-variant rounded-xl mb-6 w-full max-w-3xl"
+          ></div>
+          <div
+            class="h-12 bg-surface-variant rounded w-full max-w-3xl mb-2"
+          ></div>
+          <div
+            class="h-12 bg-surface-variant rounded w-full max-w-3xl mb-2"
+          ></div>
+          <div
+            class="h-12 bg-surface-variant rounded w-full max-w-3xl mb-2"
+          ></div>
+        </div>
+      </div>
+    </div>
+    <!-- Modal Backdrop -->
+    <div
+      class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+    >
+      <!-- Modal Container -->
+      <div
+        class="bg-surface-container-lowest w-full max-w-125 rounded-xl flex flex-col shadow-2xl border border-outline-variant"
+      >
+        <!-- Modal Header -->
+        <div
+          class="flex items-center justify-between px-container-padding py-4 border-b border-outline-variant"
+        >
+          <h2 class="font-headline-md text-headline-md text-on-surface m-0">
+            Group Created!
+          </h2>
+          <button
+            aria-label="Close modal"
+            class="text-on-surface-variant hover:text-on-surface transition-colors p-1"
+          >
+            <span class="material-symbols-outlined text-[24px]">close</span>
+          </button>
+        </div>
+        <!-- Modal Body -->
+        <div
+          class="p-container-padding flex flex-col items-center justify-center text-center"
+        >
+          <!-- Success Icon -->
+          <div
+            class="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center mb-4"
+          >
+            <span
+              class="material-symbols-outlined text-[32px] text-secondary"
+              style="font-variation-settings: &quot;FILL&quot; 1"
+              >check_circle</span
+            >
+          </div>
+          <p class="font-body-md text-body-md text-on-surface-variant mb-6">
+            Share this link to invite members to Goa Trip
+          </p>
+          <!-- Invite Link Row -->
+          <div class="w-full relative flex items-stretch">
+            <input
+              class="flex-1 h-[40px] bg-surface-container-lowest border border-outline-variant rounded-l-lg px-4 text-on-surface font-body-md text-body-md focus:outline-none focus:ring-0 focus:border-outline-variant"
+              readonly=""
+              type="text"
+              value="splitkaro.com/join/goa-trip-2023"
+            />
+            <button
+              class="h-[40px] px-4 border-y border-r border-primary rounded-r-lg bg-surface-container-lowest text-primary font-label-sm text-label-sm hover:bg-primary-fixed/30 transition-colors flex items-center"
+              onclick="alert('Link copied to clipboard!')"
+              type="button"
+            >
+              Copy
+            </button>
+          </div>
+          <!-- Helper Text -->
+          <p
+            class="font-label-sm text-[12px] text-on-surface-variant mt-2 text-left w-full"
+          >
+            Anyone with this link can join the group
+          </p>
+        </div>
+        <!-- Modal Footer -->
+        <div class="px-container-padding py-4 flex justify-end">
+          <button
+            class="h-[40px] px-6 bg-primary text-on-primary rounded-lg font-label-sm text-label-sm hover:bg-on-primary-fixed-variant transition-colors"
+            type="button"
+          >
+            Done
+          </button>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
