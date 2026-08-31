@@ -11,44 +11,8 @@ const {
   sequelize,
 } = require("../models");
 
-async function createExpenseForGroup(groupId, expenseData) {
-  const { paid_by, amount, description, split_type, date, splits } =
-    expenseData;
-
-  const group = await Groups.findByPk(groupId, {
-    include: {
-      model: User,
-      as: "users",
-      attributes: ["id", "name"],
-      through: { attributes: [] },
-    },
-    order: [[{ model: User, as: "users" }, "id", "ASC"]],
-  });
-
-  if (!group) {
-    throw { status: 404, message: "Group not found" };
-  }
-
-  const users = group.users;
-  if (!users || users.length === 0) {
-    throw {
-      status: 400,
-      message: "Group must have members before adding expenses",
-    };
-  }
-
-  const payerId = Number(paid_by);
-  if (!users.some((user) => user.id === payerId)) {
-    throw {
-      status: 400,
-      message: "paid_by must be a valid member of the group",
-    };
-  }
-
-  const parsedDate = validateAndParseDate(date);
-
+function calculateSplits(amount, split_type, splits, users) {
   const totalAmount = Math.round(Number(amount) * 100);
-
   let splitsData;
 
   if (split_type === "equal") {
@@ -117,7 +81,7 @@ async function createExpenseForGroup(groupId, expenseData) {
       );
       throw {
         status: 400,
-        message: `Missing splits for: ${missingNames.join(", ")}`,
+        message: `Missing splits for members: ${missingNames.join(", ")}`,
       };
     }
 
@@ -138,14 +102,9 @@ async function createExpenseForGroup(groupId, expenseData) {
       return Math.round((totalAmount * percentage) / 100);
     });
 
-    const calculatedTotal = initialAmounts.reduce(
-      (sum, amount) => sum + amount,
-      0,
-    );
+    const calculatedTotal = initialAmounts.reduce((sum, amt) => sum + amt, 0);
     const remainder = totalAmount - calculatedTotal;
 
-    // Array order is strictly determined by userIds (matching the DB insertion order of group.users),
-    // bypassing JS object key sorting so remainder distribution perfectly matches the equal-split path.
     const percentageAmounts = distributeRemainder(initialAmounts, remainder);
 
     splitsData = userIds.map((userId, index) => ({
@@ -154,6 +113,46 @@ async function createExpenseForGroup(groupId, expenseData) {
       amountOwed: (percentageAmounts[index] / 100).toFixed(2),
     }));
   }
+
+  return splitsData;
+}
+
+async function createExpenseForGroup(groupId, expenseData) {
+  const { paid_by, amount, description, split_type, date, splits } =
+    expenseData;
+
+  const group = await Groups.findByPk(groupId, {
+    include: {
+      model: User,
+      as: "users",
+      attributes: ["id", "name"],
+      through: { attributes: [] },
+    },
+    order: [[{ model: User, as: "users" }, "id", "ASC"]],
+  });
+
+  if (!group) {
+    throw { status: 404, message: "Group not found" };
+  }
+
+  const users = group.users;
+  if (!users || users.length === 0) {
+    throw {
+      status: 400,
+      message: "Group must have members before adding expenses",
+    };
+  }
+
+  const payerId = Number(paid_by);
+  if (!users.some((user) => user.id === payerId)) {
+    throw {
+      status: 400,
+      message: "paid_by must be a valid member of the group",
+    };
+  }
+
+  const parsedDate = validateAndParseDate(date);
+  const splitsData = calculateSplits(amount, split_type, splits, users);
 
   return await sequelize.transaction(async (transaction) => {
     const expense = await Expenses.create(
@@ -255,8 +254,78 @@ async function deleteExpense(expenseId) {
   }
 }
 
+async function updateExpenseForGroup(expenseId, expenseData) {
+  const { paid_by, amount, description, split_type, date, splits } =
+    expenseData;
+
+  const expense = await Expenses.findByPk(expenseId);
+  if (!expense) {
+    throw { status: 404, message: "Expense not found" };
+  }
+
+  const group = await Groups.findByPk(expense.groupId, {
+    include: {
+      model: User,
+      as: "users",
+      attributes: ["id", "name"],
+      through: { attributes: [] },
+    },
+    order: [[{ model: User, as: "users" }, "id", "ASC"]],
+  });
+
+  if (!group) {
+    throw { status: 404, message: "Group not found" };
+  }
+
+  const users = group.users;
+  if (!users || users.length === 0) {
+    throw {
+      status: 400,
+      message: "Group must have members before adding expenses",
+    };
+  }
+
+  const payerId = Number(paid_by);
+  if (!users.some((user) => user.id === payerId)) {
+    throw {
+      status: 400,
+      message: "paid_by must be a valid member of the group",
+    };
+  }
+
+  const parsedDate = validateAndParseDate(date);
+  const splitsData = calculateSplits(amount, split_type, splits, users);
+
+  return await sequelize.transaction(async (transaction) => {
+    await expense.update(
+      {
+        paidBy: payerId,
+        amount,
+        description,
+        splitType: split_type,
+        date: parsedDate,
+      },
+      { transaction },
+    );
+
+    await ExpenseSplits.destroy({ where: { expenseId }, transaction });
+
+    splitsData.forEach((split) => {
+      split.expenseId = expense.id;
+    });
+
+    await ExpenseSplits.bulkCreate(splitsData, { transaction });
+
+    return {
+      expense,
+      splits: splitsData,
+    };
+  });
+}
+
 module.exports = {
   createExpenseForGroup,
   getExpensesForGroup,
   deleteExpense,
+  updateExpenseForGroup,
 };

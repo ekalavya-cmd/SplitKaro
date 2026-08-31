@@ -173,7 +173,7 @@
 
 | Feature                           | Status | Notes                                                                                      |
 | --------------------------------- | ------ | ------------------------------------------------------------------------------------------ |
-| Edit existing expense             | ⏳     | No backend endpoint; would require recalculating splits                                    |
+| Edit existing expense             | 🚧     | Backend endpoint complete (`PATCH /api/groups/:id/expenses/:expenseId`); no frontend UI yet |
 | Expense categories / tags         | ⏳     | No category field in schema                                                                |
 | Multi-currency support            | ⏳     | All amounts stored as bare DECIMAL; INR (₹) is hard-coded in both API error strings and UI |
 | Expense date picker (past/future) | ⏳     | Date input exists but no calendar picker; browser native `<input type="date">` only        |

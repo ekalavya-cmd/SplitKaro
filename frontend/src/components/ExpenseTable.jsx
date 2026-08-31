@@ -166,7 +166,7 @@ export const ExpenseTable = ({
 
                           {/* Action Area (Edit / Delete) */}
                           {showActions && (
-                            <div className="mt-4 flex items-center gap-2">
+                            <div className="mt-4 flex items-center gap-4">
                               <button
                                 type="button"
                                 onClick={(e) => {
@@ -176,7 +176,7 @@ export const ExpenseTable = ({
                                     message: "Edit expense is coming soon.",
                                   });
                                 }}
-                                className="font-label-md text-label-md flex h-9 cursor-pointer items-center justify-center gap-1.5 rounded-DEFAULT border border-primary bg-transparent px-4 py-2 font-semibold tracking-wide text-primary transition-all hover:bg-primary/5 hover:shadow-md disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:shadow-none"
+                                className="font-label-md text-label-md flex h-9 cursor-pointer items-center justify-center gap-1.5 rounded-DEFAULT border border-secondary bg-transparent px-4 py-2 font-semibold tracking-wide text-secondary transition-all hover:bg-secondary/5 hover:shadow-md disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:shadow-none"
                               >
                                 <span className="material-symbols-outlined text-[20px]!">
                                   stylus

@@ -92,4 +92,5 @@ const createExpenseSchema = z
 
 module.exports = {
   createExpenseSchema,
+  updateExpenseSchema: createExpenseSchema,
 };

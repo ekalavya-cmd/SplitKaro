@@ -430,6 +430,62 @@ database CASCADE). Wrapped in a transaction.
 
 ---
 
+### `PATCH /groups/:id/expenses/:expenseId`
+
+Edit an existing expense and completely recalculate its associated `expense_splits`. Wrapped in a single transaction that deletes the old splits and inserts the new ones.
+
+**Auth:** Required (`Authorization: Bearer <accessToken>`)  
+**Path param:** `id` — integer group ID  
+**Path param:** `expenseId` — integer expense ID  
+**Request body**
+
+Same as `POST /groups/:id/expenses`.
+
+| Field         | Required    | Type    | Notes                                                            |
+| ------------- | ----------- | ------- | ---------------------------------------------------------------- |
+| `paid_by`     | Yes         | integer | Must be an `id` of a member in this group                        |
+| `amount`      | Yes         | number  | Must be > 0                                                      |
+| `description` | Yes         | string  | Non-empty                                                        |
+| `split_type`  | Yes         | string  | One of `"equal"`, `"exact"`, `"percentage"`                      |
+| `date`        | Yes         | string  | Any date string parseable by `new Date()`                        |
+| `splits`      | Conditional | object  | Required for `"exact"` and `"percentage"`; ignored for `"equal"` |
+
+**Response `200`**
+
+```json
+{
+  "message": "Expense updated successfully",
+  "expense": {
+    "id": 6,
+    "groupId": 1,
+    "paidBy": 1,
+    "amount": "1700.00",
+    "description": "Updated Hotel booking",
+    "splitType": "equal",
+    "date": "2026-07-15T00:00:00.000Z",
+    "updatedAt": "...",
+    "createdAt": "..."
+  },
+  "splits": [
+    { "expenseId": 6, "userId": 1, "amountOwed": "425.00" },
+    { "expenseId": 6, "userId": 2, "amountOwed": "425.00" },
+    { "expenseId": 6, "userId": 3, "amountOwed": "425.00" },
+    { "expenseId": 6, "userId": 4, "amountOwed": "425.00" }
+  ]
+}
+```
+
+**Error responses**
+
+Shares the exact same error responses as `POST /groups/:id/expenses` (validation, split sums, group membership constraints), plus:
+
+| Status | Body                                                   | Condition                                                               |
+| ------ | ------------------------------------------------------ | ----------------------------------------------------------------------- |
+| `403`  | `{ "message": "You are not a member of this group." }` | Authenticated user is not a member of the group this expense belongs to |
+| `404`  | `{ "message": "Expense not found" }`                   | No expense with given `:expenseId` exists                               |
+
+---
+
 ## Resource: Balances
 
 ### `GET /groups/:id/balances`
@@ -672,9 +728,10 @@ Delete a recorded settlement. Wrapped in a transaction.
 | `GET`    | `/api/groups/:id/settlements`         | List recorded settlements for a group |
 | `POST`   | `/api/groups/:id/settlements`         | Record a settlement payment           |
 | `DELETE` | `/api/groups/settlements/:id`         | Delete a settlement record            |
+| `PATCH`  | `/api/groups/:id/expenses/:expenseId` | Edit an expense and recalculate splits|
 | `DELETE` | `/api/groups/:id/expenses/:expenseId` | Delete an expense and its splits      |
 
-**Total: 13 endpoints across 1 router (excluding Auth).**
+**Total: 14 endpoints across 1 router (excluding Auth).**
 
 ---
 

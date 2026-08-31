@@ -2,6 +2,7 @@ const {
   createExpenseForGroup,
   getExpensesForGroup,
   deleteExpense,
+  updateExpenseForGroup,
 } = require("../services/expense.service");
 
 async function createExpense(req, res) {
@@ -63,8 +64,32 @@ async function removeExpense(req, res) {
   }
 }
 
+async function updateExpense(req, res) {
+  try {
+    const expenseId = req.params.expenseId;
+    const expenseData = req.body;
+
+    const result = await updateExpenseForGroup(expenseId, expenseData);
+
+    res.status(200).json({
+      message: "Expense updated successfully",
+      expense: result.expense,
+      splits: result.splits,
+    });
+  } catch (err) {
+    console.error("Error updating expense:", err);
+
+    if (err && err.status && err.message) {
+      return res.status(err.status).json({ message: err.message });
+    }
+
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+}
+
 module.exports = {
   createExpense,
   fetchExpenses,
   removeExpense,
+  updateExpense,
 };

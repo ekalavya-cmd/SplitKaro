@@ -7,7 +7,10 @@ const {
   requireExpenseGroupMembership,
 } = require("../middleware/groupMembership.middleware");
 const { validate } = require("../middleware/validate.middleware");
-const { createExpenseSchema } = require("../validators/expense.validators");
+const {
+  createExpenseSchema,
+  updateExpenseSchema,
+} = require("../validators/expense.validators");
 
 router.get(
   "/",
@@ -27,6 +30,13 @@ router.delete(
   authenticate,
   requireExpenseGroupMembership,
   expenseController.removeExpense,
+);
+router.patch(
+  "/:expenseId",
+  authenticate,
+  requireExpenseGroupMembership,
+  validate(updateExpenseSchema),
+  expenseController.updateExpense,
 );
 
 module.exports = router;
