@@ -49,6 +49,7 @@
 | ✅ View expenses on Dashboard           | Expense table on Dashboard page shows the 5 most recent expenses with date, description, payer, amount, split type badge, split breakdown                                                                                                   |
 | ✅ View expenses on Expenses page       | Dedicated Expenses page with same columns plus a Delete button per row                                                                                                                                                                      |
 | ✅ Delete expense                       | DELETE `/api/groups/:id/expenses/:expenseId` — cascades to all associated `expense_splits` rows via DB CASCADE. Gated by group membership authorization, and validates that the expense belongs to the URL's group (returns 404 otherwise). |
+| ✅ Edit expense                         | PATCH `/api/groups/:id/expenses/:expenseId` — uses `AddExpenseModal` in edit mode. Fully supports updating amount, description, payer, and all split types with dynamic tab hydration.                                                      |
 | ✅ Confirm-before-delete                | Expenses page uses `window.confirm()` dialog before calling delete                                                                                                                                                                          |
 | ✅ Split type colour badges             | Equal = blue, exact = green, percentage = yellow; consistent across Dashboard and Expenses pages                                                                                                                                            |
 
@@ -123,7 +124,6 @@
 
 | Feature                | Status | What exists                                                                                                                                         | What is missing                                                                                                            |
 | ---------------------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| Edit expense           | 🚧     | Nothing                                                                                                                                             | No backend endpoint; no frontend UI                                                                                        |
 | Delete settlement (UI) | 🚧     | Backend `DELETE /api/groups/settlements/:id` exists (gated by group membership authorization) and is wired in `splitKaroService.deleteSettlement()` | The SettleUp page has no delete button in the settlement history table; the service function is never called from any page |
 
 ### Feedback & UX
@@ -171,16 +171,16 @@
 
 ### Expense Management
 
-| Feature                           | Status | Notes                                                                                      |
-| --------------------------------- | ------ | ------------------------------------------------------------------------------------------ |
+| Feature                           | Status | Notes                                                                                       |
+| --------------------------------- | ------ | ------------------------------------------------------------------------------------------- |
 | Edit existing expense             | 🚧     | Backend endpoint complete (`PATCH /api/groups/:id/expenses/:expenseId`); no frontend UI yet |
-| Expense categories / tags         | ⏳     | No category field in schema                                                                |
-| Multi-currency support            | ⏳     | All amounts stored as bare DECIMAL; INR (₹) is hard-coded in both API error strings and UI |
-| Expense date picker (past/future) | ⏳     | Date input exists but no calendar picker; browser native `<input type="date">` only        |
-| Receipt / attachment upload       | ⏳     | No file storage or attachment table                                                        |
-| Recurring expenses                | ⏳     | No scheduling or recurrence concept                                                        |
-| Expense notes / comments          | ⏳     | No notes field                                                                             |
-| Bulk expense import               | ⏳     | No CSV or spreadsheet import                                                               |
+| Expense categories / tags         | ⏳     | No category field in schema                                                                 |
+| Multi-currency support            | ⏳     | All amounts stored as bare DECIMAL; INR (₹) is hard-coded in both API error strings and UI  |
+| Expense date picker (past/future) | ⏳     | Date input exists but no calendar picker; browser native `<input type="date">` only         |
+| Receipt / attachment upload       | ⏳     | No file storage or attachment table                                                         |
+| Recurring expenses                | ⏳     | No scheduling or recurrence concept                                                         |
+| Expense notes / comments          | ⏳     | No notes field                                                                              |
+| Bulk expense import               | ⏳     | No CSV or spreadsheet import                                                                |
 
 ### Settlement Workflow
 
@@ -218,11 +218,11 @@
 
 ## Quick Counts
 
-| Layer                       | ✅ Done                                  | 🐛 Broken                                            | 🚧 Partial                  | ⏳ Not started                                            |
-| --------------------------- | ---------------------------------------- | ---------------------------------------------------- | --------------------------- | --------------------------------------------------------- |
-| Backend (API endpoints)     | 5 expense/delete + 5 auth + 6 group = 16 | 0 group endpoints                                    | 2                           | 10+                                                       |
-| Frontend (pages / UI flows) | 5 pages shipped                          | Group-dependent UI (balance cards, member dropdowns) | 4 gaps within shipped pages | Auth UI (login/register pages, token refresh interceptor) |
-| Infrastructure              | Winston logging                          | —                                                    | 0                           | 6                                                         |
+| Layer                       | ✅ Done                                       | 🐛 Broken                                            | 🚧 Partial                  | ⏳ Not started                                            |
+| --------------------------- | --------------------------------------------- | ---------------------------------------------------- | --------------------------- | --------------------------------------------------------- |
+| Backend (API endpoints)     | 6 expense/edit/delete + 5 auth + 6 group = 17 | 0 group endpoints                                    | 1                           | 10+                                                       |
+| Frontend (pages / UI flows) | 5 pages shipped                               | Group-dependent UI (balance cards, member dropdowns) | 3 gaps within shipped pages | Auth UI (login/register pages, token refresh interceptor) |
+| Infrastructure              | Winston logging                               | —                                                    | 0                           | 6                                                         |
 
 _§4 ⏳ total: 6 (auth) + 3 (groups) + 8 (expenses) + 3 (settlements) + 6 (data) + 6 (infra) = 32 planned items_
 

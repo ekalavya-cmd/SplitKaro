@@ -1,8 +1,8 @@
 import React, { useState } from "react";
+import { useOutletContext } from "react-router-dom";
 import { Skeleton } from "./Skeleton";
 import { formatDateForDisplay } from "../utils/dateFilters";
 import { useDeleteExpense } from "../mutations/useExpenseMutations";
-import { useToast } from "../context/useToast";
 
 export const ExpenseTable = ({
   expenses = [],
@@ -14,7 +14,10 @@ export const ExpenseTable = ({
 }) => {
   const [expandedExpenseIds, setExpandedExpenseIds] = useState({});
   const deleteExpenseMutation = useDeleteExpense();
-  const { showToast } = useToast();
+
+  // Extract openExpenseModal from Outlet context
+  const context = useOutletContext();
+  const openExpenseModal = context?.openExpenseModal || (() => {});
 
   const toggleExpenseExpand = (id) => {
     setExpandedExpenseIds((prev) => ({
@@ -166,15 +169,12 @@ export const ExpenseTable = ({
 
                           {/* Action Area (Edit / Delete) */}
                           {showActions && (
-                            <div className="mt-4 flex items-center gap-4">
+                            <div className="mt-4 flex items-center gap-2">
                               <button
                                 type="button"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  showToast({
-                                    type: "success",
-                                    message: "Edit expense is coming soon.",
-                                  });
+                                  openExpenseModal(expense);
                                 }}
                                 className="font-label-md text-label-md flex h-9 cursor-pointer items-center justify-center gap-1.5 rounded-DEFAULT border border-secondary bg-transparent px-4 py-2 font-semibold tracking-wide text-secondary transition-all hover:bg-secondary/5 hover:shadow-md disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:shadow-none"
                               >

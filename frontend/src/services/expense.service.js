@@ -10,6 +10,19 @@ export const createExpense = async (groupId, expenseData) => {
   }
 };
 
+export const updateExpense = async (groupId, expenseId, expenseData) => {
+  try {
+    const response = await api.patch(
+      `/groups/${groupId}/expenses/${expenseId}`,
+      expenseData,
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error updating expense:", error);
+    throw error;
+  }
+};
+
 export const getExpenses = async (groupId) => {
   try {
     const response = await api.get(`/groups/${groupId}/expenses`);

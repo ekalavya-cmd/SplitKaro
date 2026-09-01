@@ -3,7 +3,10 @@ import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useGroupQuery } from "../queries/useGroupsQueries";
-import { useCreateExpense } from "../mutations/useExpenseMutations";
+import {
+  useCreateExpense,
+  useUpdateExpense,
+} from "../mutations/useExpenseMutations";
 import { Skeleton } from "./Skeleton";
 import { Modal } from "./Modal";
 
@@ -68,7 +71,7 @@ const fieldErrorClass = "mt-1 font-label-sm text-label-sm text-error";
 // ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
-export const AddExpenseModal = ({ isOpen, onClose, groupId }) => {
+export const AddExpenseModal = ({ isOpen, onClose, groupId, initialData }) => {
   // Tab-memory: keep per-tab split values independent of RHF
   const [exactSplits, setExactSplits] = useState({});
   const [percentageSplits, setPercentageSplits] = useState({});
@@ -96,7 +99,7 @@ export const AddExpenseModal = ({ isOpen, onClose, groupId }) => {
   const amount = useWatch({ control, name: "amount" });
   const descriptionValue = useWatch({ control, name: "description" });
 
-  // Reset on close (render-phase pattern to avoid setState-in-effect lint)
+  // Reset or Hydrate on open/close (render-phase pattern to avoid setState-in-effect lint)
   const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
   if (isOpen !== prevIsOpen) {
     setPrevIsOpen(isOpen);
@@ -104,6 +107,41 @@ export const AddExpenseModal = ({ isOpen, onClose, groupId }) => {
       reset();
       setExactSplits({});
       setPercentageSplits({});
+    } else if (initialData) {
+      const exact = {};
+      const percentage = {};
+      const splitsValueForRHF = {};
+
+      if (initialData.splits) {
+        initialData.splits.forEach((split) => {
+          exact[split.userId] = Number(split.amountOwed);
+          percentage[split.userId] = Number(
+            (
+              (Number(split.amountOwed) / Number(initialData.amount)) *
+              100
+            ).toFixed(2),
+          );
+        });
+      }
+
+      setExactSplits(exact);
+      setPercentageSplits(percentage);
+
+      if (initialData.splitType === "exact")
+        Object.assign(splitsValueForRHF, exact);
+      if (initialData.splitType === "percentage")
+        Object.assign(splitsValueForRHF, percentage);
+
+      reset({
+        description: initialData.description || "",
+        amount: initialData.amount || "",
+        paid_by: initialData.paidBy ? initialData.paidBy.toString() : "",
+        split_type: initialData.splitType || "equal",
+        date: initialData.date
+          ? initialData.date.split("T")[0]
+          : new Date().toISOString().split("T")[0],
+        splits: splitsValueForRHF,
+      });
     }
   }
 
@@ -111,6 +149,15 @@ export const AddExpenseModal = ({ isOpen, onClose, groupId }) => {
   const group = groupQuery.data;
 
   const createExpenseMutation = useCreateExpense({
+    onSuccess: () => {
+      reset();
+      setExactSplits({});
+      setPercentageSplits({});
+      onClose();
+    },
+  });
+
+  const updateExpenseMutation = useUpdateExpense({
     onSuccess: () => {
       reset();
       setExactSplits({});
@@ -148,7 +195,15 @@ export const AddExpenseModal = ({ isOpen, onClose, groupId }) => {
   };
 
   const onSubmit = (data) => {
-    createExpenseMutation.mutate({ groupId, inputs: data });
+    if (initialData) {
+      updateExpenseMutation.mutate({
+        groupId,
+        expenseId: initialData.id,
+        inputs: data,
+      });
+    } else {
+      createExpenseMutation.mutate({ groupId, inputs: data });
+    }
   };
 
   // Split values to display for the active tab
@@ -171,10 +226,16 @@ export const AddExpenseModal = ({ isOpen, onClose, groupId }) => {
       <button
         type="submit"
         form="add-expense-form"
-        disabled={createExpenseMutation.isPending}
+        disabled={
+          createExpenseMutation.isPending || updateExpenseMutation.isPending
+        }
         className="rounded-lg bg-primary px-5 py-2.5 font-body-md text-body-md font-semibold text-on-primary shadow-sm transition-all outline-none hover:bg-primary/90 focus:ring-2 focus:ring-primary/40 disabled:opacity-50"
       >
-        {createExpenseMutation.isPending ? "Saving..." : "Save Expense"}
+        {createExpenseMutation.isPending || updateExpenseMutation.isPending
+          ? "Saving..."
+          : initialData
+            ? "Save Changes"
+            : "Save Expense"}
       </button>
     </>
   );
@@ -183,7 +244,7 @@ export const AddExpenseModal = ({ isOpen, onClose, groupId }) => {
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Add Expense"
+      title={initialData ? "Edit Expense" : "Add Expense"}
       footer={footer}
     >
       <form

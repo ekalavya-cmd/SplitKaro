@@ -9,6 +9,7 @@ import { NewGroupModal } from "../components/NewGroupModal";
 
 const Layout = () => {
   const [selectedGroupId, setSelectedGroupId] = useState("");
+  const [expenseModalData, setExpenseModalData] = useState(null);
   const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false);
   const [isSettlementModalOpen, setIsSettlementModalOpen] = useState(false);
   const [isNewGroupModalOpen, setIsNewGroupModalOpen] = useState(false);
@@ -18,6 +19,11 @@ const Layout = () => {
   const openSettlementModal = (initialData = null) => {
     setSettlementModalData(initialData);
     setIsSettlementModalOpen(true);
+  };
+
+  const openExpenseModal = (initialData = null) => {
+    setExpenseModalData(initialData);
+    setIsAddExpenseOpen(true);
   };
 
   const { isAuthenticated, isInitializing, hasConnectionError, logout } =
@@ -211,7 +217,7 @@ const Layout = () => {
             </button>
 
             <button
-              onClick={() => setIsAddExpenseOpen(true)}
+              onClick={() => openExpenseModal()}
               disabled={!selectedGroupId}
               className="font-label-md text-label-md flex h-9 cursor-pointer items-center justify-center gap-1.5 rounded-DEFAULT bg-primary px-4 py-2 font-semibold tracking-wide text-on-primary transition-all hover:bg-primary/90 hover:shadow-md disabled:opacity-50 disabled:hover:bg-primary disabled:hover:text-on-primary disabled:hover:shadow-none"
             >
@@ -242,6 +248,7 @@ const Layout = () => {
                 hasConnectionError,
                 groupsIsLoading: isLoading,
                 openSettlementModal,
+                openExpenseModal,
               }}
             />
           </div>
@@ -250,8 +257,12 @@ const Layout = () => {
 
       <AddExpenseModal
         isOpen={isAddExpenseOpen}
-        onClose={() => setIsAddExpenseOpen(false)}
+        onClose={() => {
+          setIsAddExpenseOpen(false);
+          setExpenseModalData(null);
+        }}
         groupId={selectedGroupId}
+        initialData={expenseModalData}
       />
       <RecordSettlementModal
         isOpen={isSettlementModalOpen}

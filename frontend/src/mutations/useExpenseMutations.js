@@ -1,5 +1,9 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createExpense, deleteExpense } from "../services/expense.service";
+import {
+  createExpense,
+  updateExpense,
+  deleteExpense,
+} from "../services/expense.service";
 import { queryKeys } from "../queries/queryKeys";
 import { useToast } from "../context/useToast";
 
@@ -14,9 +18,15 @@ export const useCreateExpense = (options = {}) => {
         type: "success",
         message: data?.message ?? "Expense created successfully",
       });
-      queryClient.invalidateQueries({ queryKey: queryKeys.expenses.list(variables.groupId) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.balances.list(variables.groupId) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.settlements.suggest(variables.groupId) });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.expenses.list(variables.groupId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.balances.list(variables.groupId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.settlements.suggest(variables.groupId),
+      });
 
       if (options.onSuccess) {
         options.onSuccess(data, variables, context);
@@ -37,6 +47,48 @@ export const useCreateExpense = (options = {}) => {
   });
 };
 
+export const useUpdateExpense = (options = {}) => {
+  const queryClient = useQueryClient();
+  const { showToast } = useToast();
+
+  return useMutation({
+    mutationFn: ({ groupId, expenseId, inputs }) =>
+      updateExpense(groupId, expenseId, inputs),
+    onSuccess: (data, variables, context) => {
+      showToast({
+        type: "success",
+        message: data?.message ?? "Expense updated successfully",
+      });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.expenses.list(variables.groupId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.balances.list(variables.groupId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.settlements.suggest(variables.groupId),
+      });
+
+      if (options.onSuccess) {
+        options.onSuccess(data, variables, context);
+      }
+    },
+    onError: (error, variables, context) => {
+      console.error("Error updating expense:", error);
+
+      if (options.onError) {
+        options.onError(error, variables, context);
+      } else {
+        showToast({
+          type: "error",
+          message:
+            error?.message ?? "Failed to update expense. Please try again.",
+        });
+      }
+    },
+  });
+};
+
 export const useDeleteExpense = (options = {}) => {
   const queryClient = useQueryClient();
   const { showToast } = useToast();
@@ -48,9 +100,15 @@ export const useDeleteExpense = (options = {}) => {
         type: "success",
         message: data?.message ?? "Expense deleted successfully",
       });
-      queryClient.invalidateQueries({ queryKey: queryKeys.expenses.list(variables.groupId) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.balances.list(variables.groupId) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.settlements.suggest(variables.groupId) });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.expenses.list(variables.groupId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.balances.list(variables.groupId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.settlements.suggest(variables.groupId),
+      });
 
       if (options.onSuccess) {
         options.onSuccess(data, variables, context);
