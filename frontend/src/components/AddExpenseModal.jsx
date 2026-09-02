@@ -9,6 +9,7 @@ import {
 } from "../mutations/useExpenseMutations";
 import { Skeleton } from "./Skeleton";
 import { Modal } from "./Modal";
+import { splitAmount } from "../utils/splitMath";
 
 // ---------------------------------------------------------------------------
 // Schema — mirrors backend expense.service.js tolerances exactly:
@@ -551,36 +552,41 @@ export const AddExpenseModal = ({ isOpen, onClose, groupId, initialData }) => {
                   </div>
                 ) : group && group.members && group.members.length > 0 ? (
                   <div className="flex flex-col gap-3">
-                    {group.members.map((member) => {
-                      const equalAmount = amount
-                        ? (parseFloat(amount) / group.members.length).toFixed(2)
-                        : "0.00";
-                      return (
-                        <div
-                          key={member.id}
-                          className="flex items-center justify-between gap-4"
-                        >
-                          <label
-                            htmlFor={`split-${member.id}`}
-                            className="font-body-md text-body-md font-medium text-on-surface"
+                    {(() => {
+                      const totalCents = amount ? Math.round(Number(amount) * 100) : 0;
+                      const equalSplitsArray = totalCents > 0
+                        ? splitAmount(totalCents, group.members.length)
+                        : Array(group.members.length).fill(0);
+
+                      return group.members.map((member, index) => {
+                        const equalAmount = (equalSplitsArray[index] / 100).toFixed(2);
+                        return (
+                          <div
+                            key={member.id}
+                            className="flex items-center justify-between gap-4"
                           >
-                            {member.name}
-                          </label>
-                          <div className="relative">
-                            <span className="absolute top-1/2 left-3 -translate-y-1/2 font-mono-data text-on-surface-variant">
-                              ₹
-                            </span>
-                            <input
-                              type="number"
-                              id={`split-${member.id}`}
-                              value={equalAmount}
-                              readOnly
-                              className="h-10 w-32 cursor-not-allowed rounded-lg border border-outline-variant bg-surface-container-lowest pr-4 pl-8 text-right font-body-md text-body-md text-on-surface-variant focus:outline-none"
-                            />
+                            <label
+                              htmlFor={`split-${member.id}`}
+                              className="font-body-md text-body-md font-medium text-on-surface"
+                            >
+                              {member.name}
+                            </label>
+                            <div className="relative">
+                              <span className="absolute top-1/2 left-3 -translate-y-1/2 font-mono-data text-on-surface-variant">
+                                ₹
+                              </span>
+                              <input
+                                type="number"
+                                id={`split-${member.id}`}
+                                value={equalAmount}
+                                readOnly
+                                className="h-10 w-32 cursor-not-allowed rounded-lg border border-outline-variant bg-surface-container-lowest pr-4 pl-8 text-right font-body-md text-body-md text-on-surface-variant focus:outline-none"
+                              />
+                            </div>
                           </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      });
+                    })()}
                   </div>
                 ) : (
                   <p className="font-label-sm text-label-sm text-on-surface-variant">
