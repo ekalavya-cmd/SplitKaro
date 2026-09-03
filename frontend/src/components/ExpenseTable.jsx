@@ -26,16 +26,16 @@ export const ExpenseTable = ({
     }));
   };
 
-  const setSplitTypeColor = (splitType) => {
+  const getSplitTypeStyles = (splitType) => {
     switch (splitType) {
       case "equal":
-        return "bg-primary";
+        return "bg-primary/10 text-primary";
       case "exact":
-        return "bg-secondary";
+        return "bg-secondary/10 text-secondary";
       case "percentage":
-        return "bg-secondary-fixed-dim";
+        return "bg-secondary-fixed-dim/15 text-secondary-fixed-dim";
       default:
-        return "bg-outline-variant";
+        return "bg-surface-variant text-on-surface-variant";
     }
   };
 
@@ -44,7 +44,7 @@ export const ExpenseTable = ({
     deleteExpenseMutation.mutate({ groupId, expenseId });
   };
 
-  const colSpanCount = 5;
+  const colSpanCount = 6;
 
   return (
     <div className="overflow-x-auto">
@@ -60,12 +60,13 @@ export const ExpenseTable = ({
             <th className="w-32 px-4 py-3 font-label-sm text-label-sm font-semibold tracking-wider text-on-surface-variant uppercase">
               Paid By
             </th>
-            <th className="w-32 px-4 py-3 text-right font-label-sm text-label-sm font-semibold tracking-wider text-on-surface-variant uppercase">
+            <th className="w-32 px-4 py-3 font-label-sm text-label-sm font-semibold tracking-wider text-on-surface-variant uppercase">
               Amount
             </th>
-            <th className="w-55 px-4 py-3 font-label-sm text-label-sm font-semibold tracking-wider text-on-surface-variant uppercase">
+            <th className="px-4 py-3 font-label-sm text-label-sm font-semibold tracking-wider text-on-surface-variant uppercase">
               Split Type
             </th>
+            <th className="w-10 px-2 py-3 text-right" />
           </tr>
         </thead>
         <tbody className="divide-y divide-outline-variant">
@@ -81,12 +82,13 @@ export const ExpenseTable = ({
                 <td className="px-4 py-4.5">
                   <Skeleton className="h-4 w-24" />
                 </td>
-                <td className="px-4 py-4.5 text-right">
-                  <Skeleton className="ml-auto h-4 w-16" />
+                <td className="px-4 py-4.5">
+                  <Skeleton className="h-4 w-16" />
                 </td>
                 <td className="px-4 py-4.5">
                   <Skeleton className="h-4 w-20" />
                 </td>
+                <td className="px-2 py-4.5 text-right" />
               </tr>
             ))
           ) : expenses && expenses.length > 0 ? (
@@ -96,13 +98,13 @@ export const ExpenseTable = ({
                   onClick={() => toggleExpenseExpand(expense.id)}
                   className="group h-row-height-compact cursor-pointer transition-colors select-none hover:bg-surface-container-low/50"
                 >
-                  <td className="px-4 py-1 font-mono-data text-sm whitespace-nowrap text-on-surface-variant">
+                  <td className="px-4 py-2 font-mono-data text-sm whitespace-nowrap text-on-surface-variant">
                     {formatDateForDisplay(expense.date)}
                   </td>
-                  <td className="px-4 py-1 font-body-md font-medium text-on-surface">
+                  <td className="px-4 py-2 font-body-md font-medium text-on-surface">
                     {expense.description}
                   </td>
-                  <td className="px-4 py-1">
+                  <td className="px-4 py-2">
                     <div className="flex items-center gap-2">
                       <div className="flex h-6 w-6 items-center justify-center rounded-full bg-secondary-container font-label-sm text-[10px] text-on-secondary-container">
                         {expense.payer.name.substring(0, 2).toUpperCase()}
@@ -112,26 +114,24 @@ export const ExpenseTable = ({
                       </span>
                     </div>
                   </td>
-                  <td className="px-4 py-1 text-right font-mono-data font-medium text-on-surface">
+                  <td className="px-4 py-2 font-mono-data font-medium text-on-surface">
                     ₹{expense.amount}
                   </td>
-                  <td className="px-4 py-1">
-                    <div className="bg-surface-variant inline-flex items-center gap-1.5 rounded-DEFAULT border border-outline-variant px-2 py-0.5 text-on-surface-variant">
-                      <span
-                        className={`h-2 w-2 rounded-full ${setSplitTypeColor(expense.splitType)}`}
-                      ></span>
+                  <td className="px-4 py-2">
+                    <span
+                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 ${getSplitTypeStyles(expense.splitType)}`}
+                    >
                       <span className="font-label-sm text-[11px] tracking-wide uppercase">
                         {expense.splitType}
                       </span>
-                      <span className="ml-1 text-[10px] text-outline">
-                        ({expense.splits ? expense.splits.length : 0} shares)
-                      </span>
-                      <span
-                        className={`material-symbols-outlined text-[12px] text-on-surface-variant transition-transform ${expandedExpenseIds[expense.id] ? "rotate-180" : ""}`}
-                      >
-                        expand_more
-                      </span>
-                    </div>
+                    </span>
+                  </td>
+                  <td className="px-2 py-2 text-right">
+                    <span
+                      className={`material-symbols-outlined text-[16px] text-on-surface-variant transition-transform ${expandedExpenseIds[expense.id] ? "rotate-180" : ""}`}
+                    >
+                      expand_more
+                    </span>
                   </td>
                 </tr>
                 {expandedExpenseIds[expense.id] && (

@@ -12,7 +12,7 @@ import {
 const COLORS = {
   equal: "#3525cd", // primary
   exact: "#006a61", // secondary
-  percentage: "#6bd8cb", // secondary-fixed
+  percentage: "#6bd8cb", // secondary-fixed-dim
 };
 
 import { Skeleton } from "../Skeleton";
