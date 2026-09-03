@@ -8,14 +8,13 @@ const BCRYPT_ROUNDS = 12;
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     // 1. Users
-    const passwordHash = await bcrypt.hash("user@123", BCRYPT_ROUNDS);
 
     const users = [
       {
         id: 1,
         name: "Alice",
         email: "alice@gmail.com",
-        password_hash: passwordHash,
+        password_hash: await bcrypt.hash("alice@123", BCRYPT_ROUNDS),
         google_id: null,
         is_email_verified: false,
         created_at: new Date(),
@@ -25,7 +24,7 @@ module.exports = {
         id: 2,
         name: "Bob",
         email: "bob@gmail.com",
-        password_hash: passwordHash,
+        password_hash: await bcrypt.hash("bob@123", BCRYPT_ROUNDS),
         google_id: null,
         is_email_verified: false,
         created_at: new Date(),
@@ -35,7 +34,7 @@ module.exports = {
         id: 3,
         name: "Charlie",
         email: "charlie@gmail.com",
-        password_hash: passwordHash,
+        password_hash: await bcrypt.hash("charlie@123", BCRYPT_ROUNDS),
         google_id: null,
         is_email_verified: false,
         created_at: new Date(),
@@ -45,7 +44,7 @@ module.exports = {
         id: 4,
         name: "David",
         email: "david@gmail.com",
-        password_hash: passwordHash,
+        password_hash: await bcrypt.hash("david@123", BCRYPT_ROUNDS),
         google_id: null,
         is_email_verified: false,
         created_at: new Date(),
@@ -55,7 +54,7 @@ module.exports = {
         id: 5,
         name: "Eve",
         email: "eve@gmail.com",
-        password_hash: passwordHash,
+        password_hash: await bcrypt.hash("eve@123", BCRYPT_ROUNDS),
         google_id: null,
         is_email_verified: false,
         created_at: new Date(),
@@ -65,7 +64,7 @@ module.exports = {
         id: 6,
         name: "Frank",
         email: "frank@gmail.com",
-        password_hash: passwordHash,
+        password_hash: await bcrypt.hash("frank@123", BCRYPT_ROUNDS),
         google_id: null,
         is_email_verified: false,
         created_at: new Date(),
@@ -75,7 +74,7 @@ module.exports = {
         id: 7,
         name: "Grace",
         email: "grace@gmail.com",
-        password_hash: passwordHash,
+        password_hash: await bcrypt.hash("grace@123", BCRYPT_ROUNDS),
         google_id: null,
         is_email_verified: false,
         created_at: new Date(),

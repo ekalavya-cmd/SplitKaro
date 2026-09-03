@@ -9,7 +9,7 @@ import {
 } from "../mutations/useExpenseMutations";
 import { Skeleton } from "./Skeleton";
 import { Modal } from "./Modal";
-import { splitAmount } from "../utils/splitMath";
+import { splitAmount, distributeRemainder } from "../utils/splitMath";
 
 // ---------------------------------------------------------------------------
 // Schema — mirrors backend expense.service.js tolerances exactly:
@@ -114,14 +114,22 @@ export const AddExpenseModal = ({ isOpen, onClose, groupId, initialData }) => {
       const splitsValueForRHF = {};
 
       if (initialData.splits) {
-        initialData.splits.forEach((split) => {
+        const totalAmount = Number(initialData.amount);
+
+        // 1. Calculate floor basis points (100% = 10000)
+        const baseBasisPoints = initialData.splits.map((split) => {
           exact[split.userId] = Number(split.amountOwed);
-          percentage[split.userId] = Number(
-            (
-              (Number(split.amountOwed) / Number(initialData.amount)) *
-              100
-            ).toFixed(2),
-          );
+          return Math.floor((Number(split.amountOwed) / totalAmount) * 10000);
+        });
+
+        // 2. Distribute the remainder exactly
+        const totalBaseBasisPoints = baseBasisPoints.reduce((sum, val) => sum + val, 0);
+        const remainder = 10000 - totalBaseBasisPoints;
+        const adjustedBasisPoints = distributeRemainder(baseBasisPoints, remainder);
+
+        // 3. Map back to user IDs for the form state
+        initialData.splits.forEach((split, index) => {
+          percentage[split.userId] = Number((adjustedBasisPoints[index] / 100).toFixed(2));
         });
       }
 
