@@ -80,7 +80,7 @@ const createExpenseSchema = z
           0
         );
 
-        if (Math.round(percentagesTotal * 100) !== 10000) {
+        if (Math.round(percentagesTotal * 10000) !== 1000000) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             message: `Percentages sum to ${percentagesTotal}, but must sum to exactly 100`,

@@ -357,7 +357,7 @@ Values are the amount (for `exact`) or the percentage (for `percentage`).
 
 - `equal` — amount divided evenly; penny remainder distributed sequentially.
 - `exact` — sum of all split values must equal `amount` (tolerance: ±0.01).
-- `percentage` — sum of all percentages must equal `100` (tolerance: ±0.01); amounts computed server-side with penny-remainder distribution.
+- `percentage` — sum of all percentages must equal `100.0000` (tolerance: ±0.00005, validated via `Math.round(sum × 10000) === 1,000,000`); accepts up to 4 decimal places; amounts computed server-side with penny-remainder distribution.
 
 **Response `201`**
 

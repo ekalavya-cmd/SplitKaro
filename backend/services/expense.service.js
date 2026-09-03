@@ -90,7 +90,7 @@ function calculateSplits(amount, split_type, splits, users) {
       0,
     );
 
-    if (Math.round(percentagesTotal * 100) !== 10000) {
+    if (Math.round(percentagesTotal * 10000) !== 1000000) {
       throw {
         status: 400,
         message: `Percentages sum to ${percentagesTotal}, but must sum to exactly 100`,
