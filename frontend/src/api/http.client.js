@@ -30,6 +30,13 @@ httpClient.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    // TEMPORARY DEV-ONLY DELAY — remove before committing.
+    // Simulates slow network to visually test skeleton loading states.
+    if (import.meta.env.DEV) {
+      await new Promise((resolve) => setTimeout(resolve, 2000)); // adjust ms as needed
+    }
+
     return config;
   },
   (error) => Promise.reject(error),
