@@ -13,8 +13,8 @@ import { splitAmount, distributeRemainder } from "../utils/splitMath";
 
 // ---------------------------------------------------------------------------
 // Schema — mirrors backend expense.service.js tolerances exactly:
-//   Exact:      Math.abs(splitsTotal - amount) > 0.01
-//   Percentage: Math.abs(percentagesTotal - 100) > 0.01
+//   Exact:      Math.round(splitsTotal * 100) !== Math.round(amount * 100)  (±0.01)
+//   Percentage: Math.round(sum * 10000) !== 1,000,000  (4 decimal places, ±0.00005%)
 // ---------------------------------------------------------------------------
 const expenseSchema = z
   .object({
@@ -48,11 +48,11 @@ const expenseSchema = z
 
     if (data.split_type === "percentage") {
       const sum = splitValues.reduce((acc, v) => acc + (Number(v) || 0), 0);
-      if (Math.round(sum * 100) !== 10000) {
+      if (Math.round(sum * 10000) !== 1000000) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           path: ["splits"],
-          message: `Percentages must sum to 100% (currently ${sum.toFixed(2)}%)`,
+          message: `Percentages must sum to 100% (currently ${sum.toFixed(4)}%)`,
         });
       }
     }
@@ -116,21 +116,36 @@ export const AddExpenseModal = ({ isOpen, onClose, groupId, initialData }) => {
       if (initialData.splits) {
         const totalAmount = Number(initialData.amount);
 
-        // 1. Calculate floor basis points (100% = 10000)
-        const baseBasisPoints = initialData.splits.map((split) => {
-          exact[split.userId] = Number(split.amountOwed);
-          return Math.floor((Number(split.amountOwed) / totalAmount) * 10000);
-        });
+        // Only hydrate the tab that matches the expense's original split type.
+        // Non-matching tabs start empty so the user must enter values manually.
+        if (initialData.splitType === "exact") {
+          initialData.splits.forEach((split) => {
+            exact[split.userId] = Number(split.amountOwed);
+          });
+        }
 
-        // 2. Distribute the remainder exactly
-        const totalBaseBasisPoints = baseBasisPoints.reduce((sum, val) => sum + val, 0);
-        const remainder = 10000 - totalBaseBasisPoints;
-        const adjustedBasisPoints = distributeRemainder(baseBasisPoints, remainder);
-
-        // 3. Map back to user IDs for the form state
-        initialData.splits.forEach((split, index) => {
-          percentage[split.userId] = Number((adjustedBasisPoints[index] / 100).toFixed(2));
-        });
+        if (initialData.splitType === "percentage") {
+          // 1. Calculate floor basis points (100% = 1,000,000 — 4 decimal places)
+          const baseBasisPoints = initialData.splits.map((split) =>
+            Math.floor((Number(split.amountOwed) / totalAmount) * 1000000),
+          );
+          // 2. Distribute the remainder so the total lands on exactly 1,000,000
+          const totalBaseBasisPoints = baseBasisPoints.reduce(
+            (sum, val) => sum + val,
+            0,
+          );
+          const remainder = 1000000 - totalBaseBasisPoints;
+          const adjustedBasisPoints = distributeRemainder(
+            baseBasisPoints,
+            remainder,
+          );
+          // 3. Map back to user IDs: divide by 10,000 to get a 4-decimal percentage
+          initialData.splits.forEach((split, index) => {
+            percentage[split.userId] = Number(
+              (adjustedBasisPoints[index] / 10000).toFixed(4),
+            );
+          });
+        }
       }
 
       setExactSplits(exact);
@@ -194,15 +209,6 @@ export const AddExpenseModal = ({ isOpen, onClose, groupId, initialData }) => {
     }
   };
 
-  // Switch tab — restore stored values for the target tab
-  const handleTabSwitch = (type) => {
-    let restoredSplits = {};
-    if (type === "exact") restoredSplits = exactSplits;
-    if (type === "percentage") restoredSplits = percentageSplits;
-    setValue("split_type", type, { shouldValidate: false });
-    setValue("splits", restoredSplits, { shouldValidate: false });
-  };
-
   const onSubmit = (data) => {
     if (initialData) {
       updateExpenseMutation.mutate({
@@ -215,13 +221,84 @@ export const AddExpenseModal = ({ isOpen, onClose, groupId, initialData }) => {
     }
   };
 
-  // Split values to display for the active tab
-  const currentSplits =
-    splitType === "exact"
+  // Equal-distribution defaults for non-matching tabs in edit mode.
+  //
+  // WHY group.members, not initialData.splits:
+  //   Members can join a group after an expense was already created (via the
+  //   POST /api/groups/invite/:token/join flow). A late joiner has no row in
+  //   `expense_splits` for older expenses, so initialData.splits.length can be
+  //   LESS THAN the current group size — meaning using initialData.splits as the
+  //   member list would produce equal-distribution defaults that silently omit
+  //   the new member(s). Using group.members (authoritative current membership,
+  //   resolved by groupQuery) avoids this undercounting.
+  //
+  // ASSUMPTION — membership can only GROW, never shrink:
+  //   As of this writing, no member-removal endpoint exists. Group membership
+  //   is strictly append-only (create group → join via invite). This means
+  //   initialData.splits can undercount current membership but can never
+  //   OVERcount it (a split row always maps to a real, still-current member).
+  //   If a "remove member from group" feature is ever added, this assumption
+  //   must be re-verified: a removed member could still appear in
+  //   initialData.splits for historical expenses (overcount), while no longer
+  //   being in group.members — requiring defensive handling here.
+  const equalDefaultExact = {};
+  const equalDefaultPercentage = {};
+  if (group && group.members && group.members.length > 0 && amount) {
+    const memberCount = group.members.length;
+    const totalCents = Math.round(Number(amount) * 100);
+    if (totalCents > 0) {
+      const equalCentsArray = splitAmount(totalCents, memberCount);
+      group.members.forEach((member, i) => {
+        equalDefaultExact[member.id] = equalCentsArray[i] / 100;
+      });
+    }
+    const basePoints = Math.floor(1000000 / memberCount);
+    const baseArray = Array(memberCount).fill(basePoints);
+    const bpRemainder = 1000000 - baseArray.reduce((s, v) => s + v, 0);
+    const adjustedPoints = distributeRemainder(baseArray, bpRemainder);
+    group.members.forEach((member, i) => {
+      equalDefaultPercentage[member.id] = Number(
+        (adjustedPoints[i] / 10000).toFixed(4),
+      );
+    });
+  }
+
+  // Display splits: use real stored state if present; fall back to equal defaults in edit mode
+  const displayExact =
+    Object.keys(exactSplits).length > 0
       ? exactSplits
-      : splitType === "percentage"
-        ? percentageSplits
+      : initialData
+        ? equalDefaultExact
         : {};
+  const displayPercentage =
+    Object.keys(percentageSplits).length > 0
+      ? percentageSplits
+      : initialData
+        ? equalDefaultPercentage
+        : {};
+
+  // Switch tab — restore stored values; seed with equal defaults on first switch to a non-matching tab
+  const handleTabSwitch = (type) => {
+    let restoredSplits = {};
+    if (type === "exact") {
+      if (Object.keys(exactSplits).length > 0) {
+        restoredSplits = exactSplits;
+      } else if (Object.keys(equalDefaultExact).length > 0) {
+        setExactSplits(equalDefaultExact);
+        restoredSplits = equalDefaultExact;
+      }
+    }
+    if (type === "percentage") {
+      if (Object.keys(percentageSplits).length > 0) {
+        restoredSplits = percentageSplits;
+      } else if (Object.keys(equalDefaultPercentage).length > 0) {
+        setPercentageSplits(equalDefaultPercentage);
+        restoredSplits = equalDefaultPercentage;
+      }
+    }
+    setValue("split_type", type, { shouldValidate: false });
+    setValue("splits", restoredSplits, { shouldValidate: false });
+  };
 
   const footer = (
     <>
@@ -432,7 +509,7 @@ export const AddExpenseModal = ({ isOpen, onClose, groupId, initialData }) => {
                           <input
                             type="number"
                             id={`split-${member.id}`}
-                            value={currentSplits[member.id] ?? ""}
+                            value={displayExact[member.id] ?? ""}
                             onChange={(e) =>
                               handleSplitChange(
                                 member.id,
@@ -453,14 +530,14 @@ export const AddExpenseModal = ({ isOpen, onClose, groupId, initialData }) => {
                     No members available.
                   </p>
                 )}
-                {Object.keys(currentSplits).length > 0 && (
+                {Object.keys(displayExact).length > 0 && (
                   <div className="mt-2 flex items-center justify-between border-t border-outline-variant pt-4 font-label-sm text-label-sm font-bold text-on-surface">
                     <span className="tracking-wider uppercase">
                       Total Allocated
                     </span>
                     <span className="font-mono-data text-body-lg text-secondary">
                       ₹{" "}
-                      {Object.values(currentSplits)
+                      {Object.values(displayExact)
                         .reduce((sum, val) => sum + (Number(val) || 0), 0)
                         .toFixed(2)}
                     </span>
@@ -501,7 +578,7 @@ export const AddExpenseModal = ({ isOpen, onClose, groupId, initialData }) => {
                           <input
                             type="number"
                             id={`split-${member.id}`}
-                            value={currentSplits[member.id] ?? ""}
+                            value={displayPercentage[member.id] ?? ""}
                             onChange={(e) =>
                               handleSplitChange(
                                 member.id,
@@ -512,7 +589,7 @@ export const AddExpenseModal = ({ isOpen, onClose, groupId, initialData }) => {
                             placeholder="0"
                             min="0"
                             max="100"
-                            step="0.01"
+                            step="0.0001"
                             className="h-10 w-32 rounded-lg border border-outline-variant bg-surface-container-lowest pr-8 pl-4 text-right font-body-md text-body-md text-on-surface transition-shadow focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
                           />
                           <span className="absolute top-1/2 right-3 -translate-y-1/2 font-mono-data text-on-surface-variant">
@@ -527,15 +604,15 @@ export const AddExpenseModal = ({ isOpen, onClose, groupId, initialData }) => {
                     No members available.
                   </p>
                 )}
-                {Object.keys(currentSplits).length > 0 && (
+                {Object.keys(displayPercentage).length > 0 && (
                   <div className="mt-2 flex items-center justify-between border-t border-outline-variant pt-4 font-label-sm text-label-sm font-bold text-on-surface">
                     <span className="tracking-wider uppercase">
                       Total Percentage
                     </span>
                     <span className="font-mono-data text-body-lg text-secondary">
-                      {Object.values(currentSplits)
+                      {Object.values(displayPercentage)
                         .reduce((sum, val) => sum + (Number(val) || 0), 0)
-                        .toFixed(2)}{" "}
+                        .toFixed(4)}{" "}
                       %
                     </span>
                   </div>
@@ -561,13 +638,18 @@ export const AddExpenseModal = ({ isOpen, onClose, groupId, initialData }) => {
                 ) : group && group.members && group.members.length > 0 ? (
                   <div className="flex flex-col gap-3">
                     {(() => {
-                      const totalCents = amount ? Math.round(Number(amount) * 100) : 0;
-                      const equalSplitsArray = totalCents > 0
-                        ? splitAmount(totalCents, group.members.length)
-                        : Array(group.members.length).fill(0);
+                      const totalCents = amount
+                        ? Math.round(Number(amount) * 100)
+                        : 0;
+                      const equalSplitsArray =
+                        totalCents > 0
+                          ? splitAmount(totalCents, group.members.length)
+                          : Array(group.members.length).fill(0);
 
                       return group.members.map((member, index) => {
-                        const equalAmount = (equalSplitsArray[index] / 100).toFixed(2);
+                        const equalAmount = (
+                          equalSplitsArray[index] / 100
+                        ).toFixed(2);
                         return (
                           <div
                             key={member.id}
