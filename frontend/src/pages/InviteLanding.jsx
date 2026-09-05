@@ -350,8 +350,8 @@ export default function InviteLanding() {
               </div>
 
               {/* Inline error banner */}
-              <div className="mb-5 flex w-full items-start gap-2 rounded border border-error/30 bg-error-container px-3 py-2.5 text-left">
-                <span className="material-symbols-outlined mt-0.5 shrink-0 text-lg text-error">
+              <div className="mb-5 flex w-full items-center gap-2 rounded border border-error/30 bg-error-container px-3 py-2.5 text-left">
+                <span className="material-symbols-outlined mt-0.5 shrink-0 text-lg! text-error">
                   error
                 </span>
                 <div className="text-xs leading-snug text-on-error-container">
