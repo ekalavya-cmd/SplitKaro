@@ -714,22 +714,22 @@ Delete a recorded settlement. Wrapped in a transaction.
 
 ## Endpoint Summary
 
-| Method   | Path                                  | Purpose                               |
-| -------- | ------------------------------------- | ------------------------------------- |
-| `GET`    | `/api/groups`                         | List all groups                       |
-| `POST`   | `/api/groups`                         | Create a group with members           |
-| `GET`    | `/api/groups/invite/:token`           | Preview a group by its invite token   |
-| `POST`   | `/api/groups/invite/:token/join`      | Join a group using its invite token   |
-| `GET`    | `/api/groups/:id`                     | Get a group with its members          |
-| `GET`    | `/api/groups/:id/expenses`            | List all expenses for a group         |
-| `POST`   | `/api/groups/:id/expenses`            | Add an expense to a group             |
-| `GET`    | `/api/groups/:id/balances`            | Get per-member balances for a group   |
-| `GET`    | `/api/groups/:id/settlements/suggest` | Get suggested settlement payments     |
-| `GET`    | `/api/groups/:id/settlements`         | List recorded settlements for a group |
-| `POST`   | `/api/groups/:id/settlements`         | Record a settlement payment           |
-| `DELETE` | `/api/groups/settlements/:id`         | Delete a settlement record            |
-| `PATCH`  | `/api/groups/:id/expenses/:expenseId` | Edit an expense and recalculate splits|
-| `DELETE` | `/api/groups/:id/expenses/:expenseId` | Delete an expense and its splits      |
+| Method   | Path                                  | Purpose                                |
+| -------- | ------------------------------------- | -------------------------------------- |
+| `GET`    | `/api/groups`                         | List all groups                        |
+| `POST`   | `/api/groups`                         | Create a group with members            |
+| `GET`    | `/api/groups/invite/:token`           | Preview a group by its invite token    |
+| `POST`   | `/api/groups/invite/:token/join`      | Join a group using its invite token    |
+| `GET`    | `/api/groups/:id`                     | Get a group with its members           |
+| `GET`    | `/api/groups/:id/expenses`            | List all expenses for a group          |
+| `POST`   | `/api/groups/:id/expenses`            | Add an expense to a group              |
+| `GET`    | `/api/groups/:id/balances`            | Get per-member balances for a group    |
+| `GET`    | `/api/groups/:id/settlements/suggest` | Get suggested settlement payments      |
+| `GET`    | `/api/groups/:id/settlements`         | List recorded settlements for a group  |
+| `POST`   | `/api/groups/:id/settlements`         | Record a settlement payment            |
+| `DELETE` | `/api/groups/settlements/:id`         | Delete a settlement record             |
+| `PATCH`  | `/api/groups/:id/expenses/:expenseId` | Edit an expense and recalculate splits |
+| `DELETE` | `/api/groups/:id/expenses/:expenseId` | Delete an expense and its splits       |
 
 **Total: 14 endpoints across 1 router (excluding Auth).**
 

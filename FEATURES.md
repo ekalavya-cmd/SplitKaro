@@ -22,12 +22,12 @@
 
 ### Group Management
 
-| Feature                       | Current behaviour                                                                                                                                                                           |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ✅ Create group               | POST `/api/groups` — creator-only flow; creates group, adds creator as first member via `group_members`, and returns an `inviteToken`. Protected by auth middleware.                        |
-| ✅ List my groups             | GET `/api/groups` — returns only groups the authenticated user is a member of (no members included). Protected by auth middleware.                                                          |
-| ✅ View group detail          | GET `/api/groups/:id` — queries group and members via `User` and `GroupMember` association (R2 refactor).                                                                                   |
-| ✅ Group selector (UI)        | The `<select>` dropdown UI itself is fine; it will resume populating correctly once the underlying GET `/api/groups` read path is unbroken by R2.                                           |
+| Feature                       | Current behaviour                                                                                                                                                                                             |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ✅ Create group               | POST `/api/groups` — creator-only flow; creates group, adds creator as first member via `group_members`, and returns an `inviteToken`. Protected by auth middleware.                                          |
+| ✅ List my groups             | GET `/api/groups` — returns only groups the authenticated user is a member of (no members included). Protected by auth middleware.                                                                            |
+| ✅ View group detail          | GET `/api/groups/:id` — queries group and members via `User` and `GroupMember` association (R2 refactor).                                                                                                     |
+| ✅ Group selector (UI)        | The `<select>` dropdown UI itself is fine; it will resume populating correctly once the underlying GET `/api/groups` read path is unbroken by R2.                                                             |
 | ✅ Join group via invite link | Backend: `GET /api/groups/invite/:token` previews the group, `POST .../join` adds the user. Frontend: `InviteLanding` page with 7-state UI and cross-auth `sessionStorage` detour logic for logged-out users. |
 
 ### Member Management
