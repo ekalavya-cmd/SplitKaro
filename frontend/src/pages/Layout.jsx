@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, Outlet, useLocation } from "react-router-dom";
+import { Link, Outlet, useLocation, useSearchParams } from "react-router-dom";
 import { useAllGroupsQuery } from "../queries/useGroupsQueries";
 import { useAuth } from "../context/useAuth";
 import { useToast } from "../context/useToast";
@@ -15,6 +15,7 @@ const Layout = () => {
   const [isNewGroupModalOpen, setIsNewGroupModalOpen] = useState(false);
   const [settlementModalData, setSettlementModalData] = useState(null);
   const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const openSettlementModal = (initialData = null) => {
     setSettlementModalData(initialData);
@@ -38,10 +39,19 @@ const Layout = () => {
     enabled: isAuthenticated && !isInitializing,
   });
 
-  // Auto-select the first group when groups data becomes available
-  // Done during render phase to avoid cascading effect renders
+  // Auto-select the first group when groups data becomes available.
+  // If ?group=<id> is present (set by InviteLanding after a join), prefer that
+  // group and immediately clean the param from the URL so it doesn't persist.
+  // Done during render phase to avoid cascading effect renders.
   if (groups && groups.length > 0 && !selectedGroupId) {
-    setSelectedGroupId(groups[0].id);
+    const requestedId = searchParams.get("group");
+    const requestedNum = requestedId ? Number(requestedId) : null;
+    if (requestedNum && groups.some((g) => g.id === requestedNum)) {
+      setSelectedGroupId(requestedNum);
+      setSearchParams({}, { replace: true }); // clean the URL
+    } else {
+      setSelectedGroupId(groups[0].id);
+    }
   } else if (groups && groups.length === 0 && selectedGroupId !== "") {
     setSelectedGroupId("");
   }

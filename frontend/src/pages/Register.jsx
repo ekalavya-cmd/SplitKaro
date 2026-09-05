@@ -43,15 +43,26 @@ export default function Register() {
     },
   });
 
-  // If user is already authenticated, redirect to /
+  // If user is already authenticated, redirect to pending invite or /
   if (isAuthenticated) {
+    const pendingToken = sessionStorage.getItem("pendingInviteToken");
+    if (pendingToken) {
+      return <Navigate to={`/invite/${pendingToken}`} replace />;
+    }
     return <Navigate to="/" replace />;
   }
 
   const onSubmit = async (data) => {
     try {
       await authRegister(data);
-      navigate("/", { replace: true });
+      // If the user was redirected here mid-invite-flow, send them back
+      // to complete the join rather than landing on the dashboard.
+      const pendingToken = sessionStorage.getItem("pendingInviteToken");
+      if (pendingToken) {
+        navigate(`/invite/${pendingToken}`, { replace: true });
+      } else {
+        navigate("/", { replace: true });
+      }
     } catch (error) {
       showToast({
         type: "error",

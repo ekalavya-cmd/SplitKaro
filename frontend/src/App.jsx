@@ -6,6 +6,7 @@ import SettleUp from "./pages/SettleUp";
 import Error404 from "./pages/Error404";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import InviteLanding from "./pages/InviteLanding";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { PersistentErrorBanner } from "./components/PersistentErrorBanner";
 import { useAuth } from "./context/useAuth";
@@ -21,6 +22,7 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/invite/:token" element={<InviteLanding />} />
         <Route element={<ProtectedRoute />}>
           <Route element={<Layout />}>
             <Route path="/" element={<Dashboard />} />
