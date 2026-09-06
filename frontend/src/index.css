@@ -110,6 +110,30 @@
   --text-mono-data: 14px;
   --text-mono-data--line-height: 20px;
   --text-mono-data--font-weight: 500;
+
+  /* Custom Animations */
+  --animate-spin-smooth: spin-smooth 0.85s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  --animate-pulse-subtle: pulse-subtle 2s ease-in-out infinite;
+
+  @keyframes spin-smooth {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+  @keyframes pulse-subtle {
+    0%,
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.65;
+      transform: scale(0.97);
+    }
+  }
 }
 
 @layer base {
