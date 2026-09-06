@@ -27,8 +27,7 @@ const Layout = () => {
     setIsAddExpenseOpen(true);
   };
 
-  const { isAuthenticated, isInitializing, hasConnectionError, logout } =
-    useAuth();
+  const { isAuthenticated, isInitializing, logout } = useAuth();
   const { showToast } = useToast();
 
   const {
@@ -177,7 +176,7 @@ const Layout = () => {
               <option value="" disabled>
                 Select a group
               </option>
-              {isInitializing || hasConnectionError || isLoading ? (
+              {isInitializing || isLoading ? (
                 <option disabled>Loading groups...</option>
               ) : isError ? (
                 <option disabled>Error loading groups</option>
@@ -255,7 +254,6 @@ const Layout = () => {
                 setSelectedGroupId,
                 groups,
                 isInitializing,
-                hasConnectionError,
                 groupsIsLoading: isLoading,
                 openSettlementModal,
                 openExpenseModal,

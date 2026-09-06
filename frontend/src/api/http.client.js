@@ -125,7 +125,8 @@ httpClient.interceptors.response.use(
 
     return Promise.reject({
       status: 0,
-      message: "Please check your internet connection and try again.",
+      message:
+        "Network error. Please check your internet connection and try again.",
     });
   },
 );

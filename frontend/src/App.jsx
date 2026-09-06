@@ -8,17 +8,10 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import InviteLanding from "./pages/InviteLanding";
 import ProtectedRoute from "./components/ProtectedRoute";
-import { PersistentErrorBanner } from "./components/PersistentErrorBanner";
-import { useAuth } from "./context/useAuth";
 
 function App() {
-  const { hasConnectionError, retryConnection } = useAuth();
-
   return (
     <>
-      {hasConnectionError && (
-        <PersistentErrorBanner refetch={retryConnection} />
-      )}
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
