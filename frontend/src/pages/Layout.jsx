@@ -87,6 +87,7 @@ const Layout = () => {
         <div className="mb-6 px-4">
           <button
             onClick={() => setIsNewGroupModalOpen(true)}
+            disabled={!selectedGroupId}
             className="font-label-md text-label-md flex h-9 w-full cursor-pointer items-center justify-center gap-1.5 rounded-DEFAULT border border-primary bg-transparent px-4 py-2 font-semibold tracking-wide text-primary transition-all hover:bg-primary/5 hover:shadow-md disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:shadow-none"
           >
             <span className="material-symbols-outlined text-[22px]!">add</span>{" "}
