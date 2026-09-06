@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Link, Outlet, useLocation, useSearchParams } from "react-router-dom";
 import { useAllGroupsQuery } from "../queries/useGroupsQueries";
 import { useAuth } from "../context/useAuth";
@@ -17,6 +17,19 @@ const Layout = () => {
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
 
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsProfileMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   const openSettlementModal = (initialData = null) => {
     setSettlementModalData(initialData);
     setIsSettlementModalOpen(true);
@@ -27,8 +40,25 @@ const Layout = () => {
     setIsAddExpenseOpen(true);
   };
 
-  const { isAuthenticated, isInitializing, logout } = useAuth();
+  const { isAuthenticated, isInitializing, logout, user } = useAuth();
   const { showToast } = useToast();
+
+  const handleLogout = async (e) => {
+    e.preventDefault();
+    try {
+      await logout();
+      showToast({
+        type: "success",
+        message: "Logged out successfully.",
+      });
+    } catch (error) {
+      console.error("Logout failed in UI:", error);
+      showToast({
+        type: "error",
+        message: "Failed to log out. Please try again.",
+      });
+    }
+  };
 
   const {
     data: groups = [],
@@ -66,11 +96,6 @@ const Layout = () => {
     { name: "Groups", path: "/groups", icon: "group" },
   ];
 
-  const bottomNavLinks = [
-    { name: "Settings", path: "/settings", icon: "settings" },
-    { name: "Logout", path: "/logout", icon: "logout" },
-  ];
-
   return (
     <div className="flex min-h-screen bg-background font-body-md text-body-md text-on-background antialiased selection:bg-primary/20 selection:text-primary">
       {/* Sidebar */}
@@ -88,7 +113,7 @@ const Layout = () => {
           <button
             onClick={() => setIsNewGroupModalOpen(true)}
             disabled={!selectedGroupId}
-            className="font-label-md text-label-md flex h-9 w-full cursor-pointer items-center justify-center gap-1.5 rounded-DEFAULT border border-primary bg-transparent px-4 py-2 font-semibold tracking-wide text-primary transition-all hover:bg-primary/5 hover:shadow-md disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:shadow-none"
+            className="font-label-md text-label-md flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-md border border-primary bg-transparent px-4 py-2 font-semibold tracking-wide text-primary transition-all outline-none hover:bg-primary/5 hover:shadow-md focus:ring-2 focus:ring-primary/40 disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:shadow-none"
           >
             <span className="material-symbols-outlined text-[22px]!">add</span>{" "}
             New Group
@@ -116,52 +141,6 @@ const Layout = () => {
             );
           })}
         </nav>
-
-        <div className="flex flex-col gap-1 border-t border-outline-variant p-4">
-          {bottomNavLinks.map((link) => {
-            if (link.name === "Logout") {
-              return (
-                <button
-                  key={link.path}
-                  onClick={async (e) => {
-                    e.preventDefault();
-                    try {
-                      await logout();
-                      showToast({
-                        type: "success",
-                        message: "Logged out successfully.",
-                      });
-                    } catch (error) {
-                      console.error("Logout failed in UI:", error);
-                      showToast({
-                        type: "error",
-                        message: "Failed to log out. Please try again.",
-                      });
-                    }
-                  }}
-                  className="flex cursor-pointer items-center gap-3 rounded-DEFAULT px-4 py-2 text-left text-on-surface-variant transition-colors hover:bg-surface-container-low hover:text-on-surface"
-                >
-                  <span className="material-symbols-outlined text-[20px]">
-                    {link.icon}
-                  </span>
-                  <span className="font-body-md text-body-md">{link.name}</span>
-                </button>
-              );
-            }
-            return (
-              <Link
-                key={link.path}
-                to={link.path}
-                className="flex items-center gap-3 rounded-DEFAULT px-4 py-2 text-on-surface-variant transition-colors hover:bg-surface-container-low hover:text-on-surface"
-              >
-                <span className="material-symbols-outlined text-[20px]">
-                  {link.icon}
-                </span>
-                <span className="font-body-md text-body-md">{link.name}</span>
-              </Link>
-            );
-          })}
-        </div>
       </aside>
 
       {/* Main Content Area */}
@@ -221,7 +200,7 @@ const Layout = () => {
             <button
               onClick={() => openSettlementModal()}
               disabled={!selectedGroupId}
-              className="font-label-md text-label-md h-9 cursor-pointer rounded-DEFAULT border border-primary bg-transparent px-4 py-2 font-semibold tracking-wide text-primary transition-all hover:bg-primary/5 hover:shadow-md disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:shadow-none"
+              className="font-label-md text-label-md h-9 cursor-pointer rounded-md border border-primary bg-transparent px-4 py-2 font-semibold tracking-wide text-primary transition-all outline-none hover:bg-primary/5 hover:shadow-md focus:ring-2 focus:ring-primary/40 disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:shadow-none"
             >
               Settle
             </button>
@@ -229,7 +208,7 @@ const Layout = () => {
             <button
               onClick={() => openExpenseModal()}
               disabled={!selectedGroupId}
-              className="font-label-md text-label-md flex h-9 cursor-pointer items-center justify-center gap-1.5 rounded-DEFAULT bg-primary px-4 py-2 font-semibold tracking-wide text-on-primary transition-all hover:bg-primary/90 hover:shadow-md disabled:opacity-50 disabled:hover:bg-primary disabled:hover:text-on-primary disabled:hover:shadow-none"
+              className="font-label-md text-label-md flex h-9 cursor-pointer items-center justify-center gap-1.5 rounded-md bg-primary px-4 py-2 font-semibold tracking-wide text-on-primary transition-all outline-none hover:bg-primary/90 hover:shadow-md focus:ring-2 focus:ring-primary/40 disabled:opacity-50 disabled:hover:bg-primary disabled:hover:text-on-primary disabled:hover:shadow-none"
             >
               <span className="material-symbols-outlined text-[22px]!">
                 add
@@ -237,11 +216,74 @@ const Layout = () => {
               Add Expense
             </button>
 
-            <div className="ml-2 flex h-8 w-8 cursor-pointer items-center justify-center overflow-hidden rounded-full border border-outline-variant bg-secondary-container font-label-sm text-on-secondary-container">
-              {/* Avatar Placeholder */}
-              <span className="material-symbols-outlined text-[20px]">
-                person
-              </span>
+            <div className="relative ml-2" ref={dropdownRef}>
+              <button
+                onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
+                className="flex h-8 w-8 cursor-pointer items-center justify-center overflow-hidden rounded-full border border-outline-variant bg-secondary-container font-label-sm text-on-secondary-container transition-shadow focus:ring-2 focus:ring-primary/40 focus:outline-none"
+              >
+                {/* Avatar Placeholder */}
+                <span className="material-symbols-outlined text-[20px]">
+                  person
+                </span>
+              </button>
+
+              {isProfileMenuOpen && (
+                <div className="animate-in fade-in absolute top-full right-0 z-50 mt-2 w-60 overflow-hidden rounded-lg border border-outline-variant bg-surface-container-lowest py-1.5 shadow-sm duration-150">
+                  <div className="border-b border-outline-variant px-3 py-2">
+                    <p className="font-body-md leading-tight font-medium text-on-surface">
+                      {user?.name || "Loading..."}
+                    </p>
+                    <p className="text-[11px] text-on-surface-variant">
+                      {user?.email || "loading@example.com"}
+                    </p>
+                  </div>
+                  <div className="py-1">
+                    <button
+                      onClick={() => {
+                        setIsProfileMenuOpen(false);
+                        showToast({
+                          type: "info",
+                          message: "Profile page is coming soon.",
+                        });
+                      }}
+                      className="flex w-full cursor-pointer items-center gap-3 px-3 py-2 text-left font-body-md text-on-surface transition-colors hover:bg-surface-container-low"
+                    >
+                      <span className="material-symbols-outlined text-[20px] text-on-surface-variant">
+                        person
+                      </span>
+                      <span>Profile</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        setIsProfileMenuOpen(false);
+                        showToast({
+                          type: "info",
+                          message: "Settings page is coming soon.",
+                        });
+                      }}
+                      className="flex w-full cursor-pointer items-center gap-3 px-3 py-2 text-left font-body-md text-on-surface transition-colors hover:bg-surface-container-low"
+                    >
+                      <span className="material-symbols-outlined text-[20px] text-on-surface-variant">
+                        settings
+                      </span>
+                      <span>Settings</span>
+                    </button>
+                  </div>
+                  <div className="my-1 h-px bg-outline-variant"></div>
+                  <button
+                    onClick={(e) => {
+                      setIsProfileMenuOpen(false);
+                      handleLogout(e);
+                    }}
+                    className="flex w-full cursor-pointer items-center gap-3 px-3 py-2 text-left font-body-md text-error transition-colors hover:bg-error-container/30"
+                  >
+                    <span className="material-symbols-outlined text-[20px] text-error">
+                      logout
+                    </span>
+                    <span>Logout</span>
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </header>

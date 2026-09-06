@@ -85,7 +85,7 @@ export const SimplifiedSettlements = ({
                   onClick={() =>
                     onSettle(suggestion.from, suggestion.to, suggestion.amount)
                   }
-                  className="shrink-0 cursor-pointer rounded-DEFAULT border border-primary bg-transparent px-3 py-1.5 font-label-sm text-label-sm font-semibold tracking-wide text-primary transition-all hover:bg-primary/5 hover:shadow-md"
+                  className="shrink-0 cursor-pointer rounded-md border border-primary bg-transparent px-3 py-1.5 font-label-sm text-label-sm font-semibold tracking-wide text-primary transition-all outline-none hover:bg-primary/5 hover:shadow-md focus:ring-2 focus:ring-primary/40"
                 >
                   Settle
                 </button>
