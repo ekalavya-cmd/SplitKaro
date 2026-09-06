@@ -58,7 +58,7 @@ const SettleUp = () => {
   const settlementsQuery = useSettlementsQuery(selectedGroupId);
   const settlementsData = settlementsQuery.data || { settlements: [] };
 
-  const { isDataLoading, isError, errors, refetchAll } = usePageLoadingState([
+  const { isDataLoading, isError, refetchAll } = usePageLoadingState([
     groupQuery,
     suggestionsQuery,
     settlementsQuery,

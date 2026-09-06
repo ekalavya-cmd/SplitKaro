@@ -92,7 +92,7 @@ httpClient.interceptors.response.use(
           isRefreshing = false;
 
           return httpClient(originalRequest);
-        } catch (refreshError) {
+        } catch {
           const authError = {
             status: 401,
             message: "Your session has expired. Please log in again.",
@@ -106,7 +106,8 @@ httpClient.interceptors.response.use(
         }
       }
 
-      let errorMessage = data?.message || "Something went wrong";
+      let errorMessage =
+        data?.message || "Something went wrong. Please refresh and try again.";
 
       if (
         typeof errorMessage === "string" &&
@@ -124,7 +125,7 @@ httpClient.interceptors.response.use(
 
     return Promise.reject({
       status: 0,
-      message: "Network error",
+      message: "Please check your internet connection and try again.",
     });
   },
 );

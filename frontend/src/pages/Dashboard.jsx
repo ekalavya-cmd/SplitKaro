@@ -29,7 +29,7 @@ const Dashboard = () => {
   const suggestionsQuery = useSettlementSuggestionsQuery(selectedGroupId);
   const suggestions = suggestionsQuery.data || [];
 
-  const { isDataLoading, isError, errors, refetchAll } = usePageLoadingState([
+  const { isDataLoading, isError, refetchAll } = usePageLoadingState([
     groupQuery,
     expensesQuery,
     balancesQuery,

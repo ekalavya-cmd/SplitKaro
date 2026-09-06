@@ -14,12 +14,12 @@ const STYLES = {
     container:
       "border-secondary/30 bg-secondary-container text-on-secondary-container",
     icon: "text-on-secondary-container",
-    dismiss: "hover:bg-secondary/20 text-on-secondary-container",
+    dismiss: "text-on-secondary-container",
   },
   error: {
     container: "border-error/30 bg-error-container text-on-error-container",
     icon: "text-on-error-container",
-    dismiss: "hover:bg-error/20 text-on-error-container",
+    dismiss: "text-on-error-container",
   },
 };
 
@@ -44,13 +44,13 @@ const ToastItem = ({ toast, onDismiss }) => {
     <div
       role="alert"
       aria-live="assertive"
-      className={`pointer-events-auto flex w-80 items-center gap-3 rounded-lg border px-4 py-2 shadow-[0px_10px_15px_rgba(0,0,0,0.1)] transition-all duration-200 ${style.container} ${
+      className={`pointer-events-auto flex items-center gap-3 rounded-lg border px-4 py-2 shadow-[0px_10px_15px_rgba(0,0,0,0.1)] transition-all duration-200 ${style.container} ${
         visible ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
       }`}
     >
       {/* Status icon */}
       <span
-        className={`material-symbols-outlined shrink-0 text-[20px] ${style.icon}`}
+        className={`material-symbols-outlined shrink-0 text-[20px]! ${style.icon}`}
       >
         {icon}
       </span>
@@ -64,9 +64,11 @@ const ToastItem = ({ toast, onDismiss }) => {
       <button
         onClick={handleDismiss}
         aria-label="Dismiss notification"
-        className={`-mr-1 rounded-DEFAULT p-1 transition-colors ${style.dismiss}`}
+        className={`shrink-0 cursor-pointer ${style.dismiss}`}
       >
-        <span className="material-symbols-outlined text-[16px]">close</span>
+        <span className="material-symbols-outlined pt-1 text-[20px]!">
+          close
+        </span>
       </button>
     </div>
   );
@@ -93,7 +95,7 @@ export const ToastProvider = ({ children }) => {
   const showToast = useCallback(
     ({ type, message }) => {
       const id = `toast-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-      
+
       setToasts((prev) => {
         // Deduplicate: if a toast with this exact message and type is already visible, ignore
         if (prev.some((t) => t.message === message && t.type === type)) {
@@ -104,7 +106,7 @@ export const ToastProvider = ({ children }) => {
         timersRef.current[id] = setTimeout(() => {
           dismissToast(id);
         }, AUTO_DISMISS_MS);
-        
+
         return [...prev, { id, type, message }];
       });
 
