@@ -18,6 +18,7 @@ const VIEW = {
   SUCCESS: "success",
   INVALID: "invalid",
   JOIN_FAILED: "joinFailed",
+  PREVIEW_FAILED: "previewFailed",
 };
 
 export default function InviteLanding() {
@@ -35,33 +36,41 @@ export default function InviteLanding() {
   // joinError: message from the failed join response
   const [joinError, setJoinError] = useState("");
 
-  // On mount: fetch group preview (no auth required)
+  // trigger a re-fetch by incrementing this state
+  const [retryCount, setRetryCount] = useState(0);
+
+  // On mount or retry: fetch group preview (no auth required)
   useEffect(() => {
     // If we landed here (e.g., from login redirect), the token has been consumed.
     if (sessionStorage.getItem("pendingInviteToken") === token) {
       sessionStorage.removeItem("pendingInviteToken");
     }
 
-    let cancelled = false;
-    async function fetchPreview() {
+    let aborted = false;
+    async function loadPreview() {
       try {
         const data = await getGroupByInviteToken(token);
-        if (!cancelled) {
+        if (!aborted) {
           setGroupData(data);
           setView(VIEW.PREVIEW);
         }
-      } catch {
-        if (!cancelled) {
-          // 404 → invalid link; anything else → also show invalid (safe degradation)
-          setView(VIEW.INVALID);
+      } catch (err) {
+        if (!aborted) {
+          if (err?.status === 404) {
+            setView(VIEW.INVALID);
+          } else {
+            setView(VIEW.PREVIEW_FAILED);
+          }
         }
       }
     }
-    fetchPreview();
+
+    loadPreview();
+
     return () => {
-      cancelled = true;
+      aborted = true;
     };
-  }, [token]);
+  }, [token, retryCount]);
 
   // Handle "Join Group" click
   const handleJoinClick = async () => {
@@ -368,6 +377,49 @@ export default function InviteLanding() {
                 className="flex h-11 w-full items-center justify-center rounded bg-primary text-[15px] font-medium text-white shadow-sm transition-colors hover:bg-primary/90"
               >
                 Join Group
+              </button>
+
+              <p className="mt-4 text-xs text-on-surface-variant">
+                Need assistance?{" "}
+                <a
+                  href="#"
+                  className="font-medium text-primary hover:underline"
+                >
+                  Contact support
+                </a>
+              </p>
+            </div>
+          )}
+
+          {/* ── STATE 8: Preview Failed ── */}
+          {view === VIEW.PREVIEW_FAILED && (
+            <div className="text-center">
+              <p className="mb-1.5 text-[18px] font-semibold tracking-tight text-[#191C1D]">
+                Invite Preview
+              </p>
+
+              {/* Inline error banner */}
+              <div className="mt-4 mb-5 flex w-full items-center gap-2 rounded border border-error/30 bg-error-container px-3 py-2.5 text-left">
+                <span className="material-symbols-outlined mt-0.5 shrink-0 text-lg! text-error">
+                  error
+                </span>
+                <div className="text-xs leading-snug text-on-error-container">
+                  <span className="font-medium text-error">
+                    Couldn't load invite details.{" "}
+                  </span>
+                  <span>Please check your connection and try again.</span>
+                </div>
+              </div>
+
+              {/* Retry CTA */}
+              <button
+                onClick={() => {
+                  setView(VIEW.LOADING);
+                  setRetryCount((c) => c + 1);
+                }}
+                className="flex h-11 w-full items-center justify-center rounded bg-primary text-[15px] font-medium text-white shadow-sm transition-colors hover:bg-primary/90"
+              >
+                Retry
               </button>
 
               <p className="mt-4 text-xs text-on-surface-variant">
