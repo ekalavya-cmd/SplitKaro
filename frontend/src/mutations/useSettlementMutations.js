@@ -39,7 +39,8 @@ export const useCreateSettlement = (options = {}) => {
       } else {
         showToast({
           type: "error",
-          message: error?.message ?? "Failed to record settlement. Please try again.",
+          message:
+            error?.message ?? "Failed to record settlement. Please try again.",
         });
       }
     },
@@ -51,8 +52,7 @@ export const useDeleteSettlement = (options = {}) => {
   const { showToast } = useToast();
 
   return useMutation({
-    mutationFn: ({ groupId, settlementId }) =>
-      deleteSettlement(settlementId, groupId),
+    mutationFn: ({ settlementId }) => deleteSettlement(settlementId),
     onSuccess: (data, variables, context) => {
       showToast({
         type: "success",
