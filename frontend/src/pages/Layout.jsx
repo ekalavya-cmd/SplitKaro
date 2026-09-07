@@ -113,7 +113,7 @@ const Layout = () => {
           <button
             onClick={() => setIsNewGroupModalOpen(true)}
             disabled={!selectedGroupId}
-            className="font-label-md text-label-md flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-md border border-primary bg-transparent px-4 py-2 font-semibold tracking-wide text-primary transition-all outline-none hover:bg-primary/5 hover:shadow-md focus:ring-2 focus:ring-primary/40 disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:shadow-none"
+            className="font-label-md text-label-md flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-md border border-primary bg-transparent px-4 py-2 font-semibold tracking-wide text-primary transition-all outline-none hover:bg-primary/5 hover:shadow-sm focus:ring-2 focus:ring-primary/40 disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:shadow-none"
           >
             <span className="material-symbols-outlined text-[22px]!">add</span>{" "}
             New Group
@@ -133,10 +133,10 @@ const Layout = () => {
                     : "text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface"
                 }`}
               >
-                <span className="material-symbols-outlined text-[20px]">
+                <span className="material-symbols-outlined text-[20px]!">
                   {link.icon}
                 </span>
-                <span className="font-body-md text-body-md">{link.name}</span>
+                <span className="font-label-md text-label-md">{link.name}</span>
               </Link>
             );
           })}
@@ -172,7 +172,7 @@ const Layout = () => {
             </select>
 
             <div className="relative hidden w-full max-w-md md:block">
-              <span className="material-symbols-outlined absolute top-1/2 left-3 -translate-y-1/2 text-[20px] text-outline">
+              <span className="material-symbols-outlined absolute top-1/2 left-3 -translate-y-1/2 text-[20px]! text-outline">
                 search
               </span>
               <input
@@ -185,12 +185,12 @@ const Layout = () => {
 
           <div className="flex items-center gap-4">
             <button className="flex h-8 w-8 items-center justify-center rounded-full font-semibold text-outline transition-colors hover:bg-surface-container-low hover:text-on-surface">
-              <span className="material-symbols-outlined text-[20px]">
+              <span className="material-symbols-outlined text-[20px]!">
                 notifications
               </span>
             </button>
             <button className="flex h-8 w-8 items-center justify-center rounded-full font-semibold text-outline transition-colors hover:bg-surface-container-low hover:text-on-surface">
-              <span className="material-symbols-outlined text-[20px]">
+              <span className="material-symbols-outlined text-[20px]!">
                 help
               </span>
             </button>
@@ -200,7 +200,7 @@ const Layout = () => {
             <button
               onClick={() => openSettlementModal()}
               disabled={!selectedGroupId}
-              className="font-label-md text-label-md h-9 cursor-pointer rounded-md border border-primary bg-transparent px-4 py-2 font-semibold tracking-wide text-primary transition-all outline-none hover:bg-primary/5 hover:shadow-md focus:ring-2 focus:ring-primary/40 disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:shadow-none"
+              className="font-label-md text-label-md h-9 cursor-pointer rounded-md border border-primary bg-transparent px-4 py-2 font-semibold tracking-wide text-primary transition-all outline-none hover:bg-primary/5 hover:shadow-sm focus:ring-2 focus:ring-primary/40 disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:shadow-none"
             >
               Settle
             </button>
@@ -222,7 +222,7 @@ const Layout = () => {
                 className="flex h-8 w-8 cursor-pointer items-center justify-center overflow-hidden rounded-full border border-outline-variant bg-secondary-container font-label-sm text-on-secondary-container transition-shadow focus:ring-2 focus:ring-primary/40 focus:outline-none"
               >
                 {/* Avatar Placeholder */}
-                <span className="material-symbols-outlined text-[20px]">
+                <span className="material-symbols-outlined text-[20px]!">
                   person
                 </span>
               </button>
@@ -248,7 +248,7 @@ const Layout = () => {
                       }}
                       className="flex w-full cursor-pointer items-center gap-3 px-3 py-2 text-left font-body-md text-on-surface transition-colors hover:bg-surface-container-low"
                     >
-                      <span className="material-symbols-outlined text-[20px] text-on-surface-variant">
+                      <span className="material-symbols-outlined text-[20px]! text-on-surface-variant">
                         person
                       </span>
                       <span>Profile</span>
@@ -263,7 +263,7 @@ const Layout = () => {
                       }}
                       className="flex w-full cursor-pointer items-center gap-3 px-3 py-2 text-left font-body-md text-on-surface transition-colors hover:bg-surface-container-low"
                     >
-                      <span className="material-symbols-outlined text-[20px] text-on-surface-variant">
+                      <span className="material-symbols-outlined text-[20px]! text-on-surface-variant">
                         settings
                       </span>
                       <span>Settings</span>
@@ -277,7 +277,7 @@ const Layout = () => {
                     }}
                     className="flex w-full cursor-pointer items-center gap-3 px-3 py-2 text-left font-body-md text-error transition-colors hover:bg-error-container/30"
                   >
-                    <span className="material-symbols-outlined text-[20px] text-error">
+                    <span className="material-symbols-outlined text-[20px]! text-error">
                       logout
                     </span>
                     <span>Logout</span>

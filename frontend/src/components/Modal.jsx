@@ -34,7 +34,9 @@ export const Modal = ({ isOpen, onClose, title, children, footer }) => {
             type="button"
             className="flex h-8 w-8 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-surface-container-low hover:text-on-surface"
           >
-            <span className="material-symbols-outlined text-[20px]">close</span>
+            <span className="material-symbols-outlined text-[20px]!">
+              close
+            </span>
           </button>
         </div>
 

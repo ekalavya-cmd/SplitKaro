@@ -12,6 +12,9 @@ The color palette is strictly functional, adhering to Material 3 / Tonal color c
 
 **Resolved Primary Color Rule:** All primary brand elements and buttons MUST use `#3525CD` as the canonical primary color. (Earlier screens using `#4F46E5` are deprecated).
 
+> [!NOTE]
+> **Info vs Tertiary:** The `info` family is strictly for informational and heads-up messaging (like toasts or alerts). Do not confuse it with `tertiary`, which is a brand accent color.
+
 | Role                       | Token                        | Hex       |
 | -------------------------- | ---------------------------- | --------- |
 | **Primary**                | `primary`                    | `#3525cd` |
@@ -43,6 +46,10 @@ The color palette is strictly functional, adhering to Material 3 / Tonal color c
 |                            | `on-error`                   | `#ffffff` |
 |                            | `error-container`            | `#ffdad6` |
 |                            | `on-error-container`         | `#93000a` |
+| **Info**                   | `info`                       | `#8c5000` |
+|                            | `on-info`                    | `#ffffff` |
+|                            | `info-container`             | `#ffdea4` |
+|                            | `on-info-container`          | `#2e1500` |
 | **Surfaces & Backgrounds** | `background`                 | `#f8f9fa` |
 |                            | `on-background`              | `#191c1d` |
 |                            | `surface`                    | `#f8f9fa` |

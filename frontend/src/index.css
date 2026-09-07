@@ -39,6 +39,12 @@
   --color-error-container: #ffdad6;
   --color-on-error-container: #93000a;
 
+  /* Info */
+  --color-info: #8c5000;
+  --color-on-info: #ffffff;
+  --color-info-container: #ffdea4;
+  --color-on-info-container: #2e1500;
+
   /* Surfaces & Backgrounds */
   --color-background: #f8f9fa;
   --color-on-background: #191c1d;

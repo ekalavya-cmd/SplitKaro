@@ -108,7 +108,7 @@ export const NewGroupModal = ({ isOpen, onClose }) => {
           {/* Success Icon */}
           <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-secondary/10">
             <span
-              className="material-symbols-outlined text-[32px] text-secondary"
+              className="material-symbols-outlined text-[32px]! text-secondary"
               style={{ fontVariationSettings: "'FILL' 1" }}
             >
               check_circle
@@ -155,7 +155,7 @@ export const NewGroupModal = ({ isOpen, onClose }) => {
           <button
             type="button"
             onClick={handleClose}
-            className="hover:bg-surface-variant/50 cursor-pointer rounded-lg px-5 py-2.5 font-body-md text-body-md font-semibold tracking-wide text-on-surface-variant transition-colors outline-none hover:text-on-surface disabled:opacity-50"
+            className="hover:bg-surface-variant/50 font-label-md text-label-md cursor-pointer rounded-lg px-5 py-2.5 font-semibold tracking-wide text-on-surface-variant transition-colors outline-none hover:text-on-surface disabled:opacity-50"
           >
             Cancel
           </button>
@@ -163,7 +163,7 @@ export const NewGroupModal = ({ isOpen, onClose }) => {
             type="submit"
             form="new-group-form"
             disabled={isLoading}
-            className="cursor-pointer rounded-lg bg-primary px-5 py-2.5 font-body-md text-body-md font-semibold tracking-wide text-on-primary transition-all outline-none hover:bg-primary/90 hover:shadow-md focus:ring-2 focus:ring-primary/40 disabled:opacity-50 disabled:hover:bg-primary disabled:hover:text-on-primary disabled:hover:shadow-none"
+            className="font-label-md text-label-md cursor-pointer rounded-lg bg-primary px-5 py-2.5 font-semibold tracking-wide text-on-primary transition-all outline-none hover:bg-primary/90 hover:shadow-md focus:ring-2 focus:ring-primary/40 disabled:opacity-50 disabled:hover:bg-primary disabled:hover:text-on-primary disabled:hover:shadow-none"
           >
             {isLoading ? "Creating..." : "Create Group"}
           </button>

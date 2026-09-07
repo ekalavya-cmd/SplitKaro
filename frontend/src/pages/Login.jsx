@@ -58,12 +58,12 @@ export default function Login() {
 
   const handleGoogleSignIn = (e) => {
     e.preventDefault();
-    showToast({ type: "success", message: "Google Sign-In is coming soon." });
+    showToast({ type: "info", message: "Google Sign-In is coming soon." });
   };
 
   const handleForgotPassword = (e) => {
     e.preventDefault();
-    showToast({ type: "success", message: "Password reset is coming soon." });
+    showToast({ type: "info", message: "Password reset is coming soon." });
   };
 
   return (
@@ -139,7 +139,7 @@ export default function Login() {
             </div>
             {/* Primary Button */}
             <button
-              className="mt-2 flex w-full items-center justify-center rounded-lg bg-primary py-3 font-label-sm text-label-sm text-on-primary transition-colors hover:bg-primary-container disabled:cursor-not-allowed disabled:opacity-50"
+              className="mt-2 w-full cursor-pointer rounded-md bg-primary py-3 font-label-sm text-label-sm font-semibold tracking-wide text-on-primary transition-all outline-none hover:bg-primary/90 hover:shadow-md focus:ring-2 focus:ring-primary/40 disabled:opacity-50 disabled:hover:bg-primary disabled:hover:text-on-primary disabled:hover:shadow-none"
               type="submit"
               disabled={isSubmitting}
             >
@@ -156,7 +156,7 @@ export default function Login() {
           </div>
           {/* Secondary Button (Google) */}
           <button
-            className="flex w-full items-center justify-center gap-2 rounded-lg border border-outline-variant bg-transparent py-3 font-label-sm text-label-sm text-on-surface transition-colors hover:bg-surface-container-low"
+            className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-md border border-outline-variant bg-transparent py-3 font-label-sm text-label-sm font-semibold tracking-wide text-on-surface transition-all outline-none hover:bg-surface-container-low hover:shadow-sm focus:ring-2 focus:ring-outline/40 disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:shadow-none"
             type="button"
             onClick={handleGoogleSignIn}
           >

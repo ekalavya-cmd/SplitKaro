@@ -73,7 +73,7 @@ export default function Register() {
 
   const handleGoogleSignUp = (e) => {
     e.preventDefault();
-    showToast({ type: "success", message: "Google Sign-In is coming soon." });
+    showToast({ type: "info", message: "Google Sign-Up is coming soon." });
   };
 
   return (
@@ -106,7 +106,7 @@ export default function Register() {
               NAME
             </label>
             <input
-              className={`w-full border bg-surface-container-lowest ${fieldBorder(!!errors.name)} rounded-DEFAULT px-3 py-2 font-body-md text-body-md text-on-surface transition-all focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none`}
+              className={`w-full border bg-surface-container-lowest ${fieldBorder(!!errors.name)} rounded-md px-3 py-2 font-body-md text-body-md text-on-surface transition-all focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none`}
               id="name"
               placeholder="John Doe"
               type="text"
@@ -127,7 +127,7 @@ export default function Register() {
               EMAIL
             </label>
             <input
-              className={`w-full border bg-surface-container-lowest ${fieldBorder(!!errors.email)} rounded-DEFAULT px-3 py-2 font-body-md text-body-md text-on-surface transition-all focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none`}
+              className={`w-full border bg-surface-container-lowest ${fieldBorder(!!errors.email)} rounded-md px-3 py-2 font-body-md text-body-md text-on-surface transition-all focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none`}
               id="email"
               placeholder="john@example.com"
               type="email"
@@ -148,7 +148,7 @@ export default function Register() {
               PASSWORD
             </label>
             <input
-              className={`w-full border bg-surface-container-lowest ${fieldBorder(!!errors.password)} rounded-DEFAULT px-3 py-2 font-body-md text-body-md text-on-surface transition-all focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none`}
+              className={`w-full border bg-surface-container-lowest ${fieldBorder(!!errors.password)} rounded-md px-3 py-2 font-body-md text-body-md text-on-surface transition-all focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none`}
               id="password"
               placeholder="••••••••"
               type="password"
@@ -166,7 +166,7 @@ export default function Register() {
           </div>
           {/* Primary Action */}
           <button
-            className="mt-2 w-full rounded-DEFAULT bg-primary py-3 font-label-sm text-label-sm text-on-primary transition-colors hover:bg-primary/90 focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+            className="mt-2 w-full cursor-pointer rounded-md bg-primary py-3 font-label-sm text-label-sm font-semibold tracking-wide text-on-primary transition-all outline-none hover:bg-primary/90 hover:shadow-md focus:ring-2 focus:ring-primary/40 disabled:opacity-50 disabled:hover:bg-primary disabled:hover:text-on-primary disabled:hover:shadow-none"
             type="submit"
             disabled={isSubmitting}
           >
@@ -183,7 +183,7 @@ export default function Register() {
         </div>
         {/* Secondary Action */}
         <button
-          className="flex w-full items-center justify-center gap-2 rounded-DEFAULT border border-outline-variant bg-transparent py-3 font-label-sm text-label-sm text-on-surface transition-colors hover:bg-surface-container-low focus:ring-2 focus:ring-outline/50 focus:outline-none"
+          className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-md border border-outline-variant bg-transparent py-3 font-label-sm text-label-sm font-semibold tracking-wide text-on-surface transition-all outline-none hover:bg-surface-container-low hover:shadow-sm focus:ring-2 focus:ring-outline/40 disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:shadow-none"
           type="button"
           onClick={handleGoogleSignUp}
         >

@@ -30,9 +30,9 @@ export const Pagination = ({
         <button
           onClick={() => onPageChange(safePage - 1)}
           disabled={safePage <= 1}
-          className="flex h-8 cursor-pointer items-center gap-1 rounded-DEFAULT border border-primary bg-transparent px-3 font-label-sm text-label-sm font-semibold text-primary transition-all hover:bg-primary/5 disabled:cursor-not-allowed disabled:border-outline-variant disabled:text-on-surface-variant disabled:opacity-50"
+          className="flex h-8 cursor-pointer items-center gap-1 rounded-md border border-primary bg-transparent px-2 font-label-sm text-label-sm font-semibold tracking-wide text-primary shadow-none transition-all outline-none hover:bg-primary/5 hover:shadow-sm focus:ring-2 focus:ring-primary/40 disabled:border-outline-variant disabled:bg-outline-variant/5 disabled:text-on-surface-variant disabled:opacity-50 disabled:shadow-none"
         >
-          <span className="material-symbols-outlined text-[16px]">
+          <span className="material-symbols-outlined text-[16px]!">
             chevron_left
           </span>
           Prev
@@ -40,10 +40,10 @@ export const Pagination = ({
         <button
           onClick={() => onPageChange(safePage + 1)}
           disabled={safePage >= totalPages}
-          className="flex h-8 cursor-pointer items-center gap-1 rounded-DEFAULT border border-primary bg-transparent px-3 font-label-sm text-label-sm font-semibold text-primary transition-all hover:bg-primary/5 disabled:cursor-not-allowed disabled:border-outline-variant disabled:text-on-surface-variant disabled:opacity-50"
+          className="flex h-8 cursor-pointer items-center gap-1 rounded-md border border-primary bg-transparent px-2 font-label-sm text-label-sm font-semibold tracking-wide text-primary shadow-none transition-all outline-none hover:bg-primary/5 hover:shadow-sm focus:ring-2 focus:ring-primary/40 disabled:border-outline-variant disabled:bg-outline-variant/5 disabled:text-on-surface-variant disabled:opacity-50 disabled:shadow-none"
         >
           Next
-          <span className="material-symbols-outlined text-[16px]">
+          <span className="material-symbols-outlined text-[16px]!">
             chevron_right
           </span>
         </button>

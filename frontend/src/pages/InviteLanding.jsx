@@ -170,7 +170,7 @@ export default function InviteLanding() {
 
               {/* Member count chip */}
               <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#C7C4D8]/60 bg-[#F8F9FA] px-3.5 py-1.5">
-                <span className="material-symbols-outlined text-[18px] text-on-surface-variant">
+                <span className="material-symbols-outlined text-[18px]! text-on-surface-variant">
                   group
                 </span>
                 <span className="text-xs font-medium text-on-surface-variant">
@@ -227,7 +227,7 @@ export default function InviteLanding() {
           {view === VIEW.INVALID && (
             <div className="py-2 text-center">
               <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-[#F3F4F6] text-on-surface-variant">
-                <span className="material-symbols-outlined text-3xl">
+                <span className="material-symbols-outlined text-3xl!">
                   link_off
                 </span>
               </div>
@@ -251,7 +251,9 @@ export default function InviteLanding() {
           {view === VIEW.ALREADY_MEMBER && (
             <div className="py-2 text-center">
               <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
-                <span className="material-symbols-outlined text-3xl">info</span>
+                <span className="material-symbols-outlined text-3xl!">
+                  info
+                </span>
               </div>
               <h2 className="mb-2 text-xl font-semibold tracking-tight text-[#191C1D]">
                 You&apos;re Already In!
@@ -283,7 +285,7 @@ export default function InviteLanding() {
               </h2>
 
               <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#C7C4D8]/60 bg-[#F8F9FA] px-3.5 py-1.5">
-                <span className="material-symbols-outlined text-[18px] text-on-surface-variant">
+                <span className="material-symbols-outlined text-[18px]! text-on-surface-variant">
                   group
                 </span>
                 <span className="text-xs font-medium text-on-surface-variant">
@@ -319,7 +321,7 @@ export default function InviteLanding() {
           {view === VIEW.SUCCESS && (
             <div className="py-2 text-center">
               <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-secondary/10 text-secondary">
-                <span className="material-symbols-outlined text-3xl font-semibold">
+                <span className="material-symbols-outlined text-3xl! font-semibold">
                   check
                 </span>
               </div>
@@ -349,7 +351,7 @@ export default function InviteLanding() {
               </h2>
 
               <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[#C7C4D8]/60 bg-[#F8F9FA] px-3.5 py-1.5">
-                <span className="material-symbols-outlined text-[18px] text-on-surface-variant">
+                <span className="material-symbols-outlined text-[18px]! text-on-surface-variant">
                   group
                 </span>
                 <span className="text-xs font-medium text-on-surface-variant">

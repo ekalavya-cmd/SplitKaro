@@ -52,7 +52,7 @@ const Expenses = () => {
   const expensesQuery = useExpensesQuery(selectedGroupId);
   const expenses = expensesQuery.data || [];
 
-  const { isDataLoading, isError, errors, refetchAll } = usePageLoadingState([
+  const { isDataLoading, isError, refetchAll } = usePageLoadingState([
     groupQuery,
     expensesQuery,
   ]);

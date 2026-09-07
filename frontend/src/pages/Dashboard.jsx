@@ -145,7 +145,7 @@ const Dashboard = () => {
                   key={i}
                   className="flex h-28 flex-col items-center justify-center gap-2 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface-variant"
                 >
-                  <span className="material-symbols-outlined text-[32px] opacity-20">
+                  <span className="material-symbols-outlined text-[32px]! opacity-20">
                     account_balance_wallet
                   </span>
                   <span className="font-label-sm text-label-sm tracking-wider uppercase opacity-50">

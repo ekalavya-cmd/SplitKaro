@@ -36,9 +36,9 @@ export const SimplifiedSettlements = ({
             type="button"
             onClick={onRecalculate}
             disabled={isFetching || disableRecalculate}
-            className="flex cursor-pointer items-center gap-1 font-label-sm text-label-sm text-primary transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-40"
+            className="font-label-md text-label-md flex cursor-pointer items-center gap-1 text-primary transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-40"
           >
-            <span className="material-symbols-outlined text-[16px]">
+            <span className="material-symbols-outlined text-[16px]!">
               refresh
             </span>
             Recalculate
@@ -85,7 +85,7 @@ export const SimplifiedSettlements = ({
                   onClick={() =>
                     onSettle(suggestion.from, suggestion.to, suggestion.amount)
                   }
-                  className="shrink-0 cursor-pointer rounded-md border border-primary bg-transparent px-3 py-1.5 font-label-sm text-label-sm font-semibold tracking-wide text-primary transition-all outline-none hover:bg-primary/5 hover:shadow-md focus:ring-2 focus:ring-primary/40"
+                  className="shrink-0 cursor-pointer rounded-md border border-primary bg-transparent px-3 py-1.5 font-label-sm text-label-sm font-semibold tracking-wide text-primary transition-all outline-none hover:bg-primary/5 hover:shadow-sm focus:ring-2 focus:ring-primary/40"
                 >
                   Settle
                 </button>

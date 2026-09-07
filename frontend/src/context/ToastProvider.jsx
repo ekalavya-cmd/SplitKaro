@@ -7,6 +7,7 @@ import { ToastContext } from "./ToastContext";
 const ICONS = {
   success: "check_circle",
   error: "error",
+  info: "info",
 };
 
 const STYLES = {
@@ -20,6 +21,11 @@ const STYLES = {
     container: "border-error/30 bg-error-container text-on-error-container",
     icon: "text-on-error-container",
     dismiss: "text-on-error-container",
+  },
+  info: {
+    container: "border-info/30 bg-info-container text-on-info-container",
+    icon: "text-info",
+    dismiss: "text-on-info-container",
   },
 };
 

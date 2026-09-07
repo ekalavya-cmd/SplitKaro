@@ -97,7 +97,7 @@ export const SettlementFilters = ({ filterProps, members = [] }) => {
               </span>
             )}
             <span
-              className={`material-symbols-outlined transform text-[16px] transition-transform duration-300 ${
+              className={`material-symbols-outlined transform text-[20px]! transition-transform duration-300 ${
                 isAdvancedFiltersExpanded ? "rotate-180" : ""
               }`}
             >
@@ -126,7 +126,7 @@ export const SettlementFilters = ({ filterProps, members = [] }) => {
                 id="settlDatePreset"
                 value={filterDatePreset}
                 onChange={(e) => handleDatePresetChange(e.target.value)}
-                className="h-10 w-full cursor-pointer rounded-lg border border-outline-variant bg-surface-container-lowest px-4 font-body-md text-body-md text-on-surface outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                className="h-9 w-full cursor-pointer rounded-lg border border-outline-variant bg-surface-container-lowest px-4 font-body-md text-body-md text-on-surface outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
               >
                 <option value="all">All Time</option>
                 <option value="today">Today</option>
@@ -154,7 +154,7 @@ export const SettlementFilters = ({ filterProps, members = [] }) => {
                   setFilterFromDate(e.target.value);
                   setFilterDatePreset("custom");
                 }}
-                className="h-10 w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 font-body-md text-body-md text-on-surface outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                className="h-9 w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 font-body-md text-body-md text-on-surface outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
               />
             </div>
 
@@ -174,7 +174,7 @@ export const SettlementFilters = ({ filterProps, members = [] }) => {
                   setFilterToDate(e.target.value);
                   setFilterDatePreset("custom");
                 }}
-                className="h-10 w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 font-body-md text-body-md text-on-surface outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                className="h-9 w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 font-body-md text-body-md text-on-surface outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
               />
             </div>
 
@@ -183,7 +183,7 @@ export const SettlementFilters = ({ filterProps, members = [] }) => {
               <button
                 type="button"
                 onClick={handleResetFilters}
-                className="flex h-10 w-full cursor-pointer items-center justify-center gap-2 rounded-DEFAULT border border-primary bg-transparent px-6 font-body-md text-body-md font-semibold text-primary transition-all hover:bg-primary/5 hover:shadow-md"
+                className="font-label-md text-label-md h-9 cursor-pointer rounded-md border border-primary bg-transparent px-4 py-2 font-semibold tracking-wide text-primary transition-all outline-none hover:bg-primary/5 hover:shadow-sm focus:ring-2 focus:ring-primary/40 disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:shadow-none"
               >
                 Reset Filters
               </button>

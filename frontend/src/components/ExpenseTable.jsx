@@ -128,7 +128,7 @@ export const ExpenseTable = ({
                   </td>
                   <td className="px-2 py-2 text-right">
                     <span
-                      className={`material-symbols-outlined text-[16px] text-on-surface-variant transition-transform ${expandedExpenseIds[expense.id] ? "rotate-180" : ""}`}
+                      className={`material-symbols-outlined text-[22px]! text-on-surface-variant transition-transform ${expandedExpenseIds[expense.id] ? "rotate-180" : ""}`}
                     >
                       expand_more
                     </span>
@@ -176,9 +176,9 @@ export const ExpenseTable = ({
                                   e.stopPropagation();
                                   openExpenseModal(expense);
                                 }}
-                                className="font-label-md text-label-md flex h-9 cursor-pointer items-center justify-center gap-1.5 rounded-DEFAULT border border-secondary bg-transparent px-4 py-2 font-semibold tracking-wide text-secondary transition-all hover:bg-secondary/5 hover:shadow-md disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:shadow-none"
+                                className="font-label-md text-label-md flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-md border border-info bg-transparent px-2 py-1 font-semibold tracking-wide text-info transition-all outline-none hover:bg-info/5 hover:shadow-sm focus:ring-2 focus:ring-info/40 disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:shadow-none"
                               >
-                                <span className="material-symbols-outlined text-[20px]!">
+                                <span className="material-symbols-outlined text-[16px]!">
                                   stylus
                                 </span>
                                 Edit
@@ -200,9 +200,9 @@ export const ExpenseTable = ({
                                   deleteExpenseMutation.variables?.expenseId ===
                                     expense.id
                                 }
-                                className="font-label-md text-label-md flex h-9 cursor-pointer items-center justify-center gap-1.5 rounded-DEFAULT bg-error px-4 py-2 font-semibold tracking-wide text-on-primary transition-all hover:bg-error/90 hover:shadow-md disabled:opacity-50 disabled:hover:bg-error disabled:hover:text-on-primary disabled:hover:shadow-none"
+                                className="font-label-md text-label-md flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-md bg-error px-2 py-1 font-semibold tracking-wide text-on-primary transition-all outline-none hover:bg-error/90 hover:shadow-md focus:ring-2 focus:ring-error/40 disabled:opacity-50 disabled:hover:bg-error disabled:hover:text-on-primary disabled:hover:shadow-none"
                               >
-                                <span className="material-symbols-outlined text-[20px]!">
+                                <span className="material-symbols-outlined text-[16px]!">
                                   delete
                                 </span>
                                 Delete

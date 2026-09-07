@@ -305,7 +305,7 @@ export const AddExpenseModal = ({ isOpen, onClose, groupId, initialData }) => {
       <button
         type="button"
         onClick={onClose}
-        className="hover:bg-surface-variant/50 cursor-pointer rounded-lg px-5 py-2.5 font-body-md text-body-md font-semibold tracking-wide text-on-surface-variant transition-colors outline-none hover:text-on-surface disabled:opacity-50"
+        className="hover:bg-surface-variant/50 font-label-md text-label-md cursor-pointer rounded-lg px-5 py-2.5 font-semibold tracking-wide text-on-surface-variant transition-colors outline-none hover:text-on-surface disabled:opacity-50"
       >
         Cancel
       </button>
@@ -315,7 +315,7 @@ export const AddExpenseModal = ({ isOpen, onClose, groupId, initialData }) => {
         disabled={
           createExpenseMutation.isPending || updateExpenseMutation.isPending
         }
-        className="cursor-pointer rounded-lg bg-primary px-5 py-2.5 font-body-md text-body-md font-semibold tracking-wide text-on-primary transition-all outline-none hover:bg-primary/90 hover:shadow-md focus:ring-2 focus:ring-primary/40 disabled:opacity-50 disabled:hover:bg-primary disabled:hover:text-on-primary disabled:hover:shadow-none"
+        className="font-label-md text-label-md cursor-pointer rounded-lg bg-primary px-5 py-2.5 font-semibold tracking-wide text-on-primary transition-all outline-none hover:bg-primary/90 hover:shadow-md focus:ring-2 focus:ring-primary/40 disabled:opacity-50 disabled:hover:bg-primary disabled:hover:text-on-primary disabled:hover:shadow-none"
       >
         {createExpenseMutation.isPending || updateExpenseMutation.isPending
           ? "Saving..."
