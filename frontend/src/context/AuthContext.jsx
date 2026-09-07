@@ -17,9 +17,10 @@ export const AuthProvider = ({ children }) => {
 
   const silentRestore = async () => {
     try {
-      const data = await authService.refresh();
+      await authService.refresh();
+      const userData = await authService.getCurrentUser();
+      setUser(userData);
       setIsAuthenticated(true);
-      setUser(data.user || null); // Known gap: refresh only returns accessToken currently
     } catch {
       setIsAuthenticated(false);
       setUser(null);

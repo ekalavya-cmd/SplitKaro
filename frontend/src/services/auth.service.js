@@ -63,3 +63,13 @@ export const logoutAll = async () => {
     clearAccessToken();
   }
 };
+
+export const getCurrentUser = async () => {
+  try {
+    const response = await api.get("/auth/me");
+    return response.data.user;
+  } catch (error) {
+    console.error("Error fetching current user:", error);
+    throw error;
+  }
+};

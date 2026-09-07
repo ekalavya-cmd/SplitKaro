@@ -231,10 +231,10 @@ const Layout = () => {
                 <div className="animate-in fade-in absolute top-full right-0 z-50 mt-2 w-60 overflow-hidden rounded-lg border border-outline-variant bg-surface-container-lowest py-1.5 shadow-sm duration-150">
                   <div className="border-b border-outline-variant px-3 py-2">
                     <p className="font-body-md leading-tight font-medium text-on-surface">
-                      {user?.name || "Loading..."}
+                      {user?.name}
                     </p>
                     <p className="text-[11px] text-on-surface-variant">
-                      {user?.email || "loading@example.com"}
+                      {user?.email}
                     </p>
                   </div>
                   <div className="py-1">

@@ -133,7 +133,26 @@ async function loginUser({ email, password }, deviceInfo = "unknown") {
   };
 }
 
+/**
+ * Fetches the currently authenticated user's profile.
+ *
+ * @param {number|string} userId
+ * @returns {Promise<{ user: object }>}
+ * @throws {{ status: number, message: string }}
+ */
+async function getUserProfile(userId) {
+  const user = await User.findByPk(userId);
+  if (!user) {
+    throw { status: 404, message: "User not found." };
+  }
+
+  return {
+    user: sanitizeUser(user),
+  };
+}
+
 module.exports = {
   registerUser,
   loginUser,
+  getUserProfile,
 };

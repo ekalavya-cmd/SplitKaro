@@ -874,6 +874,42 @@ A new `refreshToken` cookie is also set (rotated).
 
 ---
 
+### `GET /api/auth/me`
+
+Fetch the currently authenticated user's sanitized profile.
+
+**Auth:** Required (`Authorization: Bearer <accessToken>`)  
+**Request body:** None
+
+**Response `200`**
+
+```json
+{
+  "message": "User profile retrieved successfully.",
+  "user": {
+    "id": 1,
+    "name": "Alice",
+    "email": "alice@example.com",
+    "googleId": null,
+    "avatarUrl": null,
+    "isEmailVerified": false,
+    "createdAt": "2026-07-20T00:00:00.000Z",
+    "updatedAt": "2026-07-20T00:00:00.000Z"
+  }
+}
+```
+
+**Error responses**
+
+| Status | Body                                     | Condition                           |
+| ------ | ---------------------------------------- | ----------------------------------- |
+| `401`  | `{ "message": "Access token required" }` | No/malformed Authorization header   |
+| `401`  | `{ "message": "Access token expired" }`  | Access token past its 15-minute TTL |
+| `401`  | `{ "message": "Invalid access token" }`  | Bad JWT signature or other error    |
+| `404`  | `{ "message": "User not found." }`       | User ID from token does not exist   |
+
+---
+
 ### `POST /api/auth/logout`
 
 Revoke the current session's refresh token in Redis and clear the cookie.

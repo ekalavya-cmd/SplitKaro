@@ -125,12 +125,10 @@ async function refresh(req, res) {
     );
 
     res.cookie("refreshToken", newRefreshToken, refreshCookieOptions());
-    return res
-      .status(200)
-      .json({
-        message: "Token refreshed successfully.",
-        accessToken: newAccessToken,
-      });
+    return res.status(200).json({
+      message: "Token refreshed successfully.",
+      accessToken: newAccessToken,
+    });
   } catch (err) {
     return handleServiceError(err, res, "refresh");
   }
@@ -175,4 +173,18 @@ async function logoutAllDevices(req, res) {
   }
 }
 
-module.exports = { register, login, refresh, logout, logoutAllDevices };
+async function getMe(req, res) {
+  const userId = req.userId;
+
+  try {
+    const { user } = await authService.getUserProfile(userId);
+    return res.status(200).json({
+      message: "User profile retrieved successfully.",
+      user,
+    });
+  } catch (err) {
+    return handleServiceError(err, res, "getMe");
+  }
+}
+
+module.exports = { register, login, refresh, logout, logoutAllDevices, getMe };
