@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Modal } from "./Modal";
 import { useGroupQuery } from "../queries/useGroupsQueries";
+import { useSettlementSuggestionsQuery } from "../queries/useSettlementsQueries";
 import { useCreateSettlement } from "../mutations/useSettlementMutations";
 
 // ---------------------------------------------------------------------------
@@ -45,11 +46,6 @@ export const RecordSettlementModal = ({
   groupId,
   initialData,
 }) => {
-  // Stores the original suggested amount captured when the modal opens.
-  // State (not a ref) because it drives a conditional render — refs cannot
-  // be read during render (react-hooks/refs rule).
-  const [suggestedAmount, setSuggestedAmount] = useState(null);
-
   const {
     register,
     handleSubmit,
@@ -66,11 +62,21 @@ export const RecordSettlementModal = ({
     },
   });
 
-  // Subscribe to the live amount value for the tag visibility comparison.
-  const watchedAmount = useWatch({ control, name: "amount" });
+  // Subscribe to live field values for dynamic suggestion matching.
+  const {
+    amount: watchedAmount,
+    paid_by: watchedPaidBy,
+    paid_to: watchedPaidTo,
+  } = useWatch({ control });
 
   const groupQuery = useGroupQuery(groupId, { enabled: !!groupId && isOpen });
   const group = groupQuery.data;
+
+  // Fetch suggestions to check against live input
+  const suggestionsQuery = useSettlementSuggestionsQuery(groupId, {
+    enabled: !!groupId && isOpen,
+  });
+  const suggestions = suggestionsQuery.data;
 
   // Pre-fill from initialData on open; clear on close (render-phase pattern)
   const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
@@ -84,8 +90,6 @@ export const RecordSettlementModal = ({
           amount: initialData.amount ?? "",
           date: new Date().toISOString().split("T")[0],
         });
-        // Capture the suggested amount so we can compare against it live.
-        setSuggestedAmount(initialData.amount ?? null);
       } else {
         reset({
           paid_by: "",
@@ -93,7 +97,6 @@ export const RecordSettlementModal = ({
           amount: "",
           date: new Date().toISOString().split("T")[0],
         });
-        setSuggestedAmount(null);
       }
     } else {
       reset({
@@ -105,15 +108,17 @@ export const RecordSettlementModal = ({
     }
   }
 
-  // Show the "SUGGESTED" tag when:
-  //   1. The modal was opened with a pre-filled suggestion (initialData present), AND
-  //   2. The field's current numeric value exactly matches the original suggestion.
-  // Uses Number() comparison so "1560.20" and "1560.2" are treated as equal,
-  // handling both typed input and the number spinner's native string formats.
-  const showSuggestedTag =
-    !!initialData &&
-    suggestedAmount !== null &&
-    Number(watchedAmount) === Number(suggestedAmount);
+  // Show the "SUGGESTED" tag when the live fields exactly match any optimized suggestion
+  const showSuggestedTag = React.useMemo(() => {
+    if (!suggestions || !watchedAmount || !watchedPaidBy || !watchedPaidTo)
+      return false;
+    return suggestions.some(
+      (suggestion) =>
+        String(suggestion.from.id) === String(watchedPaidBy) &&
+        String(suggestion.to.id) === String(watchedPaidTo) &&
+        Number(suggestion.amount) === Number(watchedAmount),
+    );
+  }, [suggestions, watchedAmount, watchedPaidBy, watchedPaidTo]);
 
   const createSettlementMutation = useCreateSettlement({
     onSuccess: () => {

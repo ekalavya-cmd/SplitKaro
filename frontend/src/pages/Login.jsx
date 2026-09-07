@@ -69,7 +69,7 @@ export default function Login() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-surface p-4">
       {/* Main Container */}
-      <main className="w-full max-w-105">
+      <main className="w-full max-w-120">
         {/* Login Card */}
         <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-8 shadow-sm">
           {/* Header Section */}
@@ -139,7 +139,7 @@ export default function Login() {
             </div>
             {/* Primary Button */}
             <button
-              className="mt-2 w-full cursor-pointer rounded-md bg-primary py-3 font-label-sm text-label-sm font-semibold tracking-wide text-on-primary transition-all outline-none hover:bg-primary/90 hover:shadow-md focus:ring-2 focus:ring-primary/40 disabled:opacity-50 disabled:hover:bg-primary disabled:hover:text-on-primary disabled:hover:shadow-none"
+              className="font-label-md text-label-md mt-2 w-full cursor-pointer rounded-md bg-primary py-3 font-semibold tracking-wide text-on-primary transition-all outline-none hover:bg-primary/90 hover:shadow-md focus:ring-2 focus:ring-primary/40 disabled:opacity-50 disabled:hover:bg-primary disabled:hover:text-on-primary disabled:hover:shadow-none"
               type="submit"
               disabled={isSubmitting}
             >
@@ -156,7 +156,7 @@ export default function Login() {
           </div>
           {/* Secondary Button (Google) */}
           <button
-            className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-md border border-outline-variant bg-transparent py-3 font-label-sm text-label-sm font-semibold tracking-wide text-on-surface transition-all outline-none hover:bg-surface-container-low hover:shadow-sm focus:ring-2 focus:ring-outline/40 disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:shadow-none"
+            className="font-label-md text-label-md flex w-full cursor-pointer items-center justify-center gap-2 rounded-md border border-outline-variant bg-transparent py-3 font-semibold tracking-wide text-on-surface transition-all outline-none hover:bg-surface-container-low hover:shadow-sm focus:ring-2 focus:ring-outline/40 disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:shadow-none"
             type="button"
             onClick={handleGoogleSignIn}
           >
@@ -195,10 +195,8 @@ export default function Login() {
             </svg>
             Sign in with Google
           </button>
-        </div>
-        {/* Footer */}
-        <div className="mt-6 text-center">
-          <p className="font-body-md text-body-md text-on-surface-variant">
+          {/* Footer */}
+          <p className="mt-6 text-center font-body-md text-body-md text-on-surface-variant">
             Don't have an account?{" "}
             <Link
               className="font-semibold text-primary transition-all hover:text-primary-container"

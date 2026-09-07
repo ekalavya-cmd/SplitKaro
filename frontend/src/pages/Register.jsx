@@ -79,7 +79,7 @@ export default function Register() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       {/* Registration Card */}
-      <main className="flex w-full max-w-105 flex-col gap-6 rounded-xl border border-outline-variant bg-surface-container-lowest p-8 shadow-sm">
+      <main className="flex w-full max-w-120 flex-col gap-6 rounded-xl border border-outline-variant bg-surface-container-lowest p-8 shadow-sm">
         {/* Header */}
         <header className="flex flex-col items-center gap-2 text-center">
           <h1 className="mb-2 font-headline-lg text-headline-lg font-black tracking-tighter text-primary">
@@ -166,7 +166,7 @@ export default function Register() {
           </div>
           {/* Primary Action */}
           <button
-            className="mt-2 w-full cursor-pointer rounded-md bg-primary py-3 font-label-sm text-label-sm font-semibold tracking-wide text-on-primary transition-all outline-none hover:bg-primary/90 hover:shadow-md focus:ring-2 focus:ring-primary/40 disabled:opacity-50 disabled:hover:bg-primary disabled:hover:text-on-primary disabled:hover:shadow-none"
+            className="font-label-md text-label-md mt-2 w-full cursor-pointer rounded-md bg-primary py-3 font-semibold tracking-wide text-on-primary transition-all outline-none hover:bg-primary/90 hover:shadow-md focus:ring-2 focus:ring-primary/40 disabled:opacity-50 disabled:hover:bg-primary disabled:hover:text-on-primary disabled:hover:shadow-none"
             type="submit"
             disabled={isSubmitting}
           >
@@ -183,7 +183,7 @@ export default function Register() {
         </div>
         {/* Secondary Action */}
         <button
-          className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-md border border-outline-variant bg-transparent py-3 font-label-sm text-label-sm font-semibold tracking-wide text-on-surface transition-all outline-none hover:bg-surface-container-low hover:shadow-sm focus:ring-2 focus:ring-outline/40 disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:shadow-none"
+          className="font-label-md text-label-md flex w-full cursor-pointer items-center justify-center gap-2 rounded-md border border-outline-variant bg-transparent py-3 font-semibold tracking-wide text-on-surface transition-all outline-none hover:bg-surface-container-low hover:shadow-sm focus:ring-2 focus:ring-outline/40 disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:shadow-none"
           type="button"
           onClick={handleGoogleSignUp}
         >
@@ -209,10 +209,10 @@ export default function Register() {
           Sign up with Google
         </button>
         {/* Footer */}
-        <p className="mt-2 text-center font-body-md text-body-md text-on-surface-variant">
+        <p className="mt-1 text-center font-body-md text-body-md text-on-surface-variant">
           Already have an account?{" "}
           <Link
-            className="font-semibold text-primary hover:underline"
+            className="font-semibold text-primary transition-all hover:text-primary-container"
             to="/login"
           >
             Log in
