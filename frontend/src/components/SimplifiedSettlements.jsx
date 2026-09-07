@@ -36,7 +36,7 @@ export const SimplifiedSettlements = ({
             type="button"
             onClick={onRecalculate}
             disabled={isFetching || disableRecalculate}
-            className="font-label-md text-label-md flex cursor-pointer items-center gap-1 text-primary transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-40"
+            className="font-label-md text-label-md flex cursor-pointer items-center gap-1 text-primary transition-all hover:text-primary-container disabled:text-primary-container disabled:opacity-50"
           >
             <span className="material-symbols-outlined text-[16px]!">
               refresh

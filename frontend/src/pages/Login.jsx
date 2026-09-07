@@ -201,7 +201,7 @@ export default function Login() {
           <p className="font-body-md text-body-md text-on-surface-variant">
             Don't have an account?{" "}
             <Link
-              className="font-semibold text-primary transition-colors hover:text-primary-container"
+              className="font-semibold text-primary transition-all hover:text-primary-container"
               to="/register"
             >
               Sign up
