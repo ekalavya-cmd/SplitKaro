@@ -50,7 +50,7 @@ const ToastItem = ({ toast, onDismiss }) => {
     <div
       role="alert"
       aria-live="assertive"
-      className={`pointer-events-auto flex items-center gap-3 rounded-lg border px-4 py-2 shadow-[0px_10px_15px_rgba(0,0,0,0.1)] transition-all duration-200 ${style.container} ${
+      className={`pointer-events-auto flex items-center gap-2 rounded-lg border px-4 py-2 shadow-[0px_10px_15px_rgba(0,0,0,0.1)] transition-all duration-200 ${style.container} ${
         visible ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
       }`}
     >
@@ -70,11 +70,9 @@ const ToastItem = ({ toast, onDismiss }) => {
       <button
         onClick={handleDismiss}
         aria-label="Dismiss notification"
-        className={`shrink-0 cursor-pointer ${style.dismiss}`}
+        className={`flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-full ${style.icon} transition-all hover:bg-info/10 hover:${style.dismiss}`}
       >
-        <span className="material-symbols-outlined pt-1 text-[20px]!">
-          close
-        </span>
+        <span className="material-symbols-outlined text-[20px]!">close</span>
       </button>
     </div>
   );

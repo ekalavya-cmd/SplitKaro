@@ -188,25 +188,40 @@ export default function Register() {
           onClick={handleGoogleSignUp}
         >
           {/* Simplified Google G Icon SVG for minimal footprint, strictly adhering to constraints */}
-          <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+          <svg
+            fill="none"
+            height="18"
+            viewBox="0 0 24 24"
+            width="18"
+            xmlns="http://www.w3.org/2000/svg"
+            className="pt-0.5"
+          >
             <path
-              d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+              clipRule="evenodd"
+              d="M23.52 12.2727C23.52 11.4218 23.4436 10.6036 23.3018 9.81818H12V14.4545H18.4582C18.18 15.9545 17.3345 17.2309 16.0582 18.0818V21.0927H19.9418C22.2109 19.0036 23.52 15.9273 23.52 12.2727Z"
               fill="#4285F4"
+              fillRule="evenodd"
             ></path>
             <path
-              d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+              clipRule="evenodd"
+              d="M12 24C15.24 24 17.9673 22.9255 19.9418 21.0927L16.0582 18.0818C14.9891 18.7964 13.6145 19.2273 12 19.2273C8.87455 19.2273 6.22909 17.1164 5.28545 14.2855H1.27636V17.3945C3.24545 21.3055 7.29273 24 12 24Z"
               fill="#34A853"
+              fillRule="evenodd"
             ></path>
             <path
-              d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+              clipRule="evenodd"
+              d="M5.28545 14.2854C5.04 13.5491 4.90364 12.7854 4.90364 12C4.90364 11.2145 5.04 10.4509 5.28545 9.71454V6.60545H1.27636C0.463636 8.22545 0 10.0582 0 12C0 13.9418 0.463636 15.7745 1.27636 17.3945L5.28545 14.2854Z"
               fill="#FBBC05"
+              fillRule="evenodd"
             ></path>
             <path
-              d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+              clipRule="evenodd"
+              d="M12 4.77273C13.7618 4.77273 15.3382 5.37818 16.5818 6.56727L20.0291 3.12C17.9618 1.19455 15.24 0 12 0C7.29273 0 3.24545 2.69455 1.27636 6.60545L5.28545 9.71455C6.22909 6.88364 8.87455 4.77273 12 4.77273Z"
               fill="#EA4335"
+              fillRule="evenodd"
             ></path>
           </svg>
-          Sign up with Google
+          <span>Sign up with Google</span>
         </button>
         {/* Footer */}
         <p className="mt-1 text-center font-body-md text-body-md text-on-surface-variant">

@@ -167,6 +167,7 @@ export default function Login() {
               viewBox="0 0 24 24"
               width="18"
               xmlns="http://www.w3.org/2000/svg"
+              className="pt-0.5"
             >
               <path
                 clipRule="evenodd"
@@ -193,7 +194,7 @@ export default function Login() {
                 fillRule="evenodd"
               ></path>
             </svg>
-            Sign in with Google
+            <span>Sign in with Google</span>
           </button>
           {/* Footer */}
           <p className="mt-6 text-center font-body-md text-body-md text-on-surface-variant">
