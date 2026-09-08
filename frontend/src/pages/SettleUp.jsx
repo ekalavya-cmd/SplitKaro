@@ -5,7 +5,7 @@ import {
   useSettlementsQuery,
   useSettlementSuggestionsQuery,
 } from "../queries/useSettlementsQueries";
-// import { useDeleteSettlement } from "../mutations/useSettlementMutations";
+import { useDeleteSettlement } from "../mutations/useSettlementMutations";
 import { useSettlementFilters } from "../hooks/useSettlementFilters";
 import { SettlementFilters } from "../components/SettlementFilters";
 import { SimplifiedSettlements } from "../components/SimplifiedSettlements";
@@ -63,6 +63,8 @@ const SettleUp = () => {
     suggestionsQuery,
     settlementsQuery,
   ]);
+
+  const deleteSettlementMutation = useDeleteSettlement();
 
   const { filteredSettlements, filterProps } = useSettlementFilters(
     settlementsData.settlements,
@@ -227,7 +229,7 @@ const SettleUp = () => {
                       pagedSettlements.map((settlement) => (
                         <tr
                           key={settlement.id}
-                          className="h-row-height-compact transition-colors hover:bg-surface-container-low/50"
+                          className="group relative h-row-height-compact border-b border-outline-variant transition-colors duration-150 hover:bg-surface-container-low"
                         >
                           <td className="px-4 py-2 font-mono-data text-sm whitespace-nowrap text-on-surface-variant">
                             {formatDateForDisplay(settlement.date)}
@@ -256,8 +258,37 @@ const SettleUp = () => {
                               </span>
                             </div>
                           </td>
-                          <td className="px-4 py-2 text-right font-mono-data font-medium text-on-surface">
-                            ₹{settlement.amount}
+                          <td className="py-2 pr-4 pl-6 text-right font-mono-data font-medium text-on-surface">
+                            <div className="flex items-center justify-end gap-2">
+                              <span>₹{settlement.amount}</span>
+                              <button
+                                type="button"
+                                title="Delete settlement"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (
+                                    window.confirm(
+                                      "Are you sure you want to delete this settlement?",
+                                    )
+                                  ) {
+                                    deleteSettlementMutation.mutate({
+                                      groupId: selectedGroupId,
+                                      settlementId: settlement.id,
+                                    });
+                                  }
+                                }}
+                                disabled={
+                                  deleteSettlementMutation.isPending &&
+                                  deleteSettlementMutation.variables
+                                    ?.settlementId === settlement.id
+                                }
+                                className="flex h-8 w-8 items-center justify-center rounded-full text-error opacity-0 transition-all duration-200 group-hover:opacity-100 hover:bg-error-container/40 disabled:opacity-50"
+                              >
+                                <span className="material-symbols-outlined text-[20px]!">
+                                  delete_outline
+                                </span>
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))
